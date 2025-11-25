@@ -217,7 +217,7 @@ export default function EnhancedTableOCRSystem() {
   const fileInputRef = useRef(null);
   const toastTimers = useRef({});
 
-  const API_BASE = 'http://localhost:5002/OCR';
+  const API_BASE = 'https://api.stemverse.app/OCR';
   const MAX_FILE_SIZE = 16 * 1024 * 1024;
   const ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'pdf', 'tiff', 'tif', 'bmp', 'webp'];
 
