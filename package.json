@@ -6,9 +6,12 @@
   "scripts": {
     "dev": "vite",
     "dev:frontend": "vite",
+    "homepage": "https://Pavantentu.github.io/OCR",
     "dev:backend": "cd backend && python app.py",
     "dev:all": "concurrently -n \"backend,frontend\" -c \"cyan,magenta\" \"npm run dev:backend\" \"npm run dev:frontend\"",
     "build": "vite build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -22,6 +25,7 @@
     "@vitejs/plugin-react": "^5.1.0",
     "autoprefixer": "^10.4.21",
     "concurrently": "^9.2.1",
+    "gh-pages": "^6.3.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.16",
     "vite": "^7.1.12"
