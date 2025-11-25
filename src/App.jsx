@@ -245,10 +245,87 @@ export default function EnhancedTableOCRSystem() {
 
   async function fetchLocations() {
     try {
-      const res = await fetch("/districts-mandals.csv?t=" + Date.now());
-      if (!res.ok) throw new Error("Failed to load CSV");
-      const csvText = await res.text();
+      // Detect base path - use Vite's BASE_URL if available, otherwise detect from URL
+      let basePath = '';
+      try {
+        // Vite provides import.meta.env.BASE_URL (e.g., '/OCR/')
+        if (typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL) {
+          basePath = import.meta.env.BASE_URL.replace(/\/$/, ''); // Remove trailing slash
+        }
+      } catch (e) {
+        // Fallback: detect from current path
+        const currentPath = window.location.pathname;
+        if (currentPath.startsWith('/OCR')) {
+          basePath = '/OCR';
+        } else {
+          const pathParts = currentPath.split('/').filter(p => p);
+          if (pathParts.length > 0) {
+            basePath = '/' + pathParts[0];
+          }
+        }
+      }
+      
+      // Build possible paths - prioritize base path for GitHub Pages
+      const possiblePaths = [
+        // Base path first (for GitHub Pages deployment with /OCR/ base)
+        ...(basePath ? [`${basePath}/districts-mandals.csv`] : []),
+        // Relative paths (work in local dev)
+        "./districts-mandals.csv",
+        "districts-mandals.csv",
+        // Absolute root path
+        "/districts-mandals.csv",
+        // Fallback patterns
+        "/OCR/districts-mandals.csv",
+        "OCR/districts-mandals.csv"
+      ];
+      
+      // Remove duplicates while preserving order
+      const uniquePaths = Array.from(new Set(possiblePaths));
+      
+      let csvText = null;
+      let lastError = null;
+      let successfulPath = null;
+      
+      for (const path of uniquePaths) {
+        try {
+          const res = await fetch(`${path}?t=${Date.now()}`);
+          if (res.ok) {
+            const contentType = res.headers.get('content-type') || '';
+            const text = await res.text();
+            
+            // Validate that we got CSV content, not HTML
+            if (text.trim().toLowerCase().startsWith('<!doctype') || 
+                text.trim().toLowerCase().startsWith('<html')) {
+              console.warn(`Path ${path} returned HTML instead of CSV, trying next path...`);
+              continue;
+            }
+            
+            // Check if it looks like CSV (has comma-separated values)
+            if (text.includes(',') || text.includes('mandal') || text.includes('district')) {
+              csvText = text;
+              successfulPath = path;
+              console.log(`Successfully loaded CSV from: ${path}`);
+              break;
+            } else {
+              console.warn(`Path ${path} doesn't appear to be CSV content, trying next path...`);
+              continue;
+            }
+          }
+        } catch (err) {
+          lastError = err;
+          continue;
+        }
+      }
+      
+      if (!csvText) {
+        throw new Error(`Failed to load CSV from any path. Last error: ${lastError?.message || 'Unknown'}`);
+      }
+      
       const lines = csvText.split('\n').filter(line => line.trim());
+      console.log(`CSV loaded: ${lines.length} lines from ${successfulPath}`);
+      if (lines.length > 0) {
+        console.log(`First line: ${lines[0]}`);
+      }
       await loadCSVDataFromText(lines);
     } catch (err) {
       console.warn("Could not auto-load CSV file:", err.message);
@@ -276,7 +353,10 @@ export default function EnhancedTableOCRSystem() {
 
   const loadCSVDataFromText = async (lines) => {
     try {
-      if (lines.length < 2) return;
+      if (lines.length < 2) {
+        console.warn('CSV file has insufficient lines:', lines.length);
+        return;
+      }
 
       const headerValues = [];
       let current = '';
@@ -293,12 +373,24 @@ export default function EnhancedTableOCRSystem() {
       }
       headerValues.push(current.trim().replace(/^"|"$/g, '').toLowerCase());
       
-      const mandalIdx = headerValues.findIndex(h => h.includes('mandal'));
-      const districtIdx = headerValues.findIndex(h => h.includes('district'));
-      const villageIdx = headerValues.findIndex(h => h.includes('village'));
+      // Debug: log what headers were found
+      console.log('CSV Headers found:', headerValues);
+      
+      // More flexible matching - check for both singular and plural forms
+      const mandalIdx = headerValues.findIndex(h => 
+        h.includes('mandal') || h === 'mandal' || h === 'mandals'
+      );
+      const districtIdx = headerValues.findIndex(h => 
+        h.includes('district') || h === 'district' || h === 'districts'
+      );
+      const villageIdx = headerValues.findIndex(h => 
+        h.includes('village') || h === 'village' || h === 'villages'
+      );
       
       if (districtIdx === -1 || mandalIdx === -1) {
         console.error('CSV must contain mandals and districts columns');
+        console.error('Available headers:', headerValues);
+        console.error('First line of CSV:', lines[0]);
         return;
       }
 
