@@ -6,7 +6,7 @@ import apDistricts from './data/ap-districts';
 
 const normalizeDistrictName = (name = '') => name.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-const API_BASE = 'https://api.stemverse.app/OCR';
+const API_BASE = 'http://localhost:5002/OCR';
 
 export default function FinancialAnalytics({
   districts = [],

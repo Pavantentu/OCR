@@ -7,7 +7,7 @@
     "dev": "vite",
     "dev:frontend": "vite",
     "homepage": "https://Pavantentu.github.io/OCR",
-    "dev:backend": "cd backend && python app.py",
+    "dev:backend": "cd ../backend && python app2.py",
     "dev:all": "concurrently -n \"backend,frontend\" -c \"cyan,magenta\" \"npm run dev:backend\" \"npm run dev:frontend\"",
     "build": "vite build",
     "predeploy": "npm run build",

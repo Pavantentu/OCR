@@ -122,17 +122,7 @@ def build_shg_column_headers(total_columns: int) -> List[Dict[str, str]]:
 # GOOGLE VISION CONFIGURATION
 # ============================================================================
 GOOGLE_VISION_API_KEY = {
-  "type": "service_account",
-  "project_id": "outstanding-yew-476610-h5",
-  "private_key_id": "5c4801e0229e5a9252422d799a8d2b96ac93e0fe",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDpdpqn6jGoaay+\nCTkDsB7Eg7m0lqIOizjh4pS4Rwu7iKDkQH1cLRjHiWJI5ThGFteJ+bc4tApF29qS\n1CqIpRK2mlx5YJ6NYapEEY5G9z16W90ERUeuJ7YdSytg+OkBhb1L68oHWLFGLivy\nSnBURkqqEFfR/u+tq35LfkKmAnR0tEBs0AHW0Tl8hxXvPV5HQxbVHqoKHuJJzIZ6\nQYwqT5NKVz7/SSYTNy0ajPmrc5OIcF5KtaK9e/aJ54tXXhwZgp/0W3kDO4hov1V2\ngerCRGOmX3ktK0ndcgOaHryidLxt0PuZ83TSP5vpF7Qya7NsL8S8tM2zt9WcggFf\nltmBZp0PAgMBAAECggEAVbt+tqvrWWeZDl4vqDmMSuj+kKECWOnqVRUSPQul9NOL\nFdbS0j8jSt8aDx/RxvdLZnkjvfhrj1TZkrLD/dL0qMbNr6r5/nw/fOifgVL4qg7C\n/nb8iClAGMjKYL13P15f8dngIkuBKf75l2ubjW8Uqxf+T/jZBkMkSU/P5Mug/Vui\ngWYp23OW9XVBDzpVl1xhciefkuNR9lmZs1hfmDPNvAraaLxmQNtjS9S6HIyYbvdy\nyYdvA0A8H4L3s+ZaJMt/m9xwLRdiOYHWaoM8VdpUPfOWNNohAjn9veU2UUYQLPuR\nvsnNDyqMvfKVME7xBce0hwgKRGeTbgyml+hgzIL1mQKBgQD0tZIBVH/6Pkumi8Ot\nK9EdKJ+NmLIUbdaTv4ag05Qt7eVk2b3iJ9jZGveP0LyfGr11+l9vGmKG9/EG6RH4\nObpo4MFpZk2pOnsmXCv3h3vT1BFP/bNb+KL6rnQIdFdT0RNwys6ngLxxzPlUgnJf\nb+oxPXDRO7gWs2w8ETpnRv749wKBgQD0PDMyezpuZFZv/ATnFsEnwPY1P7aV1i3C\nzzdzFaOINc88j57AtPfmpUzbmakkgK1HF2jQ/F6OwXvQpHYf6mFrGAwymo5z6/gp\nKeFg9OaRfRJBf1Q2CAy8eOcSrQB8lUaa9/PuWkFF/BC5jTMW/qbvY6qp8iyVUVbd\nDu6NGU9OqQKBgQDxz86Eg/Sm2xI0dF4bbHYKo07vRBmNOHDWtWca25jMvg11V/lc\nVtXgy9Yghjst2eWohI3zoxYDm1TQ6FV6fcknxBk7xv0tIf35jRFhW79QNnoZGnE3\ni/25S9SbWiPFTpAwYChPu1X7+nnTOcg9aMD6gWVPTPz/abOls7yLu8tPRwKBgG4d\npkegX5veCUq8Kcm27KdrzJX9f+jWhBNNMgblPrHu8NyxNDZWYV7QMHLiOOyIR5fB\n6jQvVMKwYY6UV93T4tBSK021eXyya1TD2SXJxRrbdRuquOETiAqByE0XSxzggNDl\n8kkI0F0pZLEEBIDdl45fNVciJQ+9eJh6Xvum6abhAoGBALs9BflGMxxXbwIqCH9+\nnNa7Evpdz6OIWVgdhlZGGsdcGKj0qwupDk8oK5twMg4iXZsmGvFsJ4ZblLGnkv8B\nWrE8H6jdysdb0Muxlv6dsNODEvCCGE3qlGW0Uir3vSjnQQOyGRxaIqU/D72p/w//\nN9qjnf+6O06FgLNSSAz65hEf\n-----END PRIVATE KEY-----\n",
-  "client_email": "ocr-758@outstanding-yew-476610-h5.iam.gserviceaccount.com",
-  "client_id": "116253747489591616579",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/ocr-758%40outstanding-yew-476610-h5.iam.gserviceaccount.com",
-  "universe_domain": "googleapis.com"
+  
 }
 GOOGLE_VISION_ENDPOINT = "https://vision.googleapis.com/v1/images:annotate"
 GOOGLE_VISION_REQUEST_TIMEOUT = 20  # seconds
@@ -159,9 +149,10 @@ TEMP_FOLDER = Path('temp_processing')
 UPLOAD_FOLDER = Path('uploads')
 RESULT_FOLDER = Path('result')
 FINANCIAL_FOLDER = Path(__file__).resolve().parent / 'financial_data'
+ANALYTICS_FOLDER = Path(__file__).resolve().parent / 'analytics_data'
 
 # Create necessary folders
-for folder in [TEMP_FOLDER, UPLOAD_FOLDER, RESULT_FOLDER, FINANCIAL_FOLDER]:
+for folder in [TEMP_FOLDER, UPLOAD_FOLDER, RESULT_FOLDER, FINANCIAL_FOLDER, ANALYTICS_FOLDER]:
     folder.mkdir(parents=True, exist_ok=True)
 
 # PDF Processing
@@ -1394,6 +1385,523 @@ def get_financial_data():
         logger.error(f"Financial data fetch error: {e}")
         logger.error(traceback.format_exc())
         return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route('/OCR/api/analytics/upload', methods=['POST'])
+def upload_analytics_file():
+    """Upload Excel file for Data Capture Analytics"""
+    try:
+        if 'file' not in request.files:
+            return jsonify({"success": False, "error": "No file uploaded"}), 400
+
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"success": False, "error": "No file selected"}), 400
+
+        if not file.filename.lower().endswith(('.xlsx', '.xls')):
+            return jsonify({
+                "success": False,
+                "error": "Invalid file type. Please upload an Excel file (.xlsx or .xls)."
+            }), 400
+
+        file_path = ANALYTICS_FOLDER / "analytics_data.xlsx"
+        file.save(str(file_path))
+
+        logger.info(f"Analytics data file uploaded: {file_path}")
+        return jsonify({
+            "success": True,
+            "message": "Analytics data uploaded successfully",
+            "path": str(file_path)
+        })
+    except Exception as e:
+        logger.error(f"Analytics upload error: {e}")
+        logger.error(traceback.format_exc())
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route('/OCR/api/analytics/load-sample', methods=['POST'])
+def load_sample_analytics():
+    """Load sample analytics file if it exists"""
+    try:
+        sample_file = ANALYTICS_FOLDER / "Sample Data SHG Data Capture.xlsx"
+        target_file = ANALYTICS_FOLDER / "analytics_data.xlsx"
+        
+        if sample_file.exists():
+            import shutil
+            shutil.copy2(str(sample_file), str(target_file))
+            logger.info(f"Sample analytics file loaded: {target_file}")
+            return jsonify({
+                "success": True,
+                "message": "Sample analytics data loaded successfully",
+                "path": str(target_file)
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Sample file not found"
+            }), 404
+    except Exception as e:
+        logger.error(f"Sample load error: {e}")
+        logger.error(traceback.format_exc())
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route('/OCR/api/analytics/data', methods=['GET'])
+def get_analytics_data():
+    """Serve Data Capture Analytics with Summary Information"""
+    try:
+        # Check for sample file first (as specified by user), then try analytics_data.xlsx
+        sample_file = ANALYTICS_FOLDER / "Sample Data SHG Data Capture.xlsx"
+        file_path = ANALYTICS_FOLDER / "analytics_data.xlsx"
+        
+        logger.info(f"Checking for sample file at: {sample_file}")
+        logger.info(f"Sample file exists: {sample_file.exists()}")
+        
+        # Prioritize sample file if it exists
+        if sample_file.exists():
+            logger.info(f"Using sample file: {sample_file}")
+            file_path = sample_file
+        elif file_path.exists():
+            logger.info(f"Using analytics_data.xlsx: {file_path}")
+        else:
+            logger.error(f"Neither sample file nor analytics_data.xlsx found in {ANALYTICS_FOLDER}")
+            return jsonify({
+                "success": False,
+                "error": "No analytics data found. Please ensure Excel file is in analytics_data folder.",
+                "data": None
+            }), 404
+
+        try:
+            df = pd.read_excel(file_path)
+        except Exception as e:
+            logger.error(f"Error reading Excel file: {e}")
+            logger.error(traceback.format_exc())
+            return jsonify({
+                "success": False,
+                "error": f"Error reading Excel file: {str(e)}",
+                "data": None
+            }), 500
+        
+        if df.empty:
+            return jsonify({
+                "success": False,
+                "error": "Excel file is empty",
+                "data": None
+            }), 400
+        
+        df.columns = df.columns.str.strip()
+        
+        # Log available columns for debugging
+        logger.info(f"Analytics Excel columns found: {list(df.columns)}")
+        logger.info(f"Total rows: {len(df)}")
+
+        # Helper function to find column by name (case-insensitive, partial match)
+        def find_column(possible_names):
+            try:
+                for name in possible_names:
+                    # Exact match (case-insensitive)
+                    for col in df.columns:
+                        if str(col).strip().lower() == name.lower():
+                            return col
+                    # Partial match
+                    for col in df.columns:
+                        if name.lower() in str(col).strip().lower():
+                            return col
+                return None
+            except Exception as e:
+                logger.error(f"Error in find_column: {e}")
+                return None
+
+        # Find actual column names
+        district_col = find_column(['District', 'Districts', 'District Name'])
+        mandal_col = find_column(['Mandal', 'Mandals', 'Mandal Name'])
+        village_col = find_column(['Village', 'Villages', 'Village Name'])
+        year_col = find_column(['Year', 'Years'])
+        month_col = find_column(['Month', 'Months', 'Month Name'])
+
+        # Get filter parameters
+        district = request.args.get('district')
+        mandal = request.args.get('mandal')
+        village = request.args.get('village')
+        year = request.args.get('year')
+        month = request.args.get('month')
+
+        filtered_df = df.copy()
+
+        # Apply filters with found column names
+        try:
+            if district and district_col:
+                filtered_df = filtered_df[filtered_df[district_col].astype(str).str.lower() == district.lower()]
+            if mandal and mandal_col:
+                filtered_df = filtered_df[filtered_df[mandal_col].astype(str).str.lower() == mandal.lower()]
+            if village and village_col:
+                filtered_df = filtered_df[filtered_df[village_col].astype(str).str.lower() == village.lower()]
+            if year and year_col:
+                filtered_df = filtered_df[filtered_df[year_col].astype(str) == str(year)]
+            if month and month_col:
+                filtered_df = filtered_df[filtered_df[month_col].astype(str).str.lower() == str(month).lower()]
+        except Exception as e:
+            logger.error(f"Error applying filters: {e}")
+            logger.error(traceback.format_exc())
+            # Continue with unfiltered data if filter fails
+
+        # Find numeric data columns from Excel - using exact column names from the Excel file
+        total_forms_col = find_column(['Total Forms', 'Total Form', 'Forms', 'Total', 'Imports', 'Total Imports'])
+        validation_successful_col = find_column(['Validation Successful', 'Validated Successful', 'Successful', 'Validated', 'Valid Forms'])
+        validation_failed_col = find_column(['Validation Failed', 'Failed', 'Validation Failures', 'Failed Validations'])
+        synced_to_mkb_col = find_column(['Forms Synced to MBK', 'Forms Synced to MKB', 'Synced to MBK', 'Synced to MKB', 'MBK Synced', 'MKB Synced'])
+        
+        # Failure detail columns
+        failed_incorrect_form_col = find_column(['Failed Incorrect Form', 'Incorrect Form', 'Wrong Form'])
+        failed_incorrect_values_col = find_column(['Failed Incorrect Values', 'Incorrect Values', 'Wrong Values'])
+        failed_missing_fields_col = find_column(['Failed Missing Fields', 'Missing Fields', 'Missing Data'])
+        failed_image_quality_col = find_column(['Failed Image Quality', 'Image Quality', 'Poor Image Quality'])
+        
+        # Log found columns for debugging
+        logger.info(f"Found columns - Total Forms: {total_forms_col}, Validation Successful: {validation_successful_col}, "
+                   f"Validation Failed: {validation_failed_col}, Synced to MBK: {synced_to_mkb_col}")
+        logger.info(f"Failure detail columns - Incorrect Form: {failed_incorrect_form_col}, "
+                   f"Incorrect Values: {failed_incorrect_values_col}, Missing Fields: {failed_missing_fields_col}, "
+                   f"Image Quality: {failed_image_quality_col}")
+        
+        # Calculate summary statistics by summing numeric columns
+        total_imports = 0
+        validation_successful_count = 0
+        validation_failed_count = 0
+        synced_to_mkb_count = 0
+        
+        try:
+            if total_forms_col:
+                # Sum the Total Forms column
+                total_imports = int(filtered_df[total_forms_col].fillna(0).astype(float).sum())
+                logger.info(f"Total imports calculated from '{total_forms_col}': {total_imports}")
+            else:
+                # Fallback: count rows if Total Forms column not found
+                total_imports = len(filtered_df)
+                logger.warning("Total Forms column not found, using row count as fallback")
+            
+            if validation_successful_col:
+                validation_successful_count = int(filtered_df[validation_successful_col].fillna(0).astype(float).sum())
+                logger.info(f"Validation successful calculated from '{validation_successful_col}': {validation_successful_count}")
+            else:
+                validation_successful_count = 0
+                logger.warning("Validation Successful column not found")
+            
+            if validation_failed_col:
+                validation_failed_count = int(filtered_df[validation_failed_col].fillna(0).astype(float).sum())
+                logger.info(f"Validation failed calculated from '{validation_failed_col}': {validation_failed_count}")
+            elif validation_successful_col and total_forms_col:
+                # Calculate failed as total - successful
+                validation_failed_count = max(0, total_imports - validation_successful_count)
+                logger.info(f"Validation failed calculated as difference: {validation_failed_count}")
+            else:
+                validation_failed_count = 0
+                logger.warning("Validation Failed column not found and cannot be calculated")
+            
+            if synced_to_mkb_col:
+                synced_to_mkb_count = int(filtered_df[synced_to_mkb_col].fillna(0).astype(float).sum())
+                logger.info(f"Synced to MBK calculated from '{synced_to_mkb_col}': {synced_to_mkb_count}")
+            elif validation_successful_col:
+                # Assume successful validations are synced
+                synced_to_mkb_count = validation_successful_count
+                logger.info(f"Synced to MBK set to validation successful: {synced_to_mkb_count}")
+            else:
+                synced_to_mkb_count = max(0, total_imports - validation_failed_count)
+                logger.info(f"Synced to MBK calculated as difference: {synced_to_mkb_count}")
+        except Exception as e:
+            logger.error(f"Error calculating summary statistics: {e}")
+            logger.error(traceback.format_exc())
+            # Fallback to row count
+            total_imports = len(filtered_df)
+            validation_successful_count = 0
+            validation_failed_count = 0
+            synced_to_mkb_count = 0
+        
+        # Get validation failed details - records where Validation Failed > 0
+        validation_failed_details = []
+        try:
+            if validation_failed_col:
+                # Get records where validation failed count > 0
+                failed_records = filtered_df[filtered_df[validation_failed_col].fillna(0).astype(float) > 0].copy()
+                
+                if len(failed_records) > 0:
+                    # Include important columns in details
+                    detail_cols = []
+                    if district_col:
+                        detail_cols.append(district_col)
+                    if mandal_col:
+                        detail_cols.append(mandal_col)
+                    if village_col:
+                        detail_cols.append(village_col)
+                    if year_col:
+                        detail_cols.append(year_col)
+                    if month_col:
+                        detail_cols.append(month_col)
+                    if validation_failed_col:
+                        detail_cols.append(validation_failed_col)
+                    if failed_incorrect_form_col:
+                        detail_cols.append(failed_incorrect_form_col)
+                    if failed_incorrect_values_col:
+                        detail_cols.append(failed_incorrect_values_col)
+                    if failed_missing_fields_col:
+                        detail_cols.append(failed_missing_fields_col)
+                    if failed_image_quality_col:
+                        detail_cols.append(failed_image_quality_col)
+                    
+                    # Add any other relevant columns (limit to avoid too much data)
+                    for col in failed_records.columns:
+                        if col not in detail_cols and len(detail_cols) < 15:
+                            if any(keyword in str(col).lower() for keyword in ['failed', 'error', 'issue', 'form', 'shg']):
+                                detail_cols.append(col)
+                    
+                    available_cols = [col for col in detail_cols if col in failed_records.columns]
+                    if available_cols:
+                        # Replace NaN values with None (which becomes null in JSON) or empty string
+                        details_df = failed_records[available_cols].fillna('')
+                        validation_failed_details = details_df.to_dict(orient='records')
+                        # Clean up any remaining NaN values in the records
+                        for record in validation_failed_details:
+                            for key, value in record.items():
+                                if pd.isna(value) or (isinstance(value, float) and str(value) == 'nan'):
+                                    record[key] = ''
+        except Exception as e:
+            logger.error(f"Error processing validation failed details: {e}")
+            logger.error(traceback.format_exc())
+            validation_failed_details = []
+
+        # District-wise aggregations using numeric columns
+        district_summaries = {}
+        try:
+            if district_col:
+                unique_districts = filtered_df[district_col].dropna().unique()
+                for district_name in unique_districts:
+                    try:
+                        district_name_str = str(district_name).strip()
+                        if not district_name_str or district_name_str.lower() == 'nan':
+                            continue
+                            
+                        district_data = filtered_df[filtered_df[district_col] == district_name]
+                        
+                        # Calculate district statistics using numeric columns
+                        district_imports = 0
+                        if total_forms_col:
+                            district_imports = int(district_data[total_forms_col].fillna(0).astype(float).sum())
+                        else:
+                            district_imports = len(district_data)
+                        
+                        district_validation_failed = 0
+                        if validation_failed_col:
+                            district_validation_failed = int(district_data[validation_failed_col].fillna(0).astype(float).sum())
+                        elif validation_successful_col and total_forms_col:
+                            district_successful = int(district_data[validation_successful_col].fillna(0).astype(float).sum())
+                            district_validation_failed = max(0, district_imports - district_successful)
+                        
+                        district_synced = 0
+                        if synced_to_mkb_col:
+                            district_synced = int(district_data[synced_to_mkb_col].fillna(0).astype(float).sum())
+                        elif validation_successful_col:
+                            district_synced = int(district_data[validation_successful_col].fillna(0).astype(float).sum())
+                        else:
+                            district_synced = max(0, district_imports - district_validation_failed)
+                        
+                        district_summaries[district_name_str] = {
+                            "district": district_name_str,
+                            "imports": district_imports,
+                            "validation_failed": district_validation_failed,
+                            "synced_to_mkb": district_synced,
+                            "success_rate": round((district_synced / district_imports * 100) if district_imports > 0 else 0, 2)
+                        }
+                    except Exception as e:
+                        logger.error(f"Error processing district {district_name}: {e}")
+                        logger.error(traceback.format_exc())
+                        continue
+        except Exception as e:
+            logger.error(f"Error in district aggregations: {e}")
+            logger.error(traceback.format_exc())
+
+        # Mandal-wise aggregations (if mandal column exists)
+        mandal_summaries = {}
+        try:
+            if mandal_col and district_col:
+                # Group by both district and mandal for better organization
+                for district_name in filtered_df[district_col].dropna().unique():
+                    district_name_str = str(district_name).strip()
+                    if not district_name_str or district_name_str.lower() == 'nan':
+                        continue
+                    
+                    district_data = filtered_df[filtered_df[district_col] == district_name]
+                    unique_mandals = district_data[mandal_col].dropna().unique()
+                    
+                    for mandal_name in unique_mandals:
+                        try:
+                            mandal_name_str = str(mandal_name).strip()
+                            if not mandal_name_str or mandal_name_str.lower() == 'nan':
+                                continue
+                            
+                            mandal_data = district_data[district_data[mandal_col] == mandal_name]
+                            
+                            mandal_imports = 0
+                            if total_forms_col:
+                                mandal_imports = int(mandal_data[total_forms_col].fillna(0).astype(float).sum())
+                            else:
+                                mandal_imports = len(mandal_data)
+                            
+                            mandal_validation_failed = 0
+                            if validation_failed_col:
+                                mandal_validation_failed = int(mandal_data[validation_failed_col].fillna(0).astype(float).sum())
+                            
+                            mandal_synced = 0
+                            if synced_to_mkb_col:
+                                mandal_synced = int(mandal_data[synced_to_mkb_col].fillna(0).astype(float).sum())
+                            elif validation_successful_col:
+                                mandal_synced = int(mandal_data[validation_successful_col].fillna(0).astype(float).sum())
+                            else:
+                                mandal_synced = max(0, mandal_imports - mandal_validation_failed)
+                            
+                            key = f"{district_name_str} - {mandal_name_str}"
+                            mandal_summaries[key] = {
+                                "district": district_name_str,
+                                "mandal": mandal_name_str,
+                                "imports": mandal_imports,
+                                "validation_failed": mandal_validation_failed,
+                                "synced_to_mkb": mandal_synced,
+                                "success_rate": round((mandal_synced / mandal_imports * 100) if mandal_imports > 0 else 0, 2)
+                            }
+                        except Exception as e:
+                            logger.error(f"Error processing mandal {mandal_name}: {e}")
+                            continue
+        except Exception as e:
+            logger.error(f"Error in mandal aggregations: {e}")
+            logger.error(traceback.format_exc())
+        
+        # Helper function to safely convert to int, handling NaN
+        def safe_int_sum(series, default=0):
+            """Safely sum a pandas series and convert to int, handling NaN values."""
+            try:
+                if series is None:
+                    return default
+                if hasattr(series, '__len__') and len(series) == 0:
+                    return default
+                result = series.fillna(0).astype(float).sum()
+                # Handle NaN result - check if result is NaN using multiple methods
+                import math
+                if pd.isna(result) or (isinstance(result, float) and math.isnan(result)) or (result != result):
+                    return default
+                return int(result) if not math.isnan(result) else default
+            except Exception as e:
+                logger.warning(f"Error in safe_int_sum: {e}")
+                return default
+        
+        # Prepare chart data grouped by district and year
+        chart_data_by_district = {}
+        chart_data_by_year = {}
+        
+        try:
+            if district_col:
+                # Group by district
+                for district_name in filtered_df[district_col].dropna().unique():
+                    district_name_str = str(district_name).strip()
+                    if not district_name_str or district_name_str.lower() == 'nan':
+                        continue
+                    
+                    district_data = filtered_df[filtered_df[district_col] == district_name]
+                    
+                    chart_data_by_district[district_name_str] = {
+                        "total_forms": safe_int_sum(district_data[total_forms_col] if total_forms_col and total_forms_col in district_data.columns else None),
+                        "validation_successful": safe_int_sum(district_data[validation_successful_col] if validation_successful_col and validation_successful_col in district_data.columns else None),
+                        "validation_failed": safe_int_sum(district_data[validation_failed_col] if validation_failed_col and validation_failed_col in district_data.columns else None),
+                        "failed_incorrect_form": safe_int_sum(district_data[failed_incorrect_form_col] if failed_incorrect_form_col and failed_incorrect_form_col in district_data.columns else None),
+                        "failed_incorrect_values": safe_int_sum(district_data[failed_incorrect_values_col] if failed_incorrect_values_col and failed_incorrect_values_col in district_data.columns else None),
+                        "failed_missing_fields": safe_int_sum(district_data[failed_missing_fields_col] if failed_missing_fields_col and failed_missing_fields_col in district_data.columns else None),
+                        "failed_image_quality": safe_int_sum(district_data[failed_image_quality_col] if failed_image_quality_col and failed_image_quality_col in district_data.columns else None),
+                        "synced_to_mkb": safe_int_sum(district_data[synced_to_mkb_col] if synced_to_mkb_col and synced_to_mkb_col in district_data.columns else None)
+                    }
+            
+            if year_col:
+                # Group by year
+                for year_val in filtered_df[year_col].dropna().unique():
+                    year_str = str(year_val).strip()
+                    if not year_str or year_str.lower() == 'nan':
+                        continue
+                    
+                    year_data = filtered_df[filtered_df[year_col] == year_val]
+                    
+                    chart_data_by_year[year_str] = {
+                        "total_forms": safe_int_sum(year_data[total_forms_col] if total_forms_col and total_forms_col in year_data.columns else None),
+                        "validation_successful": safe_int_sum(year_data[validation_successful_col] if validation_successful_col and validation_successful_col in year_data.columns else None),
+                        "validation_failed": safe_int_sum(year_data[validation_failed_col] if validation_failed_col and validation_failed_col in year_data.columns else None),
+                        "failed_incorrect_form": safe_int_sum(year_data[failed_incorrect_form_col] if failed_incorrect_form_col and failed_incorrect_form_col in year_data.columns else None),
+                        "failed_incorrect_values": safe_int_sum(year_data[failed_incorrect_values_col] if failed_incorrect_values_col and failed_incorrect_values_col in year_data.columns else None),
+                        "failed_missing_fields": safe_int_sum(year_data[failed_missing_fields_col] if failed_missing_fields_col and failed_missing_fields_col in year_data.columns else None),
+                        "failed_image_quality": safe_int_sum(year_data[failed_image_quality_col] if failed_image_quality_col and failed_image_quality_col in year_data.columns else None),
+                        "synced_to_mkb": safe_int_sum(year_data[synced_to_mkb_col] if synced_to_mkb_col and synced_to_mkb_col in year_data.columns else None)
+                    }
+        except Exception as e:
+            logger.error(f"Error preparing chart data: {e}")
+            logger.error(traceback.format_exc())
+        
+        # Ensure all numeric values are valid (no NaN)
+        def clean_numeric(value):
+            """Clean numeric values, replacing NaN with 0."""
+            if pd.isna(value) or (isinstance(value, float) and str(value) == 'nan'):
+                return 0
+            try:
+                return float(value) if not pd.isna(value) else 0
+            except (ValueError, TypeError):
+                return 0
+        
+        # Clean summary values
+        clean_summary = {
+            "total_imports": int(clean_numeric(total_imports)),
+            "validation_successful": int(clean_numeric(validation_successful_count)),
+            "validation_failed": int(clean_numeric(validation_failed_count)),
+            "synced_to_mkb": int(clean_numeric(synced_to_mkb_count)),
+            "success_rate": round((synced_to_mkb_count / total_imports * 100) if total_imports > 0 else 0, 2)
+        }
+        
+        # Clean district summaries
+        clean_district_summaries = {}
+        for district, data in district_summaries.items():
+            clean_district_summaries[district] = {
+                "district": str(data.get("district", "")),
+                "imports": int(clean_numeric(data.get("imports", 0))),
+                "validation_failed": int(clean_numeric(data.get("validation_failed", 0))),
+                "synced_to_mkb": int(clean_numeric(data.get("synced_to_mkb", 0))),
+                "success_rate": round(clean_numeric(data.get("success_rate", 0)), 2)
+            }
+        
+        return jsonify({
+            "success": True,
+            "data": {
+                "summary": clean_summary,
+                "validation_failed_details": validation_failed_details[:100],  # Limit to 100 records
+                "district_summaries": clean_district_summaries,
+                "mandal_summaries": mandal_summaries,
+                "chart_data": {
+                    "by_district": chart_data_by_district,
+                    "by_year": chart_data_by_year
+                },
+                "filters_applied": {
+                    "district": district,
+                    "mandal": mandal,
+                    "village": village,
+                    "year": year,
+                    "month": month
+                }
+            }
+        })
+    except Exception as e:
+        logger.error(f"Analytics data fetch error: {e}")
+        logger.error(traceback.format_exc())
+        error_message = str(e)
+        # Provide more helpful error message
+        if "No such file" in error_message or "does not exist" in error_message:
+            error_message = "Analytics Excel file not found. Please ensure the file is in the analytics_data folder."
+        return jsonify({
+            "success": False, 
+            "error": error_message,
+            "data": None
+        }), 500
 
 
 @app.errorhandler(Exception)
