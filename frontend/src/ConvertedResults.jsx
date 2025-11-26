@@ -341,6 +341,12 @@ export default function ConvertedResults({
                   CSV
                 </button>
                 <button
+                  onClick={() => window.alert('Submited file')}
+                  className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-full text-[11px] font-semibold flex items-center gap-1 shadow-sm hover:shadow-md transition-all"
+                >
+                  Submit
+                </button>
+                <button
                   onClick={() => openEditModal(file.results[0])}
                   className="px-2 py-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded-md text-[11px] font-semibold flex items-center gap-1"
                 >
@@ -374,7 +380,7 @@ export default function ConvertedResults({
           {nonConvertedFiles.map((file, idx) => (
             <div
               key={file.filename ? `${file.filename}-${idx}` : idx}
-              className="grid md:grid-cols-[1.6fr_1fr_1fr_1fr] grid-cols-1 gap-2 px-3 py-2 bg-white hover:bg-rose-50 transition-colors text-sm"
+              className="grid md:grid-cols-[1.6fr_1fr_1fr_1fr_auto] grid-cols-1 gap-2 px-3 py-2 bg-white hover:bg-rose-50 transition-colors text-sm"
             >
               <div className="flex items-center gap-2 min-w-0">
                 <FileText size={18} className="text-red-600 flex-shrink-0" />
@@ -386,6 +392,14 @@ export default function ConvertedResults({
               <div className="text-[11px] text-gray-600 md:text-center">{file.timestamp || '—'}</div>
               <div className="text-[11px] text-gray-600 md:text-center">{getFileType(file.filename)}</div>
               <div className="text-[11px] text-gray-600 md:text-center">{formatBytes(file.size)}</div>
+              <div className="flex items-center justify-end">
+                <button
+                  onClick={() => window.alert('Deleted this failed file')}
+                  className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-full text-[11px] font-semibold shadow-sm hover:shadow-md transition-all"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -442,8 +456,16 @@ export default function ConvertedResults({
                       </p>
                     </div>
                   </div>
-                  <div className="px-4 py-1 bg-green-600 text-white rounded-full font-bold">
-                    {convertedFiles.length}
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => window.alert('Submit all files')}
+                      className="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-full text-xs font-semibold shadow-sm hover:shadow-md transition-all"
+                    >
+                      Submit All
+                    </button>
+                    <div className="px-4 py-1 bg-green-600 text-white rounded-full font-bold">
+                      {convertedFiles.length}
+                    </div>
                   </div>
                 </div>
 
@@ -472,8 +494,16 @@ export default function ConvertedResults({
                       </p>
                     </div>
                   </div>
-                  <div className="px-4 py-1 bg-red-600 text-white rounded-full font-bold">
-                    {nonConvertedFiles.length}
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => window.alert('Deleted all failed files')}
+                      className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-full text-xs font-semibold shadow-sm hover:shadow-md transition-all"
+                    >
+                      Delete All
+                    </button>
+                    <div className="px-4 py-1 bg-red-600 text-white rounded-full font-bold">
+                      {nonConvertedFiles.length}
+                    </div>
                   </div>
                 </div>
 

@@ -35,8 +35,20 @@ const escapeHtml = (value) =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 
-const buildHTMLTable = (headers = [], rows = []) => {
+const buildHTMLTable = (headers = [], rows = [], headerRows = null, shgMbkId = '') => {
   if (!headers.length) return '';
+  
+  // SHG MBK ID section - left aligned
+  // let shgMbkIdHTML = '';
+  // if (shgMbkId) {
+  //   shgMbkIdHTML = `
+  //     <div class="shg-mbk-id-container" style="margin-bottom: 12px; font-weight: 600; font-size: 15px; color: #111827; text-align: left !important; display: block !important; width: 100% !important; padding-left: 0 !important; float: none !important; clear: both !important;">
+  //       <span style="color: #1f2937; display: inline-block;">SHG MBK ID :</span>
+  //       <span style="color: #111827; margin-left: 6px; display: inline-block;">${escapeHtml(shgMbkId)}</span>
+  //     </div>
+  //   `;
+  // }
+  
   const tableStyle = `
     width: 100%;
     border-collapse: collapse;
@@ -60,9 +72,27 @@ const buildHTMLTable = (headers = [], rows = []) => {
     text-align: left;
     min-width: 80px;
   `;
-  const headerCells = headers
-    .map((header) => `<th style="${headerCellStyle}">${escapeHtml(header)}</th>`)
-    .join('');
+  
+  let headerHTML = '';
+  if (headerRows && Array.isArray(headerRows) && headerRows.length > 0) {
+    headerHTML = '<thead>';
+    headerRows.forEach((row, rowIdx) => {
+      headerHTML += '<tr>';
+      row.forEach((cell) => {
+        const colSpan = cell.col_span || 1;
+        const rowSpan = cell.row_span || 1;
+        headerHTML += `<th style="${headerCellStyle}" colspan="${colSpan}" rowspan="${rowSpan}">${escapeHtml(cell.label || '')}</th>`;
+      });
+      headerHTML += '</tr>';
+    });
+    headerHTML += '</thead>';
+  } else {
+    const headerCells = headers
+      .map((header) => `<th style="${headerCellStyle}">${escapeHtml(header)}</th>`)
+      .join('');
+    headerHTML = `<thead><tr>${headerCells}</tr></thead>`;
+  }
+  
   const bodyRows = rows
     .map((row, rowIdx) => {
       const rowBg = rowIdx % 2 === 0 ? '#fefeff' : '#f4f7fb';
@@ -77,7 +107,7 @@ const buildHTMLTable = (headers = [], rows = []) => {
       return `<tr>${cells}</tr>`;
     })
     .join('');
-  return `<table style="${tableStyle}"><thead><tr>${headerCells}</tr></thead><tbody>${bodyRows}</tbody></table>`;
+  return `<table style="${tableStyle}">${headerHTML}<tbody>${bodyRows}</tbody></table>`;
 };
 
 const normalizeStructuredTableData = (tableData = {}) => {
@@ -91,10 +121,15 @@ const normalizeStructuredTableData = (tableData = {}) => {
         );
       })
     : [];
+  
+  // Use baseHeaders as primary source, only add new headers if they don't exist
   const headers = [...baseHeaders];
+  const headerSet = new Set(baseHeaders);
+  
   const addHeader = (label) => {
     if (!label) return;
-    if (!headers.includes(label)) {
+    if (!headerSet.has(label)) {
+      headerSet.add(label);
       headers.push(label);
     }
   };
@@ -106,32 +141,51 @@ const normalizeStructuredTableData = (tableData = {}) => {
     const rowObj = {};
 
     if (Array.isArray(row?.cells) && row.cells.length) {
+      // Process cells - use col_index to map to correct header position
       row.cells.forEach((cell) => {
         const colIndex =
           typeof cell?.col_index === 'number' && cell.col_index >= 0 ? cell.col_index : -1;
-        const fallbackLabel =
-          (colIndex >= 0 && headers[colIndex]) ||
-          cell?.key ||
-          `Column ${colIndex >= 0 ? colIndex + 1 : headers.length + 1}`;
-        const label = (cell?.label && cell.label.trim()) || fallbackLabel;
-        addHeader(label);
-        rowObj[label] = sanitizeValue(cell?.text);
+        
+        // Use header from baseHeaders if colIndex is valid, otherwise use cell label
+        let label;
+        if (colIndex >= 0 && colIndex < baseHeaders.length) {
+          label = baseHeaders[colIndex];
+        } else {
+          const fallbackLabel = cell?.key || `Column ${colIndex >= 0 ? colIndex + 1 : headers.length + 1}`;
+          label = (cell?.label && cell.label.trim()) || fallbackLabel;
+          // Only add if not already in headers
+          if (!headerSet.has(label)) {
+            addHeader(label);
+          }
+        }
+        // Only set value if not already set (prevent overwriting)
+        if (!(label in rowObj)) {
+          rowObj[label] = sanitizeValue(cell?.text);
+        }
+      });
+    } else {
+      // Fallback: if no cells array, process object keys directly
+      // But skip internal fields and only add if not already in baseHeaders
+      Object.keys(row || {}).forEach((key) => {
+        if (['cells', 'confidence', 'row_number', 'row_index'].includes(key)) return;
+        const label = key;
+        // Only add if not already in headers
+        if (!headerSet.has(label)) {
+          addHeader(label);
+        }
+        rowObj[label] = sanitizeValue(row[key]);
       });
     }
-
-    Object.keys(row || {}).forEach((key) => {
-      if (['cells', 'confidence', 'row_number', 'row_index'].includes(key)) return;
-      const label = key;
-      addHeader(label);
-      rowObj[label] = sanitizeValue(row[key]);
-    });
 
     rows.push(rowObj);
   });
 
-  const filteredHeaders = headers.filter(Boolean);
+  // Remove duplicates and filter empty headers
+  const filteredHeaders = Array.from(new Set(headers.filter(Boolean)));
   const csv = convertRowsToCSV(filteredHeaders, rows);
-  const html = buildHTMLTable(filteredHeaders, rows);
+  const headerRows = Array.isArray(tableData.header_rows) ? tableData.header_rows : null;
+  const shgMbkId = tableData.shg_mbk_id || '';
+  const html = buildHTMLTable(filteredHeaders, rows, headerRows, shgMbkId);
 
   return {
     dataframe: rows,
@@ -141,12 +195,54 @@ const normalizeStructuredTableData = (tableData = {}) => {
     html,
     json: JSON.stringify(rows),
     headers: filteredHeaders,
+    headerRows: Array.isArray(tableData.header_rows) ? tableData.header_rows : null,
     metadata: {
       shg_mbk_id: tableData.shg_mbk_id || '',
       total_columns: tableData.total_columns || filteredHeaders.length,
       total_rows: tableData.total_rows || rows.length,
     },
   };
+};
+
+const renderReactHeaderRows = (headerRowsData, headersList) => {
+  if (headerRowsData && Array.isArray(headerRowsData) && headerRowsData.length > 0) {
+    const maxRows = headerRowsData.length;
+    return (
+      <thead>
+        {headerRowsData.map((row, rowIdx) => (
+          <tr key={`header-row-${rowIdx}`} className="bg-indigo-700 text-white">
+            {row.map((cell, cellIdx) => {
+              const rowSpan = cell.row_span || 1;
+              const isLeaf = rowIdx + rowSpan === maxRows;
+              return (
+                <th
+                  key={`header-cell-${rowIdx}-${cellIdx}`}
+                  colSpan={cell.col_span || 1}
+                  rowSpan={rowSpan}
+                  className={`border-2 border-gray-300 px-2 py-2 text-center font-bold ${
+                    isLeaf ? '' : 'text-sm'
+                  }`}
+                >
+                  {cell.label || ''}
+                </th>
+              );
+            })}
+          </tr>
+        ))}
+      </thead>
+    );
+  }
+  return (
+    <thead>
+      <tr className="bg-indigo-700 text-white">
+        {headersList.map((header, idx) => (
+          <th key={idx} className="border-2 border-gray-300 px-2 py-2 text-center font-bold">
+            {header}
+          </th>
+        ))}
+      </tr>
+    </thead>
+  );
 };
 
 const normalizeExtractionResponse = (responseData) => {
@@ -204,6 +300,8 @@ export default function EnhancedTableOCRSystem() {
   const [duplicateUploadFiles, setDuplicateUploadFiles] = useState([]);
   const [showDuplicateResultModal, setShowDuplicateResultModal] = useState(false);
   const [activeTab, setActiveTab] = useState('upload');
+  const [processStartTime, setProcessStartTime] = useState(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   
   const [districts, setDistricts] = useState([]);
   const [mandals, setMandals] = useState([]);
@@ -242,6 +340,21 @@ export default function EnhancedTableOCRSystem() {
     localStorage.removeItem(STORAGE_KEY_RESULTS);
     localStorage.removeItem(STORAGE_KEY_FAILED);
   }, []);
+
+  // Processing timer - track how long current request has been running
+  useEffect(() => {
+    let timerId = null;
+
+    if (processing && processStartTime) {
+      timerId = setInterval(() => {
+        setElapsedSeconds(Math.floor((Date.now() - processStartTime) / 1000));
+      }, 1000);
+    }
+
+    return () => {
+      if (timerId) clearInterval(timerId);
+    };
+  }, [processing, processStartTime]);
 
   async function fetchLocations() {
     try {
@@ -831,6 +944,8 @@ export default function EnhancedTableOCRSystem() {
     }
 
     try {
+      setProcessStartTime(Date.now());
+      setElapsedSeconds(0);
       setProcessing(true);
       setMessage('🔍 Extracting tables from images...');
       setMessageType('info');
@@ -914,6 +1029,8 @@ export default function EnhancedTableOCRSystem() {
                   jsonData: table.json,
                   htmlData: table.html,
                   headers: table.headers || Object.keys(table.dataframe[0] || {}),
+                  headerRows: table.headerRows || null,
+                  shgMbkId: table.metadata?.shg_mbk_id || '',
                   district: districtName,
                   mandal: mandalName,
                   village: villageName,
@@ -977,6 +1094,14 @@ export default function EnhancedTableOCRSystem() {
             );
             setMessageType('error');
           }
+        }
+
+        // Update status message after finishing this file
+        if (fileSuccess) {
+          setMessage(
+            `✅ Processed ${totalProcessed}/${files.length}: ${fileObj.name}\n` +
+            `✅ Detected table structure.`
+          );
         }
       }
 
@@ -1308,7 +1433,7 @@ export default function EnhancedTableOCRSystem() {
                 <div className="lg:col-span-2 bg-white rounded-3xl shadow-2xl p-6 lg:p-8">
                   <h2 className="text-2xl lg:text-3xl font-bold text-gray-800 flex items-center gap-2 mb-6">
                     <Upload size={32} className="text-indigo-600" />
-                    Upload Files
+                    Import Files
                   </h2>
 
                   {files.length > 0 && (
@@ -1340,7 +1465,7 @@ export default function EnhancedTableOCRSystem() {
                         Drop files here or click to upload
                       </p>
                       <p className="text-sm text-gray-600">
-                        Supports: PNG, JPG, PDF, TIFF (Max 16MB)
+                        Supports: PNG, JPG, PDF
                       </p>
                     </div>
                     <input
@@ -1417,6 +1542,15 @@ export default function EnhancedTableOCRSystem() {
                     </div>
                   )}
 
+                  {processing && (
+                    <div className="mt-4 text-center text-sm text-gray-500 font-semibold">
+                      Time Elapsed:{' '}
+                      {String(Math.floor(elapsedSeconds / 60)).padStart(2, '0')}
+                      :
+                      {String(elapsedSeconds % 60).padStart(2, '0')}
+                    </div>
+                  )}
+
                   <div className="mt-6">
                     <button
                       onClick={handleProcess}
@@ -1431,7 +1565,7 @@ export default function EnhancedTableOCRSystem() {
                       ) : (
                         <>
                           <Table2 size={24} />
-                          Converting into Digital File
+                          Convert into Digital File
                         </>
                       )}
                     </button>
@@ -1642,6 +1776,20 @@ export default function EnhancedTableOCRSystem() {
                 .result-modal-content .shg-table {
                   width: 100% !important;
                 }
+                .result-modal-content .shg-mbk-id-container,
+                .result-modal-content div.shg-mbk-id-container {
+                  text-align: left !important;
+                  display: block !important;
+                  width: 100% !important;
+                  padding-left: 0 !important;
+                  margin-left: 0 !important;
+                  float: none !important;
+                  clear: both !important;
+                }
+                .result-modal-content .shg-mbk-id-container *,
+                .result-modal-content div.shg-mbk-id-container * {
+                  text-align: left !important;
+                }
               `}</style>
               {selectedResult.htmlData ? (
                 <div 
@@ -1654,7 +1802,8 @@ export default function EnhancedTableOCRSystem() {
                 >
                   <div
                     style={{
-                      width: '100%'
+                      width: '100%',
+                      textAlign: 'left'
                     }}
                     dangerouslySetInnerHTML={{ __html: selectedResult.htmlData }}
                   />
@@ -1669,15 +1818,7 @@ export default function EnhancedTableOCRSystem() {
                   }}
                 >
                   <table className="w-full border-collapse border-2 border-gray-300">
-                    <thead>
-                      <tr className="bg-indigo-700 text-white">
-                        {selectedResult.headers.map((header, idx) => (
-                          <th key={idx} className="border-2 border-gray-300 px-2 py-2 text-center font-bold">
-                            {header}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
+                    {renderReactHeaderRows(selectedResult.headerRows, selectedResult.headers)}
                     <tbody>
                       {selectedResult.data.map((row, rowIdx) => (
                         <tr key={rowIdx} className={rowIdx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>

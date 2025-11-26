@@ -136,6 +136,13 @@ const balanceTotalsConfig = [
 // Totals for Current Month view
 const monthTotalsConfig = [
   {
+    label: 'New Loans Disbursed (Total)',
+    key: 'New Total',
+    format: 'currency',
+    accent:
+      'from-slate-50 to-slate-100 border-slate-200 text-slate-900',
+  },
+  {
     label: 'This Month Savings',
     key: 'This Month Savings',
     format: 'currency',
@@ -143,55 +150,58 @@ const monthTotalsConfig = [
       'from-emerald-50 to-emerald-100 border-emerald-200 text-emerald-900',
   },
   {
-    label: 'This Month SHG Paid Loan',
+    label: 'SHG Loan Paid',
     key: 'This Month SHG Paid Loan',
     format: 'currency',
     accent: 'from-indigo-50 to-indigo-100 border-indigo-200 text-indigo-900',
   },
   {
-    label: 'This Month Bank Loan Paid',
+    label: 'SHG Bank Loan Paid',
     key: 'This Month Bank Loan Paid',
     format: 'currency',
     accent: 'from-blue-50 to-blue-100 border-blue-200 text-blue-900',
   },
   {
-    label: 'This Month Streenidhi Micro Loan Paid',
+    label: 'Streenidhi Micro Loan Paid',
     key: 'This Month Streenidhi Micro Loan Paid',
     format: 'currency',
     accent: 'from-sky-50 to-sky-100 border-sky-200 text-sky-900',
   },
   {
-    label: 'This Month Streenidhi Tenny Loan Paid',
+    label: 'Streenidhi Tenny Loan Paid',
     key: 'This Month Streenidhi Tenny Loan Paid',
     format: 'currency',
     accent: 'from-lime-50 to-lime-100 border-lime-200 text-lime-900',
   },
   {
-    label: 'This Month Unnathi SCSP Loan Paid',
+    label: 'Unnathi SCSP Loan Paid',
     key: 'This Month Unnathi SCSP Loan Paid',
     format: 'currency',
     accent: 'from-amber-50 to-amber-100 border-amber-200 text-amber-900',
   },
   {
-    label: 'This Month Unnathi TSP Loan Paid',
+    label: 'Unnathi TSP Loan Paid',
     key: 'This Month Unnathi TSP Loan Paid',
     format: 'currency',
     accent:
       'from-orange-50 to-orange-100 border-orange-200 text-orange-900',
   },
   {
-    label: 'This Month CIF Loan Paid',
+    label: 'CIF Loan Paid',
     key: 'This Month CIF Loan Paid',
     format: 'currency',
     accent: 'from-rose-50 to-rose-100 border-rose-200 text-rose-900',
   },
   {
-    label: 'This Month VO Loan Paid',
+    label: 'VO Loan Paid',
     key: 'This Month VO Loan Paid',
     format: 'currency',
     accent:
       'from-purple-50 to-purple-100 border-purple-200 text-purple-900',
   },
+];
+
+const others = [
   {
     label: 'Penalty (Current Month)',
     key: 'Penalties',
@@ -276,7 +286,7 @@ const ApMap = ({
 
   const allDistrictTotalsConfig = useMemo(() => {
     const map = new Map();
-    [...balanceTotalsConfig, ...monthTotalsConfig].forEach((cfg) => {
+    [...balanceTotalsConfig, ...monthTotalsConfig, ...others].forEach((cfg) => {
       if (!map.has(cfg.key)) map.set(cfg.key, cfg);
     });
     return Array.from(map.values());
@@ -602,12 +612,7 @@ const ApMap = ({
     districtViewMode === 'currentMonth'
       ? ['This Month Savings']
       : ['Total Savings Balance'];
-  const newDisbursedKeys = [
-    'New Total',
-    'Penalties',
-    'Entry Membership Fee',
-    'Savings Returned',
-  ];
+  const newDisbursedKeys = ['New Total'];
 
   const savingsCards = activeConfig.filter((card) =>
     savingsKeys.includes(card.key)
@@ -626,9 +631,9 @@ const ApMap = ({
       : 'Loan Balances & New Loans';
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Map Section */}
-      <div className="lg:col-span-2 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl shadow-2xl p-6 flex items-center justify-center border-2 border-gray-200">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Map Section */}
+        <div className="lg:col-span-2 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl shadow-2xl p-6 flex items-center justify-center border-2 border-gray-200 max-h-[640px] overflow-hidden">
         <div
           className="w-full h-auto max-w-4xl flex items-center justify-center cursor-pointer"
           role="img"
@@ -653,7 +658,7 @@ const ApMap = ({
       </div>
 
       {/* District Details Sidebar */}
-      <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-2xl p-6 border-2 border-gray-100">
+      <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-2xl p-6 border-2 border-gray-100 max-h-[640px] overflow-y-auto">
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-3">
             <div className="bg-indigo-600 p-3 rounded-2xl">
@@ -745,7 +750,7 @@ const ApMap = ({
                   {middleSectionTitle}
                 </h4>
               </div>
-              <div className="grid grid-cols-1 gap-3 max-h-[260px] overflow-y-auto pr-1">
+              <div className="grid grid-cols-1 gap-3 pr-1">
                 {loanCards.map(({ label, key, format, accent }) => (
                   <div
                     key={key}
@@ -785,6 +790,32 @@ const ApMap = ({
                 ))}
               </div>
             </div>
+
+            {/* Others Section */}
+            {districtViewMode === 'currentMonth' && (
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                    Others
+                  </h4>
+                </div>
+                <div className="grid grid-cols-1 gap-3">
+                  {others.map(({ label, key, format, accent }) => (
+                    <div
+                      key={key}
+                      className={`bg-gradient-to-br ${accent} rounded-2xl p-3 border shadow-sm`}
+                    >
+                      <p className="text-[11px] uppercase tracking-wide font-semibold text-gray-600">
+                        {label}
+                      </p>
+                      <p className="text-lg font-extrabold text-gray-900 mt-1">
+                        {formatValue(columnTotals[key], format)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Info Message */}
             <div className="bg-gray-100 rounded-xl p-3 border border-gray-200">

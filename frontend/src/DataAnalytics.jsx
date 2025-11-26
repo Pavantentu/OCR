@@ -670,13 +670,7 @@ export default function DataAnalytics({
             <p className="text-sm text-gray-600 animate-fade-in" style={{ animationDelay: '0.2s' }}>Comprehensive insights and metrics</p>
           </div>
         </div>
-        <button
-          onClick={exportAnalytics}
-          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold flex items-center gap-2 transition-all duration-300 transform hover:scale-105 hover:shadow-lg active:scale-95"
-        >
-          <Download size={20} />
-          Export
-        </button>
+       
       </div>
 
       {/* Filter Parameters Section - Moved to Top */}
