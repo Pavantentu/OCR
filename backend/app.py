@@ -1178,29 +1178,146 @@ def get_financial_data():
             })
 
         def column_sum(frame, column_name):
-            if column_name not in frame:
+            """Strict column sum by exact column name."""
+            if column_name not in frame.columns:
                 return 0.0
             return float(pd.to_numeric(frame[column_name], errors='coerce').fillna(0).sum())
 
+        def flexible_column_sum(frame, candidates):
+            """
+            Sum values from the first matching column using a list of possible
+            column names. Matching is case-insensitive and ignores extra spaces.
+            """
+            if frame is None or frame.empty:
+                return 0.0
+
+            normalized_cols = {
+                str(col).strip().lower(): col for col in frame.columns
+            }
+
+            total = 0.0
+            for candidate in candidates:
+                key = str(candidate).strip().lower()
+                actual = normalized_cols.get(key)
+                if not actual:
+                    continue
+                value = column_sum(frame, actual)
+                if value != 0:
+                    total = value
+                    break
+            return total
+
+        COLUMN_SYNONYMS = {
+            # Savings
+            "Total Savings Balance": ["Total Savings Balance"],
+            "This Month Savings": ["This Month Savings"],
+
+            # Loan balances (totals)
+            "Total - SHG Loan Balance": ["Total - SHG Loan Balance"],
+            "Total - Bank Loan Balance": ["Total - Bank Loan Balance"],
+            "Total - Streenidhi Micro Loan Balance": [
+                "Total - Streenidhi Micro Loan Balance",
+                "Total Streenidhi Micro Loan Balance",
+                "Total - Srinidi Micro Loan Balance",
+                "Total Srinidi Micro Loan Balance",
+                "Total Srinidhi Micro Loan Balance",
+            ],
+            "Total - Streenidhi Tenny Loan Balance": [
+                "Total - Streenidhi Tenny Loan Balance",
+                "Total Streenidhi Tenny Loan Balance",
+                "Total - Srinidi Tenny Loan Balance",
+                "Total Srinidi Tenny Loan Balance",
+                "Total Srinidhi Tenny Loan Balance",
+            ],
+            "Total - Unnathi SCSP Loan Balance": [
+                "Total - Unnathi SCSP Loan Balance",
+                "Total Unnathi SCSP Loan Balance",
+                "Total - Unnati SCSP Loan Balance",
+                "Total Unnati SCSP Loan Balance",
+            ],
+            "Total - Unnathi TSP Loan Balance": [
+                "Total - Unnathi TSP Loan Balance",
+                "Total Unnathi TSP Loan Balance",
+                "Total - Unnati TSP Loan Balance",
+                "Total Unnati TSP Loan Balance",
+            ],
+            "Total - CIF Loan Balance": [
+                "Total - CIF Loan Balance",
+                "Total CIF Loan Balance",
+            ],
+            "Total - VO Loan Balance": ["Total - VO Loan Balance"],
+
+            # This month repayments (for trends + district snapshot)
+            "This Month SHG Paid Loan": ["This Month SHG Paid Loan"],
+            "This Month Bank Loan Paid": ["This Month Bank Loan Paid"],
+            "This Month Streenidhi Micro Loan Paid": [
+                "This Month Streenidhi Micro Loan Paid",
+                "This Month Srinidi Micro Loan Paid",
+                "This Month Srinidhi Micro Loan Paid",
+            ],
+            "This Month Streenidhi Tenny Loan Paid": [
+                "This Month Streenidhi Tenny Loan Paid",
+                "This Month Srinidi Tenny Loan Paid",
+                "This Month Srinidhi Tenny Loan Paid",
+            ],
+            "This Month Unnathi SCSP Loan Paid": [
+                "This Month Unnathi SCSP Loan Paid",
+                "This Month Unnati SCSP Loan Paid",
+            ],
+            "This Month Unnathi TSP Loan Paid": [
+                "This Month Unnathi TSP Loan Paid",
+                "This Month Unnati TSP Loan Paid",
+            ],
+            "This Month CIF Loan Paid": ["This Month CIF Loan Paid"],
+            "This Month VO Loan Paid": ["This Month VO Loan Paid"],
+
+            # New loans / other flows
+            "New Total": ["New Total"],
+
+            # Current month extras
+            "Penalties": [
+                "Penalties",
+                "Penalty",
+                "This Month Penalties",
+                "This Month Penalty",
+                "Penalty Amount",
+            ],
+            "Entry Membership Fee": [
+                "Entry Membership Fee",
+                "Membership Entry Fee",
+                "This Month Membership Entry Fee",
+                "This Month Entry Membership Fee",
+            ],
+            "Savings Returned": [
+                "Savings Returned",
+                "This Month Savings Returned",
+                "Returned Savings",
+            ],
+        }
+
+        def column_sum_with_synonyms(frame, canonical_key):
+            candidates = COLUMN_SYNONYMS.get(canonical_key, [canonical_key])
+            return flexible_column_sum(frame, candidates)
+
         savings = {
-            "this_month": column_sum(filtered_df, 'This Month Savings'),
-            "total": column_sum(filtered_df, 'Total Savings Balance')
+            "this_month": column_sum_with_synonyms(filtered_df, "This Month Savings"),
+            "total": column_sum_with_synonyms(filtered_df, "Total Savings Balance"),
         }
 
         loan_types = [
             ('SHG Loans', 'Total - SHG Loan Balance'),
             ('Bank Loans', 'Total - Bank Loan Balance'),
-            ('Srinidi Micro', 'Total - Srinidi Micro Loan Balance'),
-            ('Srinidi Tenny', 'Total - Srinidi Tenny Loan Balance'),
-            ('Unnati SCSP', 'Total - Unnati SCSP Loan Balance'),
-            ('Unnati TSP', 'Total - Unnati TSP Loan Balance'),
+            ('Streenidhi Micro', 'Total - Streenidhi Micro Loan Balance'),
+            ('Streenidhi Tenny', 'Total - Streenidhi Tenny Loan Balance'),
+            ('Unnathi SCSP', 'Total - Unnathi SCSP Loan Balance'),
+            ('Unnathi TSP', 'Total - Unnathi TSP Loan Balance'),
             ('CIF Loans', 'Total - CIF Loan Balance'),
             ('VO Loans', 'Total - VO Loan Balance')
         ]
 
         loan_portfolio = []
-        for name, col in loan_types:
-            value = column_sum(filtered_df, col)
+        for name, canonical_key in loan_types:
+            value = column_sum_with_synonyms(filtered_df, canonical_key)
             if value > 0:
                 loan_portfolio.append({"name": name, "value": value})
 
@@ -1239,21 +1356,25 @@ def get_financial_data():
                 logger.error(f"Error calculating loan type distribution: {e}")
                 loan_type_distribution = []
 
-        repayment_cols = [
-            ('SHG', 'This Month SHG Paid Loan'),
-            ('Bank', 'This Month Bank Loan Paid'),
-            ('Srinidi Micro', 'This Month Srinidi Micro Loan Paid'),
-            ('Srinidi Tenny', 'This Month Srinidi Tenny Loan Paid'),
-            ('Unnati SCSP', 'This Month Unnati SCSP Loan Paid'),
-            ('Unnati TSP', 'This Month Unnati TSP Loan Paid'),
-            ('CIF', 'This Month CIF Loan Paid'),
-            ('VO', 'This Month VO Loan Paid')
+        repayment_defs = [
+            ("This Month Savings", "This Month Savings"),
+            ("This Month SHG Paid Loan", "This Month SHG Paid Loan"),
+            ("This Month Bank Loan Paid", "This Month Bank Loan Paid"),
+            ("This Month Streenidhi Micro Loan Paid", "This Month Streenidhi Micro Loan Paid"),
+            ("This Month Streenidhi Tenny Loan Paid", "This Month Streenidhi Tenny Loan Paid"),
+            ("This Month Unnathi SCSP Loan Paid", "This Month Unnathi SCSP Loan Paid"),
+            ("This Month Unnathi TSP Loan Paid", "This Month Unnathi TSP Loan Paid"),
+            ("This Month CIF Loan Paid", "This Month CIF Loan Paid"),
+            ("This Month VO Loan Paid", "This Month VO Loan Paid"),
+            ("Penalty (Current Month)", "Penalties"),
+            ("Membership Entry Fee (Current Month)", "Entry Membership Fee"),
+            ("Savings Returned (Current Month)", "Savings Returned"),
         ]
 
         repayment_trends = []
-        for name, col in repayment_cols:
-            value = column_sum(filtered_df, col)
-            repayment_trends.append({"name": name, "paid": value})
+        for display_name, canonical_key in repayment_defs:
+            value = column_sum_with_synonyms(filtered_df, canonical_key)
+            repayment_trends.append({"name": display_name, "paid": value})
 
         district_shg_loans = []
         district_savings = []
@@ -1261,17 +1382,35 @@ def get_financial_data():
         district_summaries = {}
 
         CUSTOM_TOTAL_COLUMNS = [
+            # Balances
             "Total Savings Balance",
             "Total - SHG Loan Balance",
             "Total - Bank Loan Balance",
-            "Total - Srinidi Micro Loan Balance",
-            "Total - Srinidi Tenny Loan Balance",
-            "Total - Unnati SCSP Loan Balance",
-            "Total - Unnati TSP Loan Balance",
+            "Total - Streenidhi Micro Loan Balance",
+            "Total - Streenidhi Tenny Loan Balance",
+            "Total - Unnathi SCSP Loan Balance",
+            "Total - Unnathi TSP Loan Balance",
             "Total - CIF Loan Balance",
             "Total - VO Loan Balance",
-            "New Loan Type",
+
+            # New loans (totals)
             "New Total",
+
+            # This month flows (for Current Month view)
+            "This Month Savings",
+            "This Month SHG Paid Loan",
+            "This Month Bank Loan Paid",
+            "This Month Streenidhi Micro Loan Paid",
+            "This Month Streenidhi Tenny Loan Paid",
+            "This Month Unnathi SCSP Loan Paid",
+            "This Month Unnathi TSP Loan Paid",
+            "This Month CIF Loan Paid",
+            "This Month VO Loan Paid",
+
+            # Current-month extras
+            "Penalties",
+            "Entry Membership Fee",
+            "Savings Returned",
         ]
 
         if 'District' in filtered_df.columns:
@@ -1338,18 +1477,10 @@ def get_financial_data():
                     group["Village"].dropna().astype(str).str.strip().str.lower().nunique()
                 ) if "Village" in group.columns else 0
 
-                column_totals = {col: 0 for col in CUSTOM_TOTAL_COLUMNS}
-                for col_name in CUSTOM_TOTAL_COLUMNS:
-                    if col_name in group.columns:
-                        series = group[col_name]
-                        numeric_values = pd.to_numeric(series, errors='coerce')
-                        if numeric_values.notna().any():
-                            amount = float(numeric_values.fillna(0).sum())
-                        else:
-                            cleaned = series.fillna('').astype(str).str.strip()
-                            cleaned = cleaned[cleaned != ""]
-                            amount = int(cleaned.count())
-                        column_totals[col_name] = amount
+                column_totals = {}
+                for canonical_key in CUSTOM_TOTAL_COLUMNS:
+                    amount = column_sum_with_synonyms(group, canonical_key)
+                    column_totals[canonical_key] = amount
 
                 district_summaries[district_name] = {
                     "district": district_name,

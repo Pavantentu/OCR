@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { TrendingUp, Upload, AlertCircle, BarChart3 } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import ApMap from './components/ApMap';
 import apDistricts from './data/ap-districts';
@@ -180,11 +180,19 @@ export default function FinancialAnalytics({
   const prepareChartData = () => {
     if (!financialData) return null;
 
-    // Use district-wise data from backend
-    const shgLoanData = financialData.district_shg_loans || [];
-    const loanTypeData = financialData.loan_portfolio || [];
-    const newLoanCountData = financialData.district_new_loans || [];
-    const savingsData = financialData.district_savings || [];
+    // Use district-wise data from backend and sort high-to-low for better readability
+    const shgLoanData = (financialData.district_shg_loans || [])
+      .slice()
+      .sort((a, b) => (b.value || 0) - (a.value || 0));
+    const loanTypeData = (financialData.loan_portfolio || [])
+      .slice()
+      .sort((a, b) => (b.value || 0) - (a.value || 0));
+    const newLoanCountData = (financialData.district_new_loans || [])
+      .slice()
+      .sort((a, b) => (b.value || 0) - (a.value || 0));
+    const savingsData = (financialData.district_savings || [])
+      .slice()
+      .sort((a, b) => (b.value || 0) - (a.value || 0));
 
     return {
       shgLoanData,
@@ -204,7 +212,7 @@ export default function FinancialAnalytics({
 
   return (
     <div className="space-y-6">
-      {/* Header & Upload Section */}
+      {/* Header */}
       <div className="bg-white rounded-3xl shadow-2xl p-6 lg:p-8">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-6">
           <div>
@@ -219,39 +227,7 @@ export default function FinancialAnalytics({
               {(selectedMonth || selectedYear) && ` | ${selectedMonth} ${selectedYear}`}
             </p>
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => financialFileInputRef.current?.click()}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-bold flex items-center gap-2 hover:bg-indigo-700 transition-all"
-            >
-              <Upload size={18} />
-              Upload Financial Excel
-            </button>
-            <input 
-              type="file"
-              ref={financialFileInputRef}
-              className="hidden"
-              accept=".xlsx, .xls"
-              onChange={handleFinancialFileUpload}
-            />
-          </div>
         </div>
-
-        {!selectedDistrict && (
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <AlertCircle className="h-5 w-5 text-yellow-400" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-yellow-700">
-                  Please select District, Mandal, Village, Year & Month in the <b>Upload & Process</b> tab to filter these analytics. 
-                  Currently showing all available data or data based on current selection.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 mb-6">
@@ -264,19 +240,7 @@ export default function FinancialAnalytics({
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
             <p className="text-gray-600 font-medium">Loading financial data...</p>
           </div>
-        ) : !financialData ? (
-          <div className="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
-            <TrendingUp size={48} className="mx-auto text-gray-400 mb-4" />
-            <p className="text-xl text-gray-600 font-semibold">No Financial Data Found</p>
-            <p className="text-gray-500 mt-2 mb-4">Please upload an Excel file containing the financial data.</p>
-            <button
-              onClick={() => financialFileInputRef.current?.click()}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
-            >
-              Upload Excel File
-            </button>
-          </div>
-        ) : (
+        ) : !financialData ? null : (
           <div className="space-y-6">
             {/* Interactive District Map */}
             <div className="bg-white rounded-3xl shadow-2xl p-6 lg:p-8">
@@ -354,60 +318,6 @@ export default function FinancialAnalytics({
                 ) : (
                   <div className="flex items-center justify-center h-full text-gray-400 font-semibold">
                     No loan type data
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* New Loan Type Count by District */}
-            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-lg">
-              <h3 className="text-lg font-bold text-gray-800 mb-4 text-center">
-                New Loan Type Count by District
-              </h3>
-              <div className="h-96 w-full min-h-[360px]">
-                {chartData?.newLoanCountData && chartData.newLoanCountData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%" minHeight={320}>
-                    <BarChart
-                      data={chartData.newLoanCountData}
-                      margin={{ top: 20, right: 20, left: 10, bottom: 40 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis 
-                        dataKey="name" 
-                        angle={-30} 
-                        textAnchor="end" 
-                        interval={0} 
-                        height={70}
-                        tick={{ fontSize: 12 }}
-                      />
-                      <YAxis allowDecimals={false} />
-                      <Tooltip />
-                      <Bar dataKey="value" fill={BAR_COLORS.newLoan} radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : financialData.district_new_loans && financialData.district_new_loans.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%" minHeight={320}>
-                    <BarChart
-                      data={financialData.district_new_loans}
-                      margin={{ top: 20, right: 20, left: 10, bottom: 40 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis 
-                        dataKey="name" 
-                        angle={-30} 
-                        textAnchor="end" 
-                        interval={0} 
-                        height={70}
-                        tick={{ fontSize: 12 }}
-                      />
-                      <YAxis allowDecimals={false} />
-                      <Tooltip />
-                      <Bar dataKey="value" fill={BAR_COLORS.newLoan} radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-400 font-semibold">
-                    No new loan data
                   </div>
                 )}
               </div>
