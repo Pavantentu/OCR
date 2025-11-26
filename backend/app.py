@@ -134,7 +134,7 @@ CORS(app,
         r"/OCR/*": {
             "origins": [
                 "http://localhost:5173",
-                "https://karthik-stemworld.github.io"
+                "https://pavantentu.github.io"
             ],
             "methods": ["GET", "POST", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
