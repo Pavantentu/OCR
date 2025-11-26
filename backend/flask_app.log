@@ -10216,3 +10216,28 @@ Type' for loan type distribution
 2025-11-25 20:52:56,747 - INFO - ================================================================================
 
 2025-11-25 20:52:56,764 - INFO - 127.0.0.1 - - [25/Nov/2025 20:52:56] "POST /OCR/api/extract-tables HTTP/1.1" 200 -
+2025-11-26 11:52:13,812 - WARNING - PDF support disabled - install PyMuPDF: pip install PyMuPDF
+2025-11-26 11:52:15,438 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5002
+ * Running on http://192.168.1.10:5002
+2025-11-26 11:52:15,438 - INFO - [33mPress CTRL+C to quit[0m
+2025-11-26 11:52:15,443 - INFO -  * Restarting with stat
+2025-11-26 11:52:17,554 - WARNING - PDF support disabled - install PyMuPDF: pip install PyMuPDF
+2025-11-26 11:52:17,585 - WARNING -  * Debugger is active!
+2025-11-26 11:52:17,605 - INFO -  * Debugger PIN: 852-824-504
+2025-11-26 12:01:37,562 - INFO -  * Detected change in 'C:\\Users\\nares\\Desktop\\OCR-git\\OCR\\backend\\app2.py', reloading
+2025-11-26 12:01:38,166 - INFO -  * Restarting with stat
+2025-11-26 12:01:51,732 - WARNING - PDF support disabled - install PyMuPDF: pip install PyMuPDF
+2025-11-26 12:01:51,929 - WARNING -  * Debugger is active!
+2025-11-26 12:01:51,973 - INFO -  * Debugger PIN: 852-824-504
+2025-11-26 12:11:07,300 - WARNING - PDF support disabled - install PyMuPDF: pip install PyMuPDF
+2025-11-26 12:11:08,924 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5002
+ * Running on http://192.168.1.10:5002
+2025-11-26 12:11:08,925 - INFO - [33mPress CTRL+C to quit[0m
+2025-11-26 12:11:08,935 - INFO -  * Restarting with stat
+2025-11-26 12:11:16,225 - WARNING - PDF support disabled - install PyMuPDF: pip install PyMuPDF
+2025-11-26 12:11:16,342 - WARNING -  * Debugger is active!
+2025-11-26 12:11:16,400 - INFO -  * Debugger PIN: 852-824-504

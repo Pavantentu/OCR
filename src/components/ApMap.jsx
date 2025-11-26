@@ -1,8 +1,9 @@
-import React, { useMemo, useRef, useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import apDistricts from '../data/ap-districts';
 import { MapPin } from 'lucide-react';
 
-const normalizeDistrictName = (name = '') => name.toLowerCase().replace(/[^a-z0-9]/g, '');
+const normalizeDistrictName = (name = '') =>
+  name.toLowerCase().replace(/[^a-z0-9]/g, '');
 
 // Precompute canonical names for each AP district
 const canonicalDistrictNameToId = apDistricts.reduce((acc, district) => {
@@ -13,18 +14,16 @@ const canonicalDistrictNameToId = apDistricts.reduce((acc, district) => {
 // Allow alternate spellings commonly seen in Excel/map labels
 const districtNameAliases = {
   sripottisriramulunellore: 'spsr_nellore',
-  sripottisriramulunelloredistrict: 'spsr_nellore',
   nellore: 'spsr_nellore',
-  sripottisriramulu: 'spsr_nellore',
-  ysrkadapa: 'kadapa',
-  kadapa: 'kadapa',
-  kadapadistrict: 'kadapa',
+  ysrkadapa: 'ysr_kadapa',
+  kadapa: 'ysr_kadapa',
   vishakhapatnam: 'visakhapatnam',
   visakhapatnam: 'visakhapatnam',
   visakapatanam: 'visakhapatnam',
   anantapuram: 'anantapur',
   ananthapur: 'anantapur',
-  'sri satyasaidistrict': 'anantapur',
+  'sri satyasaidistrict': 'sri_sathya_sai',
+  srisathyasai: 'sri_sathya_sai',
   prakasam: 'prakasam',
   guntur: 'guntur',
   westgodavari: 'west_godavari',
@@ -41,56 +40,23 @@ const resolveDistrictId = (name = '') => {
   return canonicalDistrictNameToId[normalized] || districtNameAliases[normalized] || null;
 };
 
-// Mapping from SVG encoded path IDs to district IDs (resolved from the provided SVG)
-const districtPathMapping = {
-  '_x31_58-3': 'srikakulam',
-  '_x31_59-6': 'vizianagaram',
-  '_x33_56-0': 'visakhapatnam',
-  'path1056': 'east_godavari',
-  'path1034': 'west_godavari',
-  '_x31_80-3': 'krishna',
-  '_x31_82-5': 'guntur',
-  '_x31_83-6': 'prakasam',
-  '_x31_89-2': 'spsr_nellore',
-  '_x31_87-9': 'kadapa',
-  '_x31_84-2': 'kurnool',
-  '_x31_88-1': 'anantapur',
-  '_x31_90-7': 'chittoor',
-};
-
-const IMAGE_CANDIDATES = [
-  '/OCR/andhra-pradesh-map-image.png',
-  '/OCR/andhra-pradesh-map-image.jpg',
-  '/OCR/andhra-pradesh-map-image.jpeg',
-];
-
 const numberFormatter = new Intl.NumberFormat('en-IN');
 const currencyFormatter = new Intl.NumberFormat('en-IN', {
   style: 'currency',
   currency: 'INR',
   maximumFractionDigits: 0,
 });
-const districtTotalsConfig = [
-  { label: 'Total Saving Balance', key: 'Total Savings Balance', format: 'currency', accent: 'from-indigo-50 to-indigo-100 border-indigo-200 text-indigo-900' },
-  { label: 'Total - SHG Loan Balance', key: 'Total - SHG Loan Balance', format: 'currency', accent: 'from-blue-50 to-blue-100 border-blue-200 text-blue-900' },
-  { label: 'Total - Bank Loan Balance', key: 'Total - Bank Loan Balance', format: 'currency', accent: 'from-sky-50 to-sky-100 border-sky-200 text-sky-900' },
-  { label: 'Total - Srinidi Micro Loan Balance', key: 'Total - Srinidi Micro Loan Balance', format: 'currency', accent: 'from-emerald-50 to-emerald-100 border-emerald-200 text-emerald-900' },
-  { label: 'Total - Srinidi Tenny Loan Balance', key: 'Total - Srinidi Tenny Loan Balance', format: 'currency', accent: 'from-lime-50 to-lime-100 border-lime-200 text-lime-900' },
-  { label: 'Total - Unnati SCSP Loan Balance', key: 'Total - Unnati SCSP Loan Balance', format: 'currency', accent: 'from-amber-50 to-amber-100 border-amber-200 text-amber-900' },
-  { label: 'Total - Unnati TSP Loan Balance', key: 'Total - Unnati TSP Loan Balance', format: 'currency', accent: 'from-orange-50 to-orange-100 border-orange-200 text-orange-900' },
-  { label: 'Total - CIF Loan Balance', key: 'Total - CIF Loan Balance', format: 'currency', accent: 'from-rose-50 to-rose-100 border-rose-200 text-rose-900' },
-  { label: 'Total - VO Loan Balance', key: 'Total - VO Loan Balance', format: 'currency', accent: 'from-purple-50 to-purple-100 border-purple-200 text-purple-900' },
-  { label: 'New Loan Type', key: 'New Loan Type', format: 'number', accent: 'from-fuchsia-50 to-fuchsia-100 border-fuchsia-200 text-fuchsia-900' },
-  { label: 'New Total', key: 'New Total', format: 'currency', accent: 'from-slate-50 to-slate-100 border-slate-200 text-slate-900' },
-];
+
 const formatNumber = (value) => {
   const numeric = Number(value);
   return Number.isFinite(numeric) ? numberFormatter.format(numeric) : '—';
 };
+
 const formatCurrency = (value) => {
   const numeric = Number(value);
   return Number.isFinite(numeric) ? currencyFormatter.format(numeric) : '—';
 };
+
 const formatValue = (value, type = 'number') => {
   if (value === undefined || value === null || Number.isNaN(Number(value))) {
     return '—';
@@ -98,28 +64,184 @@ const formatValue = (value, type = 'number') => {
   return type === 'currency' ? formatCurrency(value) : formatNumber(value);
 };
 
+// Totals for Balances view
+const balanceTotalsConfig = [
+  {
+    label: 'Total Savings Balance',
+    key: 'Total Savings Balance',
+    format: 'currency',
+    accent:
+      'from-indigo-50 to-indigo-100 border-indigo-200 text-indigo-900',
+  },
+  {
+    label: 'Total - SHG Loan Balance',
+    key: 'Total - SHG Loan Balance',
+    format: 'currency',
+    accent: 'from-blue-50 to-blue-100 border-blue-200 text-blue-900',
+  },
+  {
+    label: 'Total - Bank Loan Balance',
+    key: 'Total - Bank Loan Balance',
+    format: 'currency',
+    accent: 'from-sky-50 to-sky-100 border-sky-200 text-sky-900',
+  },
+  {
+    label: 'Total - Streenidhi Micro Loan Balance',
+    key: 'Total - Streenidhi Micro Loan Balance',
+    format: 'currency',
+    accent:
+      'from-emerald-50 to-emerald-100 border-emerald-200 text-emerald-900',
+  },
+  {
+    label: 'Total - Streenidhi Tenny Loan Balance',
+    key: 'Total - Streenidhi Tenny Loan Balance',
+    format: 'currency',
+    accent: 'from-lime-50 to-lime-100 border-lime-200 text-lime-900',
+  },
+  {
+    label: 'Total - Unnathi SCSP Loan Balance',
+    key: 'Total - Unnathi SCSP Loan Balance',
+    format: 'currency',
+    accent: 'from-amber-50 to-amber-100 border-amber-200 text-amber-900',
+  },
+  {
+    label: 'Total - Unnathi TSP Loan Balance',
+    key: 'Total - Unnathi TSP Loan Balance',
+    format: 'currency',
+    accent:
+      'from-orange-50 to-orange-100 border-orange-200 text-orange-900',
+  },
+  {
+    label: 'Total - CIF Loan Balance',
+    key: 'Total - CIF Loan Balance',
+    format: 'currency',
+    accent: 'from-rose-50 to-rose-100 border-rose-200 text-rose-900',
+  },
+  {
+    label: 'Total - VO Loan Balance',
+    key: 'Total - VO Loan Balance',
+    format: 'currency',
+    accent:
+      'from-purple-50 to-purple-100 border-purple-200 text-purple-900',
+  },
+  {
+    label: 'New Loans Disbursed (Total)',
+    key: 'New Total',
+    format: 'currency',
+    accent:
+      'from-slate-50 to-slate-100 border-slate-200 text-slate-900',
+  },
+];
+
+// Totals for Current Month view
+const monthTotalsConfig = [
+  {
+    label: 'This Month Savings',
+    key: 'This Month Savings',
+    format: 'currency',
+    accent:
+      'from-emerald-50 to-emerald-100 border-emerald-200 text-emerald-900',
+  },
+  {
+    label: 'This Month SHG Paid Loan',
+    key: 'This Month SHG Paid Loan',
+    format: 'currency',
+    accent: 'from-indigo-50 to-indigo-100 border-indigo-200 text-indigo-900',
+  },
+  {
+    label: 'This Month Bank Loan Paid',
+    key: 'This Month Bank Loan Paid',
+    format: 'currency',
+    accent: 'from-blue-50 to-blue-100 border-blue-200 text-blue-900',
+  },
+  {
+    label: 'This Month Streenidhi Micro Loan Paid',
+    key: 'This Month Streenidhi Micro Loan Paid',
+    format: 'currency',
+    accent: 'from-sky-50 to-sky-100 border-sky-200 text-sky-900',
+  },
+  {
+    label: 'This Month Streenidhi Tenny Loan Paid',
+    key: 'This Month Streenidhi Tenny Loan Paid',
+    format: 'currency',
+    accent: 'from-lime-50 to-lime-100 border-lime-200 text-lime-900',
+  },
+  {
+    label: 'This Month Unnathi SCSP Loan Paid',
+    key: 'This Month Unnathi SCSP Loan Paid',
+    format: 'currency',
+    accent: 'from-amber-50 to-amber-100 border-amber-200 text-amber-900',
+  },
+  {
+    label: 'This Month Unnathi TSP Loan Paid',
+    key: 'This Month Unnathi TSP Loan Paid',
+    format: 'currency',
+    accent:
+      'from-orange-50 to-orange-100 border-orange-200 text-orange-900',
+  },
+  {
+    label: 'This Month CIF Loan Paid',
+    key: 'This Month CIF Loan Paid',
+    format: 'currency',
+    accent: 'from-rose-50 to-rose-100 border-rose-200 text-rose-900',
+  },
+  {
+    label: 'This Month VO Loan Paid',
+    key: 'This Month VO Loan Paid',
+    format: 'currency',
+    accent:
+      'from-purple-50 to-purple-100 border-purple-200 text-purple-900',
+  },
+  {
+    label: 'Penalty (Current Month)',
+    key: 'Penalties',
+    format: 'currency',
+    accent: 'from-red-50 to-red-100 border-red-200 text-red-900',
+  },
+  {
+    label: 'Membership Entry Fee (Current Month)',
+    key: 'Entry Membership Fee',
+    format: 'currency',
+    accent: 'from-yellow-50 to-yellow-100 border-yellow-200 text-yellow-900',
+  },
+  {
+    label: 'Savings Returned (Current Month)',
+    key: 'Savings Returned',
+    format: 'currency',
+    accent: 'from-teal-50 to-teal-100 border-teal-200 text-teal-900',
+  },
+];
+
 const ApMap = ({
   selectedDistrictId: controlledSelectedDistrictId,
   onDistrictSelect,
   districtSummaries = {},
   isAnalyticsLoading = false,
 }) => {
-  const [internalSelectedDistrictId, setInternalSelectedDistrictId] = useState(null);
+  const [internalSelectedDistrictId, setInternalSelectedDistrictId] =
+    useState(null);
+  const [districtViewMode, setDistrictViewMode] = useState('currentMonth'); // 'currentMonth' | 'balances'
   const [svgContent, setSvgContent] = useState(null);
-  const [svgError, setSvgError] = useState(null);
-  const [imageSrc, setImageSrc] = useState(null);
-  const [useImageMap, setUseImageMap] = useState(false); // Prefer interactive SVG by default
-  const [imageCheckKey, setImageCheckKey] = useState(0);
   const [processedSvg, setProcessedSvg] = useState(null);
-  const mapWrapperRef = useRef(null);
-  const imageRef = useRef(null);
+  const [svgError, setSvgError] = useState(null);
+
   const svgContainerRef = useRef(null);
+
   const svgMarkup = useMemo(() => {
     if (!processedSvg) return null;
     return { __html: processedSvg };
   }, [processedSvg]);
 
-  const activeDistrictId = controlledSelectedDistrictId ?? internalSelectedDistrictId;
+  // Keep internal selection in sync with external props and reset view to Current Month
+  useEffect(() => {
+    if (controlledSelectedDistrictId) {
+      setInternalSelectedDistrictId(controlledSelectedDistrictId);
+    }
+    setDistrictViewMode('currentMonth');
+  }, [controlledSelectedDistrictId]);
+
+  const activeDistrictId =
+    controlledSelectedDistrictId ?? internalSelectedDistrictId;
 
   const districtSummariesById = useMemo(() => {
     if (!districtSummaries) return {};
@@ -145,21 +267,35 @@ const ApMap = ({
   }, [districtSummaries]);
 
   const selectedDistrict = useMemo(() => {
-    return apDistricts.find((district) => district.id === activeDistrictId) || null;
+    return (
+      apDistricts.find((district) => district.id === activeDistrictId) || null
+    );
   }, [activeDistrictId]);
 
   const analyticsSummary = districtSummariesById[activeDistrictId];
+
+  const allDistrictTotalsConfig = useMemo(() => {
+    const map = new Map();
+    [...balanceTotalsConfig, ...monthTotalsConfig].forEach((cfg) => {
+      if (!map.has(cfg.key)) map.set(cfg.key, cfg);
+    });
+    return Array.from(map.values());
+  }, []);
+
   const aggregatedSummary = useMemo(() => {
     const summaries = Object.values(districtSummariesById);
     if (!summaries.length) return null;
 
-    const combinedTotals = districtTotalsConfig.reduce((acc, { key }) => {
-      acc[key] = 0;
-      return acc;
-    }, {});
+    const combinedTotals = allDistrictTotalsConfig.reduce(
+      (acc, { key }) => {
+        acc[key] = 0;
+        return acc;
+      },
+      {}
+    );
 
     summaries.forEach((summary) => {
-      districtTotalsConfig.forEach(({ key }) => {
+      allDistrictTotalsConfig.forEach(({ key }) => {
         const value = Number(summary.column_totals?.[key]) || 0;
         combinedTotals[key] += value;
       });
@@ -169,133 +305,130 @@ const ApMap = ({
       district: 'Andhra Pradesh',
       column_totals: combinedTotals,
     };
-  }, [districtSummariesById]);
+  }, [districtSummariesById, allDistrictTotalsConfig]);
 
-  const displaySummary = (activeDistrictId && analyticsSummary) ? analyticsSummary : aggregatedSummary;
-  const displayName = activeDistrictId && selectedDistrict
-    ? selectedDistrict.district
-    : displaySummary?.district || 'Select a district';
+  const displaySummary =
+    activeDistrictId && analyticsSummary ? analyticsSummary : aggregatedSummary;
 
-  const handleMapClick = React.useCallback((event) => {
-    // Handle image map clicks (coordinate-based selection)
-    if (useImageMap && imageRef.current && imageSrc) {
-      const img = imageRef.current;
-      const rect = img.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-      
-      // Calculate relative position (0-1)
-      const relX = x / rect.width;
-      const relY = y / rect.height;
-      
-      // For now, allow manual district selection via dropdown or use coordinate mapping
-      // This is a placeholder - you can add coordinate-based district detection here
-      console.log('Image map clicked at:', relX, relY);
-      return;
-    }
-    
-    // Handle SVG path clicks
-    const targetPath = event.target.closest('path');
-    if (!targetPath || !targetPath.classList.contains('district')) return;
-    
-    // Try to get district ID from path
-    const pathId = targetPath.dataset.districtId || targetPath.id || targetPath.getAttribute('data-district-id');
-    const updateSelection = (districtId) => {
+  const displayName =
+    activeDistrictId && selectedDistrict
+      ? selectedDistrict.district
+      : displaySummary?.district || 'Select a district';
+
+  const updateSelection = React.useCallback(
+    (districtId) => {
+      if (!districtId) return;
       setInternalSelectedDistrictId(districtId);
+      setDistrictViewMode('currentMonth');
+
       if (onDistrictSelect) {
         const districtName =
-          apDistricts.find((district) => district.id === districtId)?.district ||
+          apDistricts.find((district) => district.id === districtId)
+            ?.district ||
           districtSummariesById[districtId]?.district ||
           districtId;
         onDistrictSelect(districtId, districtName);
       }
-    };
+    },
+    [onDistrictSelect, districtSummariesById]
+  );
 
-    const match = apDistricts.find((district) => district.id === pathId);
-    
-    if (match) {
-      updateSelection(match.id);
-    } else {
-      // Try to find by mapping
-      const originalId = targetPath.getAttribute('data-original-id');
-      const mappedDistrictId = districtPathMapping[originalId] || districtPathMapping[pathId];
-      
-      if (mappedDistrictId) {
-        const mappedMatch = apDistricts.find((district) => district.id === mappedDistrictId);
-        if (mappedMatch) {
-          updateSelection(mappedMatch.id);
-          return;
-        }
-      }
-      
-      // Log for debugging - helps identify which paths need mapping
-      console.log('Clicked path - ID:', pathId, 'Original ID:', originalId, 'Path data length:', targetPath.getAttribute('d')?.length);
+  const inferDistrictFromPath = React.useCallback((pathElement) => {
+    if (!svgContainerRef.current || !pathElement || !pathElement.getBBox) {
+      return null;
     }
-  }, [useImageMap, imageSrc, onDistrictSelect, districtSummariesById]);
 
-  // Detect which image file exists (png/jpg/jpeg) and prefer using it
-  useEffect(() => {
-    let isMounted = true;
+    const labels =
+      svgContainerRef.current.querySelectorAll('text.district-label');
+    if (!labels.length) return null;
 
-    const tryLoadImages = async () => {
-      for (const candidate of IMAGE_CANDIDATES) {
-        try {
-          await new Promise((resolve, reject) => {
-            const testImage = new Image();
-            testImage.onload = () => resolve();
-            testImage.onerror = reject;
-            testImage.src = candidate + '?t=' + Date.now(); // cache bust
-          });
+    const bbox = pathElement.getBBox();
+    const cx = bbox.x + bbox.width / 2;
+    const cy = bbox.y + bbox.height / 2;
 
-          if (isMounted) {
-            setImageSrc(candidate);
-            setUseImageMap(true);
-          }
-          return;
-        } catch (error) {
-          // try next candidate
+    let closestId = null;
+    let closestDist = Infinity;
+
+    labels.forEach((label) => {
+      if (!label.getBBox) return;
+      const lb = label.getBBox();
+      const lx = lb.x + lb.width / 2;
+      const ly = lb.y + lb.height / 2;
+      const dx = lx - cx;
+      const dy = ly - cy;
+      const distSq = dx * dx + dy * dy;
+
+      const candidateId = resolveDistrictId(label.textContent || '');
+      if (!candidateId) return;
+
+      if (distSq < closestDist) {
+        closestDist = distSq;
+        closestId = candidateId;
+      }
+    });
+
+    return closestId;
+  }, []);
+
+  const handleMapClick = React.useCallback(
+    (event) => {
+      if (!svgContainerRef.current) return;
+
+      const labelNode = event.target.closest('text.district-label');
+      const targetPath = labelNode
+        ? null
+        : event.target.closest('path.district');
+
+      if (!labelNode && !targetPath) return;
+
+      let districtId = null;
+
+      if (labelNode) {
+        districtId = resolveDistrictId(labelNode.textContent || '');
+      }
+
+      if (!districtId && targetPath) {
+        const pathId =
+          targetPath.getAttribute('data-district-id') || targetPath.id || '';
+        const directMatch = apDistricts.find(
+          (district) => district.id === pathId
+        );
+        if (directMatch) {
+          districtId = directMatch.id;
         }
       }
 
-      if (isMounted) {
-        setImageSrc(null);
-        setUseImageMap(false);
+      if (!districtId && targetPath) {
+        districtId = inferDistrictFromPath(targetPath);
       }
-    };
 
-    tryLoadImages();
+      if (districtId) {
+        updateSelection(districtId);
+      } else {
+        console.log('Clicked SVG element but could not resolve district ID', {
+          clickedElement: event.target.tagName,
+        });
+      }
+    },
+    [inferDistrictFromPath, updateSelection]
+  );
 
-    return () => {
-      isMounted = false;
-    };
-  }, [imageCheckKey]);
-
-  const retryImageMapDetection = () => {
-    setImageSrc(null);
-    setUseImageMap(true);
-    setImageCheckKey((key) => key + 1);
-  };
-
-  // Load SVG content
+  // Load SVG content (new 26-district map)
   useEffect(() => {
-    // Try multiple paths - first without /OCR/, then with /OCR/
     const svgPaths = [
       '/andhra-pradesh-map.svg',
-      '/OCR/andhra-pradesh-map.svg'
+      '/OCR/andhra-pradesh-map.svg',
     ];
-    
+
     let currentPathIndex = 0;
-    
-    const tryFetch = (path) => {
-      return fetch(path)
+
+    const tryFetch = (path) =>
+      fetch(path)
         .then((response) => {
           if (!response.ok) {
-            throw new Error(`Failed to fetch SVG: ${response.status} ${response.statusText}`);
-          }
-          // Check content type
-          const contentType = response.headers.get('content-type');
-          if (contentType && !contentType.includes('svg') && !contentType.includes('xml') && !contentType.includes('text')) {
-            throw new Error(`Unexpected content type: ${contentType}. Expected SVG.`);
+            throw new Error(
+              `Failed to fetch SVG: ${response.status} ${response.statusText}`
+            );
           }
           return response.text();
         })
@@ -303,134 +436,131 @@ const ApMap = ({
           if (!text || !text.trim()) {
             throw new Error('Empty SVG content received.');
           }
-          
+
           const trimmed = text.trim();
-          
-          // Check if it's HTML (404 page, etc.)
-          if (trimmed.startsWith('<!DOCTYPE') || trimmed.startsWith('<html') || (trimmed.startsWith('<!') && !trimmed.startsWith('<?xml'))) {
-            throw new Error('Received HTML instead of SVG. The SVG file may not exist.');
+
+          if (
+            trimmed.startsWith('<!DOCTYPE') ||
+            trimmed.startsWith('<html') ||
+            (trimmed.startsWith('<!') && !trimmed.startsWith('<?xml'))
+          ) {
+            throw new Error('Received HTML instead of SVG.');
           }
-          
-          // Check if it's actually SVG
+
           if (!trimmed.startsWith('<svg') && !trimmed.startsWith('<?xml')) {
-            throw new Error('Invalid SVG content. File does not appear to be a valid SVG.');
+            throw new Error('Invalid SVG content. Not an SVG.');
           }
-          
+
           setSvgContent(text);
           setSvgError(null);
         });
-    };
-    
+
     const attemptFetch = () => {
       if (currentPathIndex >= svgPaths.length) {
-        setSvgError('Failed to load SVG from all attempted paths. Please ensure andhra-pradesh-map.svg exists in the public folder.');
-        setUseImageMap(true);
+        setSvgError(
+          'Failed to load andhra-pradesh-map.svg from the public folder.'
+        );
         return;
       }
-      
-      tryFetch(svgPaths[currentPathIndex])
-        .catch((error) => {
-          console.warn(`Failed to load SVG from ${svgPaths[currentPathIndex]}:`, error.message);
-          currentPathIndex++;
-          attemptFetch();
-        });
+
+      tryFetch(svgPaths[currentPathIndex]).catch((error) => {
+        console.warn(
+          `Failed to load SVG from ${svgPaths[currentPathIndex]}:`,
+          error.message
+        );
+        currentPathIndex += 1;
+        attemptFetch();
+      });
     };
-    
+
     attemptFetch();
   }, []);
 
-  // Process SVG and map district paths after load
+  // Process SVG and map district paths and labels after load
   useEffect(() => {
-    if (!svgContent || useImageMap) {
+    if (!svgContent) {
       setProcessedSvg(null);
       return;
     }
 
     try {
-      // Clean the SVG content - remove BOM if present
       let cleanSvgContent = svgContent.trim();
-      if (cleanSvgContent.charCodeAt(0) === 0xFEFF) {
+      if (cleanSvgContent.charCodeAt(0) === 0xfeff) {
         cleanSvgContent = cleanSvgContent.slice(1);
       }
-      
-      // Ensure it starts with SVG
-      if (!cleanSvgContent.startsWith('<svg') && !cleanSvgContent.startsWith('<?xml')) {
-        throw new Error('SVG content does not start with <svg> or <?xml>');
-      }
-      
-      // Parse and modify SVG
+
       const parser = new DOMParser();
       const svgDoc = parser.parseFromString(cleanSvgContent, 'image/svg+xml');
-      
-      // Check for parsing errors
+
       const parserError = svgDoc.querySelector('parsererror');
       if (parserError) {
         const errorText = parserError.textContent || 'Unknown parsing error';
         console.error('SVG parsing error:', errorText);
-        // Log the first few characters to help debug
-        console.error('First 200 chars of SVG:', cleanSvgContent.substring(0, 200));
         setSvgError('SVG parsing error: ' + errorText);
         setProcessedSvg(null);
-        // Fall back to image map
-        setUseImageMap(true);
         return;
       }
-      
+
       const svgElement = svgDoc.documentElement;
 
-      // Find all paths in the SVG
-      const paths = svgElement.querySelectorAll('path[id]');
-      
-      // Map encoded IDs to district IDs (this mapping may need adjustment based on actual SVG structure)
-      // The SVG has paths with IDs like "_x31_58-3", "_x31_59-6", etc.
-      // We'll need to identify which path corresponds to which district
-      // For now, we'll add a data attribute to help identify districts
+      // Ensure viewBox and sizing classes
+      const viewBox =
+        svgElement.getAttribute('viewBox') || '0 0 1238.0786 1041.3174';
+      svgElement.setAttribute('viewBox', viewBox);
+      svgElement.setAttribute(
+        'class',
+        'w-full h-auto max-w-4xl cursor-pointer'
+      );
+
+      // Mark district shapes
+      const paths = svgElement.querySelectorAll('path');
       paths.forEach((path) => {
-        // Add district class to all main district paths (paths with complex d attributes)
         const d = path.getAttribute('d') || '';
-        if (d.length > 100) { // Main district paths typically have long path data
-          path.setAttribute('class', 'district');
-          // Store original ID for reference
-          path.setAttribute('data-original-id', path.id);
-          const mappedDistrict = districtPathMapping[path.id];
-          if (mappedDistrict) {
-            path.setAttribute('data-district-id', mappedDistrict);
-            path.setAttribute('id', mappedDistrict);
-          } else {
-            path.setAttribute('data-district-id', path.id);
-          }
+        if (d.length > 100) {
+          path.classList.add('district');
+          path.setAttribute('data-original-id', path.id || '');
         }
       });
 
-      // Update viewBox and class
-      const viewBox = svgElement.getAttribute('viewBox') || '0 0 1238.0786 1041.3174';
-      svgElement.setAttribute('viewBox', viewBox);
-      svgElement.setAttribute('class', 'w-full h-auto max-w-4xl');
+      // Mark district labels
+      const textNodes = svgElement.querySelectorAll('text');
+      textNodes.forEach((text) => {
+        text.classList.add('district-label');
+        const existingStyle = text.getAttribute('style') || '';
+        text.setAttribute(
+          'style',
+          `${existingStyle}; cursor: pointer; user-select: none;`
+        );
+      });
 
-      // Inject styles
-      const style = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'style');
+      // Inject styles for hover/active states
+      const style = svgDoc.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'style'
+      );
       style.textContent = `
-            .district {
-              fill: #ffffff;
-              stroke: #000000;
-              stroke-width: 2.5;
-              cursor: pointer;
-              transition: all 0.3s ease;
-            }
-            .district:hover {
-              fill: #e0e0e0;
-              stroke: #000000;
-              stroke-width: 3.5;
-            }
-            .district.active {
-              fill: #FFA500;
-              stroke: #000000;
-              stroke-width: 4;
-            }
+        .district {
+          stroke: #ffffff;
+          stroke-width: 2;
+          cursor: pointer;
+          transition: all 0.25s ease;
+        }
+        .district:hover {
+          stroke: #111827;
+          stroke-width: 3;
+          filter: drop-shadow(0 0 6px rgba(30, 64, 175, 0.6));
+        }
+        .district.active {
+          stroke: #111827;
+          stroke-width: 3.5;
+          filter: drop-shadow(0 0 8px rgba(29, 78, 216, 0.85));
+        }
+        text.district-label {
+          cursor: pointer;
+        }
       `;
       svgElement.insertBefore(style, svgElement.firstChild);
 
-      // Convert to string for React to render
       const serializer = new XMLSerializer();
       const svgString = serializer.serializeToString(svgElement);
       setProcessedSvg(svgString);
@@ -440,37 +570,18 @@ const ApMap = ({
       setSvgError('Error processing SVG: ' + error.message);
       setProcessedSvg(null);
     }
-  }, [svgContent, useImageMap]);
+  }, [svgContent]);
 
-  // Add click event listeners to SVG paths after render
-  useEffect(() => {
-    if (!processedSvg || !svgContainerRef.current) return;
-
-    const container = svgContainerRef.current;
-    const paths = container.querySelectorAll('path.district');
-    
-    const clickHandler = (e) => {
-      e.stopPropagation();
-      handleMapClick(e);
-    };
-    
-    paths.forEach((path) => {
-      path.addEventListener('click', clickHandler);
-    });
-
-    // Cleanup function
-    return () => {
-      paths.forEach((path) => {
-        path.removeEventListener('click', clickHandler);
-      });
-    };
-  }, [processedSvg, handleMapClick]);
-
+  // Highlight active district path
   useEffect(() => {
     if (!svgContainerRef.current || !processedSvg) return;
+
     const paths = svgContainerRef.current.querySelectorAll('path.district');
     paths.forEach((path) => {
-      const pathId = path.getAttribute('data-district-id') || path.id;
+      const pathId =
+        path.getAttribute('data-district-id') ||
+        path.getAttribute('data-original-id') ||
+        path.id;
       if (pathId === activeDistrictId) {
         path.classList.add('active');
       } else {
@@ -482,92 +593,52 @@ const ApMap = ({
   const hasAnalytics = Boolean(displaySummary);
   const columnTotals = displaySummary?.column_totals || {};
 
+  const activeConfig =
+    districtViewMode === 'currentMonth'
+      ? monthTotalsConfig
+      : balanceTotalsConfig;
+
+  const savingsKeys =
+    districtViewMode === 'currentMonth'
+      ? ['This Month Savings']
+      : ['Total Savings Balance'];
+  const newDisbursedKeys = [
+    'New Total',
+    'Penalties',
+    'Entry Membership Fee',
+    'Savings Returned',
+  ];
+
+  const savingsCards = activeConfig.filter((card) =>
+    savingsKeys.includes(card.key)
+  );
+  const newDisbursedCards = activeConfig.filter((card) =>
+    newDisbursedKeys.includes(card.key)
+  );
+  const loanCards = activeConfig.filter(
+    (card) =>
+      !savingsKeys.includes(card.key) && !newDisbursedKeys.includes(card.key)
+  );
+
+  const middleSectionTitle =
+    districtViewMode === 'currentMonth'
+      ? 'Loan Repayments & Other Flows'
+      : 'Loan Balances & New Loans';
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Map Section */}
-      <div
-        ref={mapWrapperRef}
-        className="lg:col-span-2 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl shadow-2xl p-6 flex items-center justify-center border-2 border-gray-200"
-        onClick={handleMapClick}
-      >
-        <div 
-          className="svg-container w-full h-auto max-w-4xl flex items-center justify-center"
+      <div className="lg:col-span-2 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl shadow-2xl p-6 flex items-center justify-center border-2 border-gray-200">
+        <div
+          className="w-full h-auto max-w-4xl flex items-center justify-center cursor-pointer"
           role="img"
           aria-label="Andhra Pradesh District Map"
+          onClick={handleMapClick}
         >
-          {useImageMap && imageSrc ? (
-            // Display image map
-            <img
-              ref={imageRef}
-              src={imageSrc}
-              alt="Andhra Pradesh District Map"
-              className="w-full h-auto max-w-4xl cursor-pointer"
-              onError={(e) => {
-                console.error('Image map not found, falling back to SVG');
-                setUseImageMap(false);
-                setImageSrc(null);
-              }}
-              onClick={handleMapClick}
-              style={{ imageRendering: 'high-quality' }}
-            />
-          ) : useImageMap ? (
-            <div className="text-gray-500">Looking for image map...</div>
-          ) : svgError ? (
+          {svgError ? (
             <div className="text-red-600 p-4 text-center max-w-md">
               <p className="font-semibold mb-2">Map Loading Error</p>
               <p className="text-sm">{svgError}</p>
-              <div className="flex gap-2 mt-4 justify-center">
-                <button 
-                  onClick={() => {
-                    setSvgError(null);
-                    setUseImageMap(false);
-                    // Try both paths
-                    const tryPaths = ['/andhra-pradesh-map.svg', '/OCR/andhra-pradesh-map.svg'];
-                    let pathIndex = 0;
-                    const attemptFetch = () => {
-                      if (pathIndex >= tryPaths.length) {
-                        setSvgError('SVG not found. Falling back to image map.');
-                        setUseImageMap(true);
-                        return;
-                      }
-                      fetch(tryPaths[pathIndex])
-                        .then((response) => {
-                          if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
-                          return response.text();
-                        })
-                        .then((text) => {
-                          if (!text || !text.trim()) {
-                            throw new Error('Invalid SVG content');
-                          }
-                          const trimmed = text.trim();
-                          if (trimmed.startsWith('<!DOCTYPE') || trimmed.startsWith('<html')) {
-                            throw new Error('Received HTML instead of SVG');
-                          }
-                          if (!trimmed.startsWith('<svg') && !trimmed.startsWith('<?xml')) {
-                            throw new Error('Invalid SVG format');
-                          }
-                          setSvgContent(text);
-                          setSvgError(null);
-                        })
-                        .catch((error) => {
-                          console.warn(`Failed from ${tryPaths[pathIndex]}:`, error.message);
-                          pathIndex++;
-                          attemptFetch();
-                        });
-                    };
-                    attemptFetch();
-                  }}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-                >
-                  Retry SVG
-                </button>
-                <button 
-                  onClick={retryImageMapDetection}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                >
-                  Try Image Map
-                </button>
-              </div>
             </div>
           ) : svgMarkup ? (
             <div
@@ -583,53 +654,154 @@ const ApMap = ({
 
       {/* District Details Sidebar */}
       <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-2xl p-6 border-2 border-gray-100">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="bg-indigo-600 p-3 rounded-2xl">
-            <MapPin size={28} className="text-white" />
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-indigo-600 p-3 rounded-2xl">
+              <MapPin size={24} className="text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-gray-800">
+                District Snapshot
+              </h3>
+              <p className="text-sm text-gray-500">
+                Click a district on the map to view details
+              </p>
+            </div>
           </div>
-          <h3 className="text-2xl font-bold text-gray-800">District Snapshot</h3>
+
+          {/* View toggle */}
+          <div className="inline-flex items-center gap-3 bg-gray-100 rounded-full px-3 py-1 text-xs font-medium">
+            <label className="inline-flex items-center gap-1 cursor-pointer">
+              <input
+                type="radio"
+                className="text-indigo-600"
+                checked={districtViewMode === 'currentMonth'}
+                onChange={() => setDistrictViewMode('currentMonth')}
+              />
+              <span>Current Month</span>
+            </label>
+            <span className="w-px h-5 bg-gray-300" />
+            <label className="inline-flex items-center gap-1 cursor-pointer">
+              <input
+                type="radio"
+                className="text-indigo-600"
+                checked={districtViewMode === 'balances'}
+                onChange={() => setDistrictViewMode('balances')}
+              />
+              <span>Balances</span>
+            </label>
+          </div>
         </div>
-        
+
         {hasAnalytics ? (
-          <div className="space-y-4">
+          <div className="space-y-5">
             {/* District Name */}
-            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-5 shadow-lg">
-              <p className="text-sm text-indigo-100 font-semibold uppercase tracking-wider mb-1">Selected District</p>
-              <p className="text-3xl font-extrabold text-white">{displayName}</p>
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-4 shadow-lg">
+              <p className="text-xs text-indigo-100 font-semibold uppercase tracking-wider mb-1">
+                Selected District
+              </p>
+              <p className="text-2xl font-extrabold text-white">
+                {displayName}
+              </p>
             </div>
 
             {isAnalyticsLoading && !activeDistrictId && (
               <div className="flex items-center gap-3 bg-indigo-50 border border-indigo-100 text-indigo-700 rounded-2xl px-4 py-3">
                 <div className="h-3 w-3 bg-indigo-600 rounded-full animate-ping" />
-                <p className="text-sm font-medium">Aggregating statewide totals from the latest Excel upload...</p>
+                <p className="text-sm font-medium">
+                  Aggregating statewide totals from the latest Excel upload...
+                </p>
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {districtTotalsConfig.map(({ label, key, format, accent }) => (
-                <div
-                  key={key}
-                  className={`bg-gradient-to-br ${accent} rounded-2xl p-4 border shadow-md`}
-                >
-                  <p className="text-xs uppercase tracking-wide font-bold text-gray-600">{label}</p>
-                  <p className="text-base font-extrabold text-gray-900 mt-1 whitespace-nowrap overflow-hidden text-ellipsis">
-                    {formatValue(columnTotals[key], format)}
-                  </p>
-                </div>
-              ))}
+            {/* Savings Section */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                  Savings
+                </h4>
+              </div>
+              <div className="grid grid-cols-1 gap-3">
+                {savingsCards.map(({ label, key, format, accent }) => (
+                  <div
+                    key={key}
+                    className={`bg-gradient-to-br ${accent} rounded-2xl p-3 border shadow-sm`}
+                  >
+                    <p className="text-[11px] uppercase tracking-wide font-semibold text-gray-600">
+                      {label}
+                    </p>
+                    <p className="text-lg font-extrabold text-gray-900 mt-1">
+                      {formatValue(columnTotals[key], format)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Loans Section */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                  {middleSectionTitle}
+                </h4>
+              </div>
+              <div className="grid grid-cols-1 gap-3 max-h-[260px] overflow-y-auto pr-1">
+                {loanCards.map(({ label, key, format, accent }) => (
+                  <div
+                    key={key}
+                    className={`bg-gradient-to-br ${accent} rounded-2xl p-3 border shadow-sm`}
+                  >
+                    <p className="text-[11px] uppercase tracking-wide font-semibold text-gray-600">
+                      {label}
+                    </p>
+                    <p className="text-lg font-extrabold text-gray-900 mt-1">
+                      {formatValue(columnTotals[key], format)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* New Loans Disbursed Section */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                  New Loans Disbursed
+                </h4>
+              </div>
+              <div className="grid grid-cols-1 gap-3">
+                {newDisbursedCards.map(({ label, key, format, accent }) => (
+                  <div
+                    key={key}
+                    className={`bg-gradient-to-br ${accent} rounded-2xl p-3 border shadow-sm`}
+                  >
+                    <p className="text-[11px] uppercase tracking-wide font-semibold text-gray-600">
+                      {label}
+                    </p>
+                    <p className="text-lg font-extrabold text-gray-900 mt-1">
+                      {formatValue(columnTotals[key], format)}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Info Message */}
-            <div className="bg-gray-100 rounded-xl p-4 border border-gray-200">
-              <p className="text-sm text-gray-600 text-center">
-                💡 Click on any district on the map to view its detailed statistics
+            <div className="bg-gray-100 rounded-xl p-3 border border-gray-200">
+              <p className="text-xs text-gray-600 text-center">
+                Click on any coloured district or its label on the map to
+                update this snapshot. View toggles always reset to{' '}
+                <span className="font-semibold">Current Month</span> when you
+                change districts.
               </p>
             </div>
           </div>
         ) : (
           <div className="text-center py-12">
             <MapPin size={48} className="mx-auto text-gray-300 mb-4" />
-            <p className="text-gray-500 text-lg">Select a district on the map to view details.</p>
+            <p className="text-gray-500 text-lg">
+              Select a district on the map to view details.
+            </p>
           </div>
         )}
       </div>
@@ -638,4 +810,5 @@ const ApMap = ({
 };
 
 export default ApMap;
+
 
