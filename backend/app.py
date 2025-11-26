@@ -438,13 +438,12 @@ class OCRProcessor:
         logger.info(f"{'='*70}")
         
         try:
-            # Run validation and extraction pipeline
-            # CRITICAL: Pass debug=False and return_images=True
+        # Run validation and extraction pipeline without saving debug/training outputs
             result = process_with_validation(
                 image_path,
-                debug=False,  # No debug files
-                training_mode=False,
-                return_images=True  # We need images for OCR
+            debug=False,  # No debug files
+            training_mode=False,
+            return_images=False  # Keep processing in-memory only
             )
             
             if not result or not result.get('success'):

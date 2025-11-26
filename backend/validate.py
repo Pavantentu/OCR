@@ -430,71 +430,72 @@ class SHGImageValidator:
         
         return diagnostics
     
-    def check_cell_count(self, image: np.ndarray, image_path: str) -> Tuple[bool, int, str]:
+    def check_cell_count(
+        self,
+        image: np.ndarray,
+        image_path: str,
+        capture_state: bool = False
+    ) -> Dict[str, object]:
         """
         Run the main detector to verify exactly 298 cells are detected.
-        Uses the debug_id mapping (18a_debug_ids.jpg) which is the accurate count
-        after the full processing pipeline.
-        
-        Returns:
-            (is_acceptable, cell_count, message)
+        Optionally capture the detector state so downstream processing can
+        continue without repeating the heavy work.
         """
         print("\n[CHECK 4/4] Table Structure Validation...")
         print("  Running SHG detector to count cells (using debug ID mapping)...")
         
-        # Create a temporary detector instance with debug enabled
-        # to generate the debug_id mapping
         temp_detector = SHGFormDetector(debug=self.debug, return_images=False)
+        pipeline_state = None
         
         try:
-            # Read image
             img = cv2.imread(str(image_path))
             if img is None:
-                return False, 0, "✗ FAIL - Could not read image"
+                return {
+                    'passed': False,
+                    'count': 0,
+                    'message': "✗ FAIL - Could not read image",
+                    'state': None
+                }
             
             img_name = Path(image_path).stem
-            
-            # Preprocess
             img = temp_detector.preprocess_scanned(img)
             
-            # Step 1: Detect table boundary
             bbox = temp_detector.detect_table_boundary(img, img_name)
             if bbox is None:
-                return False, 0, "✗ FAIL - Could not detect table boundary"
+                return {
+                    'passed': False,
+                    'count': 0,
+                    'message': "✗ FAIL - Could not detect table boundary",
+                    'state': None
+                }
             
-            # Step 2: Crop and deskew
             cropped = temp_detector.crop_and_deskew_table(img, bbox, img_name)
             
-            # Step 3: Verify table shape
             if not temp_detector.verify_table_shape(cropped, img_name):
-                return False, 0, "✗ FAIL - Wrong table shape"
+                return {
+                    'passed': False,
+                    'count': 0,
+                    'message': "✗ FAIL - Wrong table shape",
+                    'state': None
+                }
             
-            # Step 4: Detect lines and intersections
             h_lines, v_lines, intersections = temp_detector.detect_lines_and_intersections(
                 cropped, img_name
             )
             
-            # Step 5: Trace cells from intersections
             cells = temp_detector.trace_cells_from_intersections(
                 h_lines, v_lines, intersections, img_name, cropped
             )
             
-            # Step 6: Get debug ID mapping (this is the accurate count)
-            # This sorts cells by position and assigns sequential debug IDs
-            # matching the 18a_debug_ids.jpg visualization
             debug_id_map = temp_detector.get_cells_by_debug_order(cells)
-            
-            # The debug_id_map count is the accurate final count
             cell_count = int(len(debug_id_map))
             expected_count = 298
             is_acceptable = bool(cell_count == expected_count)
             
             status = "✓ PASS" if is_acceptable else "✗ FAIL"
             message = f"{status} - Detected {cell_count} cells (expected: {expected_count})"
-            
             print(f"  {message}")
             
-            # If failed, run diagnostics
             if not is_acceptable:
                 diff = cell_count - expected_count
                 if diff > 0:
@@ -502,12 +503,10 @@ class SHGImageValidator:
                 else:
                     print(f"  ⚠ {abs(diff)} cells missing - running diagnostic analysis...\n")
                 
-                # Run detailed diagnostics
                 diagnostics = self.diagnose_cell_detection_failure(
                     cropped, cropped, h_lines, v_lines, intersections, cells, expected_count
                 )
                 
-                # Print diagnostic results
                 print("  " + "="*66)
                 print("  DIAGNOSTIC REPORT - Why Cell Detection Failed")
                 print("  " + "="*66)
@@ -520,11 +519,10 @@ class SHGImageValidator:
                         print(f"    Severity: {issue['severity']}")
                         print(f"    Details: {issue['description']}")
                         
-                        # Print specific details based on issue type
                         if issue['type'] == 'localized_shadows':
                             print(f"    Shadow regions detected: {issue['count']}")
                             if self.debug and issue['regions'][:3]:
-                                print(f"    Sample locations:")
+                                print("    Sample locations:")
                                 for region in issue['regions'][:3]:
                                     print(f"      - Row {region['row']}, Col {region['col']}, "
                                           f"Brightness: {region['brightness']:.1f}")
@@ -540,7 +538,7 @@ class SHGImageValidator:
                                   f"(missing {issue['missing']})")
                         
                         elif issue['type'] == 'sparse_rows':
-                            print(f"    Rows with incomplete detection:")
+                            print("    Rows with incomplete detection:")
                             for sparse in issue['rows'][:5]:
                                 print(f"      - Row {sparse['row']}: {sparse['count']} cells")
                         
@@ -552,7 +550,6 @@ class SHGImageValidator:
                     
                     print("  " + "="*66 + "\n")
                     
-                    # Save diagnostic visualization
                     if self.debug:
                         self.save_diagnostic_visualization(
                             cropped, diagnostics, img_name
@@ -561,7 +558,6 @@ class SHGImageValidator:
                     print("  No specific issues identified - may be table modification")
                     print("  " + "="*66 + "\n")
             
-            # If debug mode, save the debug_ids image for reference
             if self.debug and debug_id_map:
                 debug_ref = cropped.copy()
                 for debug_id, cell in debug_id_map.items():
@@ -574,12 +570,38 @@ class SHGImageValidator:
                 self.save_debug_image(debug_ref, "04_cell_count_verification.jpg", 
                                     f"Verified {cell_count} cells with debug IDs")
             
-            return is_acceptable, cell_count, message
+            result = {
+                'passed': bool(is_acceptable),
+                'count': int(cell_count),
+                'message': message,
+                'state': None
+            }
+            
+            if capture_state and is_acceptable:
+                pipeline_state = {
+                    'detector': temp_detector,
+                    'img_name': img_name,
+                    'bbox': bbox,
+                    'cropped': cropped,
+                    'h_lines': h_lines,
+                    'v_lines': v_lines,
+                    'intersections': intersections,
+                    'cells': cells,
+                    'image_path': str(image_path)
+                }
+                result['state'] = pipeline_state
+            
+            return result
             
         except Exception as e:
             import traceback
             traceback.print_exc()
-            return False, 0, f"✗ FAIL - Error during validation: {str(e)}"
+            return {
+                'passed': False,
+                'count': 0,
+                'message': f"✗ FAIL - Error during validation: {str(e)}",
+                'state': None
+            }
     
     def save_diagnostic_visualization(self, image, diagnostics, img_name):
         """Save visualization of detected issues"""
@@ -604,7 +626,7 @@ class SHGImageValidator:
                             "Problem areas highlighted")
 
     
-    def validate_image(self, image_path: str) -> Dict:
+    def validate_image(self, image_path: str, capture_state: bool = False):
         """
         Run all validation checks on the image.
         
@@ -639,6 +661,7 @@ class SHGImageValidator:
         
         # Run all checks
         checks = {}
+        cell_result = None
         
         # 1. Blur check
         blur_pass, blur_score, blur_msg = self.check_blur(image)
@@ -668,12 +691,17 @@ class SHGImageValidator:
         quality_passed = blur_pass and noise_pass and shadow_pass
         
         if quality_passed:
-            cell_pass, cell_count, cell_msg = self.check_cell_count(image, image_path)
+            cell_result = self.check_cell_count(
+                image,
+                image_path,
+                capture_state=capture_state
+            )
             checks['cell_count'] = {
-                'passed': bool(cell_pass),
-                'count': int(cell_count),
-                'message': str(cell_msg)
+                'passed': bool(cell_result['passed']),
+                'count': int(cell_result['count']),
+                'message': str(cell_result['message'])
             }
+            cell_pass = cell_result['passed']
         else:
             print("\n[CHECK 4/4] Table Structure Validation...")
             print("  ⚠ SKIPPED - Image quality checks failed")
@@ -723,7 +751,13 @@ class SHGImageValidator:
                 print(f"Warning: Could not save validation report: {e}\n")
         
         # Also make result JSON-safe before returning
-        return self.make_json_serializable(result)
+        json_safe_result = self.make_json_serializable(result)
+        
+        if capture_state:
+            pipeline_state = cell_result.get('state') if (cell_result and cell_result.get('passed')) else None
+            return json_safe_result, pipeline_state
+        
+        return json_safe_result
 
 
 def process_with_validation(image_path: str, debug=False, training_mode=False, 
@@ -748,7 +782,14 @@ def process_with_validation(image_path: str, debug=False, training_mode=False,
     """
     # Step 1: Validate image
     validator = SHGImageValidator(debug=debug)
-    validation_result = validator.validate_image(image_path)
+    capture_state = not return_images
+    validation_output = validator.validate_image(image_path, capture_state=capture_state)
+    
+    if isinstance(validation_output, tuple):
+        validation_result, pipeline_state = validation_output
+    else:
+        validation_result = validation_output
+        pipeline_state = None
     
     # Step 2: Only proceed if validation passed
     if not validation_result['valid']:
@@ -765,54 +806,68 @@ def process_with_validation(image_path: str, debug=False, training_mode=False,
     print("VALIDATION PASSED - Starting SHG Form Detection")
     print("="*70 + "\n")
     
-    # Step 3: Run main detector with return_images=True to get cell data
-    detector = SHGFormDetector(debug=debug, return_images=True)
+    # Step 3: Continue processing without restarting detector logic
+    resume_state = pipeline_state if (capture_state and pipeline_state and pipeline_state.get('cells')) else None
+    
+    detector = None
+    if resume_state:
+        detector = resume_state['detector']
+    else:
+        detector = SHGFormDetector(debug=debug, return_images=return_images)
     
     try:
-        # Read and preprocess image
-        img = cv2.imread(str(image_path))
-        if img is None:
-            return {
-                'success': False,
-                'validation': validation_result,
-                'error': 'Could not read image',
-                'cells': None,
-                'shg_id': None
-            }
-        
-        img_name = Path(image_path).stem
-        
-        # Full processing pipeline
-        img = detector.preprocess_scanned(img)
-        bbox = detector.detect_table_boundary(img, img_name)
-        
-        if bbox is None:
-            return {
-                'success': False,
-                'validation': validation_result,
-                'error': 'Could not detect table boundary',
-                'cells': None,
-                'shg_id': None
-            }
-        
-        cropped = detector.crop_and_deskew_table(img, bbox, img_name)
-        
-        if not detector.verify_table_shape(cropped, img_name):
-            return {
-                'success': False,
-                'validation': validation_result,
-                'error': 'Wrong table shape',
-                'cells': None,
-                'shg_id': None
-            }
-        
-        h_lines, v_lines, intersections = detector.detect_lines_and_intersections(
-            cropped, img_name
-        )
-        
-        cells = detector.trace_cells_from_intersections(
-            h_lines, v_lines, intersections, img_name, cropped
-        )
+        if resume_state:
+            img_name = resume_state['img_name']
+            bbox = resume_state['bbox']
+            cropped = resume_state['cropped']
+            h_lines = resume_state['h_lines']
+            v_lines = resume_state['v_lines']
+            intersections = resume_state['intersections']
+            cells = resume_state['cells']
+        else:
+            # Read and preprocess image
+            img = cv2.imread(str(image_path))
+            if img is None:
+                return {
+                    'success': False,
+                    'validation': validation_result,
+                    'error': 'Could not read image',
+                    'cells': None,
+                    'shg_id': None
+                }
+            
+            img_name = Path(image_path).stem
+            
+            img = detector.preprocess_scanned(img)
+            bbox = detector.detect_table_boundary(img, img_name)
+            
+            if bbox is None:
+                return {
+                    'success': False,
+                    'validation': validation_result,
+                    'error': 'Could not detect table boundary',
+                    'cells': None,
+                    'shg_id': None
+                }
+            
+            cropped = detector.crop_and_deskew_table(img, bbox, img_name)
+            
+            if not detector.verify_table_shape(cropped, img_name):
+                return {
+                    'success': False,
+                    'validation': validation_result,
+                    'error': 'Wrong table shape',
+                    'cells': None,
+                    'shg_id': None
+                }
+            
+            h_lines, v_lines, intersections = detector.detect_lines_and_intersections(
+                cropped, img_name
+            )
+            
+            cells = detector.trace_cells_from_intersections(
+                h_lines, v_lines, intersections, img_name, cropped
+            )
         
         # Extract SHG ID field
         shg_id = detector.extract_shg_id_field(cropped, cells, img_name)
@@ -844,7 +899,7 @@ def process_with_validation(image_path: str, debug=False, training_mode=False,
         print(f"✓ Validation passed")
         print(f"✓ Total cells detected: {len(cells)}")
         print(f"✓ Data cells extracted: {len(extracted_cells)}")
-        print(f"✓ Cell images included: {return_images or True}")
+        print("✓ Cell images included: True (kept in memory)")
         print("="*70 + "\n")
         
         return result
