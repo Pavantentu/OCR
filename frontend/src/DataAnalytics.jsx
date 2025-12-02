@@ -432,7 +432,7 @@ export default function DataAnalytics({
   const [chartView, setChartView] = useState('district'); // 'district' or 'year'
   const [chartType, setChartType] = useState('pie'); // 'bar' or 'pie'
   
-  const API_BASE = 'http://localhost:5002/OCR';
+  const API_BASE = 'https://api.stemverse.app/OCR';
 
 
   // Get filtered mandals and villages based on selected district

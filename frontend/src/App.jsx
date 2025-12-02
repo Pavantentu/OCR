@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Download, Eye, FileText, Table2, CheckCircle, AlertCircle, X, Upload, MapPin, RotateCw, RotateCcw, CheckSquare, ZoomIn, ZoomOut, BarChart3, TrendingUp } from 'lucide-react';
+import { Download, Eye, FileText, Table2, CheckCircle, AlertCircle, X, Upload, MapPin, RotateCw, RotateCcw, CheckSquare, ZoomIn, ZoomOut, BarChart3, TrendingUp, Camera } from 'lucide-react';
 import ConvertedResults from './ConvertedResults';
 import DataAnalytics from './DataAnalytics';
 import FinancialAnalytics from './FinancialAnalytics';
@@ -311,9 +311,14 @@ export default function EnhancedTableOCRSystem() {
   const [selectedVillage, setSelectedVillage] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
+  const [showCameraModal, setShowCameraModal] = useState(false);
+  const [cameraError, setCameraError] = useState('');
 
   const fileInputRef = useRef(null);
   const toastTimers = useRef({});
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const cameraStreamRef = useRef(null);
 
   const API_BASE = 'http://localhost:5002/OCR';
   const MAX_FILE_SIZE = 16 * 1024 * 1024;
@@ -655,26 +660,37 @@ export default function EnhancedTableOCRSystem() {
     }
   }, [selectedMandal, mandals]);
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const selectedFiles = Array.from(e.target.files || []);
     if (selectedFiles.length === 0) return;
 
     const duplicates = [];
     const invalidFiles = [];
     const oversizedFiles = [];
+    const qualityRejectedFiles = [];
     const validNewFiles = [];
 
-    selectedFiles.forEach(file => {
+    for (const file of selectedFiles) {
       const ext = file.name.split('.').pop()?.toLowerCase();
       
       if (!ext || !ALLOWED_EXTENSIONS.includes(ext)) {
         invalidFiles.push(file.name);
-        return;
+        continue;
       }
 
       if (file.size > MAX_FILE_SIZE) {
         oversizedFiles.push(file.name);
-        return;
+        continue;
+      }
+
+      // For image files, run quality checks (blur, shadow, full table, angle)
+      if (isImageFile(file)) {
+        const issues = await analyzeImageFileQuality(file);
+        if (issues.length > 0) {
+          qualityRejectedFiles.push(file.name);
+          showToast('warning', `Scan quality issue: ${file.name}`, issues);
+          continue;
+        }
       }
 
       const isDuplicate = files.some(f => 
@@ -686,7 +702,7 @@ export default function EnhancedTableOCRSystem() {
       } else {
         validNewFiles.push(file);
       }
-    });
+    }
 
     const currentMonthName = selectedMonth
       ? new Date(2000, parseInt(selectedMonth) - 1).toLocaleString('default', { month: 'long' })
@@ -737,6 +753,9 @@ export default function EnhancedTableOCRSystem() {
     if (oversizedFiles.length > 0) {
       messages.push(`❌ ${oversizedFiles.length} file(s) too large (max 16MB)`);
     }
+    if (qualityRejectedFiles.length > 0) {
+      messages.push(`❌ ${qualityRejectedFiles.length} file(s) rejected due to scan quality. Please rescan with better lighting and full table.`);
+    }
 
     if (messages.length > 0) {
       setMessage(messages.join('\n'));
@@ -772,6 +791,243 @@ export default function EnhancedTableOCRSystem() {
   const handleDragOver = (e) => {
     e.preventDefault();
     e.stopPropagation();
+  };
+
+  // --- Camera-based document scanner helpers ---
+  const SCAN_BLUR_VARIANCE_THRESHOLD = 900;
+  const SCAN_SHADOW_DARK_RATIO = 0.3;
+  const SCAN_FULLTABLE_INNER_DARK = 0.02;
+  const SCAN_FULLTABLE_BORDER_DARK = 0.004;
+  const SCAN_NARROW_ASPECT_LOW = 0.6;
+  const SCAN_NARROW_ASPECT_HIGH = 1.8;
+
+  const startCamera = async () => {
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
+      setCameraError('Camera is not supported in this browser. Please use a modern browser like Chrome, Edge, or a modern mobile browser.');
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
+      });
+      cameraStreamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+      setCameraError('');
+    } catch (err) {
+      console.error('Error starting camera', err);
+      setCameraError('Unable to access camera. Please check browser permissions and try again.');
+    }
+  };
+
+  const openCamera = async () => {
+    setShowCameraModal(true);
+    await startCamera();
+  };
+
+  const stopCamera = () => {
+    if (cameraStreamRef.current) {
+      cameraStreamRef.current.getTracks().forEach((track) => track.stop());
+      cameraStreamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  };
+
+  const closeCamera = () => {
+    stopCamera();
+    setShowCameraModal(false);
+  };
+
+  const analyzeScanQuality = (canvas) => {
+    const issues = [];
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return issues;
+
+    const width = canvas.width;
+    const height = canvas.height;
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data;
+
+    let sum = 0;
+    let sumSq = 0;
+    let darkCount = 0;
+    let count = 0;
+
+    const borderSize = Math.floor(Math.min(width, height) * 0.06);
+    let borderDark = 0;
+    let borderTotal = 0;
+    let innerDark = 0;
+    let innerTotal = 0;
+
+    // Sample every 4th pixel (step 16 in RGBA array)
+    for (let i = 0; i < data.length; i += 16) {
+      const idx = i / 4;
+      const x = idx % width;
+      const y = Math.floor(idx / width);
+
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      const v = 0.299 * r + 0.587 * g + 0.114 * b;
+
+      sum += v;
+      sumSq += v * v;
+      count++;
+
+      if (v < 40) darkCount++;
+
+      const isBorder =
+        x < borderSize ||
+        x >= width - borderSize ||
+        y < borderSize ||
+        y >= height - borderSize;
+
+      if (isBorder) {
+        borderTotal++;
+        if (v < 90) borderDark++;
+      } else {
+        innerTotal++;
+        if (v < 90) innerDark++;
+      }
+    }
+
+    if (!count) return issues;
+
+    const mean = sum / count;
+    const variance = sumSq / count - mean * mean;
+    const darkRatio = darkCount / count;
+    const borderDarkRatio = borderTotal ? borderDark / borderTotal : 0;
+    const innerDarkRatio = innerTotal ? innerDark / innerTotal : 0;
+
+    // Blur check
+    if (variance < SCAN_BLUR_VARIANCE_THRESHOLD) {
+      issues.push('The scan looks blurred. Please hold the camera steady and refocus, then scan again.');
+    }
+
+    // Shadow check
+    if (darkRatio > SCAN_SHADOW_DARK_RATIO && mean > 70) {
+      issues.push('The scan has strong shadows. Please move to better lighting and avoid shadows over the table.');
+    }
+
+    // Full table coverage check
+    if (innerDarkRatio > SCAN_FULLTABLE_INNER_DARK && borderDarkRatio < SCAN_FULLTABLE_BORDER_DARK) {
+      issues.push('It looks like the full table is not captured. Please include the entire table in the frame.');
+    }
+
+    // Narrow angle / perspective check
+    const aspect = width / height;
+    if (aspect > SCAN_NARROW_ASPECT_HIGH || aspect < SCAN_NARROW_ASPECT_LOW) {
+      issues.push('The scan appears narrow-angled. Try holding the camera parallel to the page to reduce perspective distortion.');
+    }
+
+    return issues;
+  };
+
+  const isImageFile = (file) => {
+    if (!file) return false;
+    const type = file.type || '';
+    if (type.startsWith('image/')) return true;
+    const name = (file.name || '').toLowerCase();
+    return /\.(png|jpe?g|bmp|webp|tiff?|tif)$/.test(name);
+  };
+
+  const analyzeImageFileQuality = async (file) => {
+    if (typeof document === 'undefined' || !isImageFile(file)) {
+      return [];
+    }
+
+    return new Promise((resolve) => {
+      try {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+
+        img.onload = () => {
+          try {
+            const maxDim = 1280;
+            let width = img.width;
+            let height = img.height;
+            const maxSide = Math.max(width, height);
+            const scale = maxSide > maxDim ? maxDim / maxSide : 1;
+
+            width = Math.round(width * scale);
+            height = Math.round(height * scale);
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+              URL.revokeObjectURL(url);
+              resolve([]);
+              return;
+            }
+
+            ctx.drawImage(img, 0, 0, width, height);
+            URL.revokeObjectURL(url);
+
+            const issues = analyzeScanQuality(canvas);
+            resolve(issues);
+          } catch (err) {
+            console.error('Error analyzing image quality:', err);
+            URL.revokeObjectURL(url);
+            resolve([]);
+          }
+        };
+
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          resolve([]);
+        };
+
+        img.src = url;
+      } catch (err) {
+        console.error('Error preparing image for quality analysis:', err);
+        resolve([]);
+      }
+    });
+  };
+
+  const capturePhoto = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+
+    const width = video.videoWidth || 1280;
+    const height = video.videoHeight || 720;
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0, width, height);
+
+    const qualityIssues = analyzeScanQuality(canvas);
+
+    // If there are quality issues, block upload and show feedback
+    if (qualityIssues.length > 0) {
+      showToast('warning', 'Scan quality issues detected', qualityIssues);
+      // Keep camera open so user can rescan
+      return;
+    }
+
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return;
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const file = new File([blob], `scan-${timestamp}.jpeg`, { type: 'image/jpeg' });
+        const fakeEvent = { target: { files: [file] } };
+        handleFileChange(fakeEvent);
+        closeCamera();
+      },
+      'image/jpeg',
+      0.92
+    );
   };
 
   const removeFile = (fileId) => {
@@ -1431,10 +1687,13 @@ export default function EnhancedTableOCRSystem() {
 
                 {/* File Upload Section */}
                 <div className="lg:col-span-2 bg-white rounded-3xl shadow-2xl p-6 lg:p-8">
-                  <h2 className="text-2xl lg:text-3xl font-bold text-gray-800 flex items-center gap-2 mb-6">
+                  <h2 className="text-2xl lg:text-3xl font-bold text-gray-800 flex items-center gap-2 mb-2">
                     <Upload size={32} className="text-indigo-600" />
                     Import Files
                   </h2>
+                  <p className="text-xs text-gray-500 mb-4">
+                    Upload clear photos or PDFs of the SHG tables. For best results, avoid blur, shadows, and cut-off edges.
+                  </p>
 
                   {files.length > 0 && (
                     <div className="grid grid-cols-3 gap-4 mb-6">
@@ -1476,6 +1735,20 @@ export default function EnhancedTableOCRSystem() {
                       onChange={handleFileChange}
                       className="hidden"
                     />
+                  </div>
+
+                  <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <p className="text-xs text-gray-500">
+                      On mobile, you can also use the camera to scan the table. Make sure the full table is visible and sharp.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={openCamera}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 border-indigo-500 text-indigo-700 bg-white hover:bg-indigo-50 font-semibold shadow-sm"
+                    >
+                      <Camera size={18} />
+                      Scan Document
+                    </button>
                   </div>
 
                   {files.length > 0 && (
@@ -1711,6 +1984,66 @@ export default function EnhancedTableOCRSystem() {
                   }}
                 />
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Camera Scan Modal */}
+      {showCameraModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b-2 border-gray-300">
+              <div>
+                <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                  <Camera size={22} className="text-indigo-600" />
+                  Scan SHG Table
+                </h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  Hold your phone parallel to the page. Ensure the entire table is inside the frame, without blur or heavy shadows.
+                </p>
+              </div>
+              <button
+                onClick={closeCamera}
+                className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-4 flex-1 flex flex-col gap-4">
+              {cameraError && (
+                <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">
+                  {cameraError}
+                </div>
+              )}
+              <div className="flex-1 flex items-center justify-center">
+                <div className="w-full max-w-2xl aspect-[3/2] bg-black rounded-xl overflow-hidden flex items-center justify-center">
+                  <video
+                    ref={videoRef}
+                    className="w-full h-full object-contain"
+                    autoPlay
+                    playsInline
+                  />
+                </div>
+              </div>
+              <canvas ref={canvasRef} className="hidden" />
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={closeCamera}
+                  className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={capturePhoto}
+                  className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold flex items-center gap-2"
+                >
+                  <Camera size={18} />
+                  Capture
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -243,7 +243,7 @@ class SHGImageValidator:
         
         return is_acceptable, shadow_score, message
     
-    def diagnose_cell_detection_failure(self, image_path: str, cropped, h_lines, v_lines, 
+    def diagnose_cell_detection_failure(self, cropped, h_lines, v_lines, 
                                         intersections, cells, expected_count=298) -> Dict:
         """
         Diagnose WHY cell detection failed by analyzing specific issues.
@@ -256,7 +256,7 @@ class SHGImageValidator:
             'recommendations': []
         }
         
-        if len(image_path.shape) == 3:
+        if len(cropped.shape) == 3:
             gray = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
         else:
             gray = cropped
@@ -457,6 +457,8 @@ class SHGImageValidator:
                     'state': None
                 }
             
+            # Match detector pipeline: analyze scale before preprocessing
+            img = temp_detector.analyze_image_scale(img)
             img_name = Path(image_path).stem
             img = temp_detector.preprocess_scanned(img)
             
@@ -487,10 +489,14 @@ class SHGImageValidator:
                 h_lines, v_lines, intersections, img_name, cropped
             )
             
-            debug_id_map = temp_detector.get_cells_by_debug_order(cells)
-            cell_count = int(len(debug_id_map))
+            # Count cells directly from trace_cells_from_intersections result
+            # This matches what test.py reports in "Traced X cells"
+            cell_count = int(len(cells))
             expected_count = 298
             is_acceptable = bool(cell_count == expected_count)
+            
+            # Create debug ID map for visualization/debugging (always create, used conditionally)
+            debug_id_map = temp_detector.get_cells_by_debug_order(cells)
             
             status = "✓ PASS" if is_acceptable else "✗ FAIL"
             message = f"{status} - Detected {cell_count} cells (expected: {expected_count})"
@@ -504,7 +510,7 @@ class SHGImageValidator:
                     print(f"  ⚠ {abs(diff)} cells missing - running diagnostic analysis...\n")
                 
                 diagnostics = self.diagnose_cell_detection_failure(
-                    cropped, cropped, h_lines, v_lines, intersections, cells, expected_count
+                    cropped, h_lines, v_lines, intersections, cells, expected_count
                 )
                 
                 print("  " + "="*66)
@@ -836,6 +842,8 @@ def process_with_validation(image_path: str, debug=False, training_mode=False,
                     'shg_id': None
                 }
             
+            # Match detector CLI: analyze scale before preprocessing
+            img = detector.analyze_image_scale(img)
             img_name = Path(image_path).stem
             
             img = detector.preprocess_scanned(img)

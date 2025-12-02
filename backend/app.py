@@ -16,6 +16,7 @@ from io import BytesIO
 from PIL import Image
 import requests
 import pandas as pd
+import copy
 
 try:
     from google.oauth2 import service_account
@@ -62,12 +63,12 @@ SHG_COLUMN_LAYOUT = [
 ]
 
 # Multi-level header rows to mimic the physical form layout
-SHG_HEADER_ROWS = [
+BASE_SHG_HEADER_ROWS = [
     # First row: Title row spanning all columns
     [
         {"label": "………......................... స్వయం స్హయక స్ంఘ  ................. తేదిన జరిగిన స్మావేశ ఆరిిక లావాదేవీలు వివరములు (అనుభందం - II)", "col_span": 17, "row_span": 1},
     ],
-    # Second row: Main category headers
+    # Main category headers
     [
         {"label": "సభ్యురాలి MBK ID", "col_span": 1, "row_span": 3},
         {"label": "సభ్యురాలు పేరు", "col_span": 1, "row_span": 3},
@@ -100,6 +101,25 @@ SHG_HEADER_ROWS = [
 DEFAULT_SHG_COLUMN_COUNT = len(SHG_COLUMN_LAYOUT)
 
 
+def build_shg_header_rows(shg_mbk_id: str) -> List[List[Dict[str, str]]]:
+    """
+    Inject a dynamic SHG MBK ID row between the title and category headers while
+    preserving the base multi-level header layout.
+    """
+    header_rows = copy.deepcopy(BASE_SHG_HEADER_ROWS)
+    helper_row = [
+        {"label": "SHG MBK ID", "col_span": 1, "row_span": 1, "align": "left"},
+        {
+            "label": shg_mbk_id or "",
+            "col_span": 16,
+            "row_span": 1,
+            "align": "left",
+        },
+    ]
+    header_rows.insert(1, helper_row)
+    return header_rows
+
+
 def build_shg_column_headers(total_columns: int) -> List[Dict[str, str]]:
     """
     Create a list of column header dictionaries describing the SHG layout.
@@ -126,7 +146,11 @@ def build_shg_column_headers(total_columns: int) -> List[Dict[str, str]]:
 # ============================================================================
 # GOOGLE VISION CONFIGURATION
 # ============================================================================
-GOOGLE_VISION_API_KEY = 
+GOOGLE_VISION_API_KEY = {
+
+}
+
+
 GOOGLE_VISION_ENDPOINT = "https://vision.googleapis.com/v1/images:annotate"
 GOOGLE_VISION_REQUEST_TIMEOUT = 20  # seconds
 # ============================================================================
@@ -543,24 +567,7 @@ class OCRProcessor:
         
         total_columns = max(max_col_index + 1, DEFAULT_SHG_COLUMN_COUNT)
         headers = build_shg_column_headers(total_columns)
-        
-        # Build header rows with SHG MBK ID row inserted between title and main headers
-        header_rows = []
-        if len(SHG_HEADER_ROWS) > 0:
-            # Add title row (first row)
-            header_rows.append(SHG_HEADER_ROWS[0])
-            
-            # Add SHG MBK ID row (second row) - dynamically inserted
-            shg_mbk_id_label = f"SHG MBK ID : {shg_mbk_id}" if shg_mbk_id else "SHG MBK ID :"
-            header_rows.append([
-                {"label": shg_mbk_id_label, "col_span": total_columns, "row_span": 1}
-            ])
-            
-            # Add remaining header rows (skip first as it's already added)
-            header_rows.extend(SHG_HEADER_ROWS[1:])
-        else:
-            header_rows = SHG_HEADER_ROWS
-        
+        header_rows = build_shg_header_rows(shg_mbk_id)
         header_lookup = {header['index']: header for header in headers}
         
         data_rows = []

@@ -14,6 +14,7 @@ const canonicalDistrictNameToId = apDistricts.reduce((acc, district) => {
 // Allow alternate spellings commonly seen in Excel/map labels
 const districtNameAliases = {
   sripottisriramulunellore: 'spsr_nellore',
+  sripottisriramalunellore: 'spsr_nellore',
   nellore: 'spsr_nellore',
   ysrkadapa: 'ysr_kadapa',
   kadapa: 'ysr_kadapa',
@@ -343,37 +344,39 @@ const ApMap = ({
     [onDistrictSelect, districtSummariesById]
   );
 
-  const inferDistrictFromPath = React.useCallback((pathElement) => {
+  const inferDistrictFromPath = React.useCallback((pathElement, event) => {
     if (!svgContainerRef.current || !pathElement || !pathElement.getBBox) {
       return null;
     }
 
-    const labels =
-      svgContainerRef.current.querySelectorAll('text.district-label');
+      const labels = svgContainerRef.current.querySelectorAll(
+        'text.district-label[data-district-id]'
+      );
     if (!labels.length) return null;
 
-    const bbox = pathElement.getBBox();
-    const cx = bbox.x + bbox.width / 2;
-    const cy = bbox.y + bbox.height / 2;
+    const pathRect = pathElement.getBoundingClientRect();
+    const cx =
+      event?.clientX ?? pathRect.left + (pathRect.width || 0) / 2;
+    const cy =
+      event?.clientY ?? pathRect.top + (pathRect.height || 0) / 2;
 
     let closestId = null;
     let closestDist = Infinity;
 
     labels.forEach((label) => {
-      if (!label.getBBox) return;
-      const lb = label.getBBox();
-      const lx = lb.x + lb.width / 2;
-      const ly = lb.y + lb.height / 2;
+      const districtId = label.getAttribute('data-district-id');
+      if (!districtId) return;
+
+      const lb = label.getBoundingClientRect();
+      const lx = lb.left + (lb.width || 0) / 2;
+      const ly = lb.top + (lb.height || 0) / 2;
       const dx = lx - cx;
       const dy = ly - cy;
       const distSq = dx * dx + dy * dy;
 
-      const candidateId = resolveDistrictId(label.textContent || '');
-      if (!candidateId) return;
-
       if (distSq < closestDist) {
         closestDist = distSq;
-        closestId = candidateId;
+        closestId = districtId;
       }
     });
 
@@ -409,7 +412,7 @@ const ApMap = ({
       }
 
       if (!districtId && targetPath) {
-        districtId = inferDistrictFromPath(targetPath);
+        districtId = inferDistrictFromPath(targetPath, event);
       }
 
       if (districtId) {
@@ -541,6 +544,15 @@ const ApMap = ({
           'style',
           `${existingStyle}; cursor: pointer; user-select: none;`
         );
+
+        const districtId = resolveDistrictId(text.textContent || '');
+        if (districtId) {
+          text.setAttribute('data-district-id', districtId);
+          text.setAttribute('role', 'button');
+          text.setAttribute('tabindex', '0');
+        } else {
+          text.removeAttribute('data-district-id');
+        }
       });
 
       // Inject styles for hover/active states
@@ -659,7 +671,7 @@ const ApMap = ({
 
       {/* District Details Sidebar */}
       <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-2xl p-6 border-2 border-gray-100 max-h-[640px] overflow-y-auto">
-        <div className="flex items-center justify-between gap-3 mb-4">
+        <div className="mb-4">
           <div className="flex items-center gap-3">
             <div className="bg-indigo-600 p-3 rounded-2xl">
               <MapPin size={24} className="text-white" />
@@ -675,26 +687,27 @@ const ApMap = ({
           </div>
 
           {/* View toggle */}
-          <div className="inline-flex items-center gap-3 bg-gray-100 rounded-full px-3 py-1 text-xs font-medium">
-            <label className="inline-flex items-center gap-1 cursor-pointer">
-              <input
-                type="radio"
-                className="text-indigo-600"
-                checked={districtViewMode === 'currentMonth'}
-                onChange={() => setDistrictViewMode('currentMonth')}
-              />
-              <span>Current Month</span>
-            </label>
-            <span className="w-px h-5 bg-gray-300" />
-            <label className="inline-flex items-center gap-1 cursor-pointer">
-              <input
-                type="radio"
-                className="text-indigo-600"
-                checked={districtViewMode === 'balances'}
-                onChange={() => setDistrictViewMode('balances')}
-              />
-              <span>Balances</span>
-            </label>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs font-semibold text-gray-700">
+            <div className="flex flex-1 min-w-[200px] items-center justify-between gap-3">
+              <label className="flex-1 inline-flex items-center justify-center gap-2 bg-white rounded-xl px-3 py-2 border border-gray-200 cursor-pointer transition hover:border-indigo-300">
+                <input
+                  type="radio"
+                  className="text-indigo-600"
+                  checked={districtViewMode === 'currentMonth'}
+                  onChange={() => setDistrictViewMode('currentMonth')}
+                />
+                <span>Current Month</span>
+              </label>
+              <label className="flex-1 inline-flex items-center justify-center gap-2 bg-white rounded-xl px-3 py-2 border border-gray-200 cursor-pointer transition hover:border-indigo-300">
+                <input
+                  type="radio"
+                  className="text-indigo-600"
+                  checked={districtViewMode === 'balances'}
+                  onChange={() => setDistrictViewMode('balances')}
+                />
+                <span>Balances</span>
+              </label>
+            </div>
           </div>
         </div>
 
