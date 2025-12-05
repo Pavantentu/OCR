@@ -161,17 +161,12 @@ CORS(app,
         r"/OCR/*": {
             "origins": [
                 "http://localhost:5173",
-                "https://pavantentu.github.io"
+                "https://pavantentu.github.io",
+                "*"
             ],
             "methods": ["GET", "POST", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
             "supports_credentials": True,
-            "max_age": 3600
-        },
-        r"/api/*": {
-            "origins": ["*"],
-            "methods": ["GET", "OPTIONS"],
-            "allow_headers": ["Content-Type"],
             "max_age": 3600
         }
     }
@@ -2179,7 +2174,7 @@ def get_analytics_data():
         }), 500
 
 
-@app.route('/api/districts', methods=['GET'])
+@app.route('/OCR/api/districts', methods=['GET'])
 def get_districts():
     """Get all districts"""
     try:
@@ -2205,7 +2200,7 @@ def get_districts():
         }), 500
 
 
-@app.route('/api/mandals', methods=['GET'])
+@app.route('/OCR/api/mandals', methods=['GET'])
 def get_mandals():
     """Get mandals for a specific district"""
     try:
@@ -2259,7 +2254,7 @@ def get_mandals():
         }), 500
 
 
-@app.route('/api/villages', methods=['GET'])
+@app.route('/OCR/api/villages', methods=['GET'])
 def get_villages():
     """Get villages for a specific mandal"""
     try:
@@ -2363,9 +2358,9 @@ if __name__ == '__main__':
     print("  Health:   http://localhost:5002/OCR/api/health")
     print("  Extract:  http://localhost:5002/OCR/api/extract-tables")
     print("  Validate: http://localhost:5002/OCR/api/validate-only")
-    print("  Districts: http://localhost:5002/api/districts")
-    print("  Mandals:   http://localhost:5002/api/mandals?district=DistrictName")
-    print("  Villages: http://localhost:5002/api/villages?district=DistrictName&mandal=MandalName")
+    print("  Districts: http://localhost:5002/OCR/api/districts")
+    print("  Mandals:   http://localhost:5002/OCR/api/mandals?district=DistrictName")
+    print("  Villages: http://localhost:5002/OCR/api/villages?district=DistrictName&mandal=MandalName")
     print("=" * 70)
     print("\n🚀 Starting Flask server with CPU optimizations...")
     print("📊 Watch for throughput metrics (cells/sec) in logs\n")
