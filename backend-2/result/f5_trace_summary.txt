@@ -1,0 +1,82 @@
+================================================================================
+CELL DETECTION SUMMARY
+================================================================================
+
+Intersections found: 350
+Cells created: 298
+Cell creation attempts: 1400
+Approximate attempts per intersection: 4 (typically 3-4 roles per point)
+
+WHY SO MANY ATTEMPTS?
+--------------------------------------------------------------------------------
+The algorithm tries each intersection point in multiple roles:
+  1. TL (Top-Left) role - looks for TR to the right, BL below
+  2. TR (Top-Right) role - looks for TL to the left, BR below
+  3. BL (Bottom-Left) role - looks for TL above, BR to the right
+  4. BR (Bottom-Right) role - looks for BL above, TR to the left
+
+This multi-role approach ensures cells can be detected from any corner,
+but it means N intersections generate ~4N attempts.
+
+WHY DO SOME CELLS SHOW AS TRIANGLES IN DEBUG IMAGES?
+--------------------------------------------------------------------------------
+Triangles appear when an attempt finds 3 valid corners but fails on the 4th.
+This is correct behavior - cells must be 4-sided rectangles.
+Examples:
+  - Missing BR corner → Triangle with TL, TR, BL
+  - BR exists but connectivity fails → Shows 3 connected + 1 failing
+  - Bottom line broken → BL-BR connection shows red X
+
+CONNECTIVITY VS COVERAGE
+--------------------------------------------------------------------------------
+These are checked separately:
+
+CONNECTIVITY (uses h_line/v_line references):
+  - Checks if intersection points have line references
+  - Validates lines overlap between corners
+  - Detects missing internal lines (merged cells)
+  - MUST PASS: All 4 edges connected
+
+COVERAGE (checks actual pixels in mask):
+  - Samples pixels along expected edge lines
+  - Requires 40% for horizontal, 35% for vertical edges
+  - More forgiving than connectivity
+  - MUST PASS: All 4 edges >= threshold
+
+Issue in your example:
+  - CONNECTIVITY: BOTTOM edge FAILED (True/False/True/True)
+  - COVERAGE: All edges 1.00 (perfect coverage)
+  - Result: REJECTED because connectivity is mandatory
+  - This means: Corners exist, lines detected, but NOT properly connected
+
+DEBUGGING THE FAILED BOTTOM EDGE:
+--------------------------------------------------------------------------------
+When an edge fails connectivity, check:
+  1. Are both corners on the SAME line? (Y position for horizontal)
+  2. Is the line broken/segmented? (Check visualized line ranges)
+  3. Do the line spans overlap? (Check [start-end] ranges)
+  4. Is the tolerance sufficient? (Currently 5 pixels)
+
+Look for debug logging:
+  [H-CONN DEBUG] - Shows exact reason for horizontal connection failure
+  [V-CONN DEBUG] - Shows exact reason for vertical connection failure
+
+CONNECTIVITY CHECK VISUALIZATION
+--------------------------------------------------------------------------------
+Each attempt saves: connectivity_check_attempt_XXXX.jpg
+  - Green lines/corners: Connected successfully
+  - Red lines/corners: Connection failed
+  - Line labels: Show [position] and (start-end) ranges
+  - Status: 'ALL CONNECTED ✓' (green) or 'FAILED ✗' (red)
+
+NEXT STEPS TO IMPROVE CELL DETECTION
+--------------------------------------------------------------------------------
+If cells are being rejected:
+  1. Check the connectivity debug images
+  2. Read the debug log for [H-CONN DEBUG] or [V-CONN DEBUG] lines
+  3. Verify line detection (check _14_cleaned_lines.jpg)
+  4. Check if lines are broken or segmented
+  5. Consider increasing PIX_TOL (currently 5 pixels) if lines are slightly offset
+  6. Consider lowering coverage thresholds if lines are faint
+
+================================================================================

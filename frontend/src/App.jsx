@@ -3,6 +3,7 @@ import { Download, Eye, FileText, Table2, CheckCircle, AlertCircle, X, Upload, M
 import ConvertedResults from './ConvertedResults';
 import DataAnalytics from './DataAnalytics';
 import FinancialAnalytics from './FinancialAnalytics';
+import { API_BASE } from './utils/apiConfig';
 
 const STORAGE_KEY_RESULTS = 'ocr_results_v1';
 const STORAGE_KEY_FAILED = 'ocr_failed_v1';
@@ -320,7 +321,6 @@ export default function EnhancedTableOCRSystem() {
   const canvasRef = useRef(null);
   const cameraStreamRef = useRef(null);
 
-  const API_BASE = 'http://localhost:5002/OCR';
   const MAX_FILE_SIZE = 16 * 1024 * 1024;
   const ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'pdf', 'tiff', 'tif', 'bmp', 'webp'];
 
@@ -684,6 +684,7 @@ export default function EnhancedTableOCRSystem() {
       }
 
       // For image files, run quality checks (blur, shadow, full table, angle)
+      // PDF files skip quality checks as they are processed differently
       if (isImageFile(file)) {
         const issues = await analyzeImageFileQuality(file);
         if (issues.length > 0) {
@@ -692,6 +693,9 @@ export default function EnhancedTableOCRSystem() {
           continue;
         }
       }
+      
+      // PDF files are allowed and will be processed by the backend
+      // No additional validation needed for PDFs
 
       const isDuplicate = files.some(f => 
         f.name === file.name && f.size === file.size
@@ -1153,6 +1157,77 @@ export default function EnhancedTableOCRSystem() {
     }
   };
 
+  // Helper function to update analytics Excel file
+  const updateAnalytics = async (fileData) => {
+    try {
+      const {
+        district,
+        mandal,
+        village,
+        month,
+        year,
+        shgId = '',
+        validationStatus,
+        failureReason = null,
+        syncedToMbk = false
+      } = fileData;
+
+      const response = await fetch(`${API_BASE}/api/analytics/update`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          district,
+          mandal,
+          village,
+          month,
+          year,
+          shg_id: shgId,
+          validation_status: validationStatus,
+          failure_reason: failureReason,
+          synced_to_mbk: syncedToMbk
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.warn('Analytics update failed:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.warn('Error updating analytics:', error);
+      return false;
+    }
+  };
+
+  // Helper function to determine failure reason from validation result
+  const getFailureReason = (validation) => {
+    if (!validation || !validation.is_valid) {
+      const errors = validation?.errors || [];
+      const errorMessages = errors.map(e => e.toLowerCase()).join(' ');
+      
+      if (errorMessages.includes('incorrect form') || errorMessages.includes('wrong form')) {
+        return 'incorrect_form';
+      }
+      if (errorMessages.includes('incorrect value') || errorMessages.includes('wrong value')) {
+        return 'incorrect_values';
+      }
+      if (errorMessages.includes('missing field') || errorMessages.includes('missing data')) {
+        return 'missing_fields';
+      }
+      if (errorMessages.includes('image quality') || errorMessages.includes('poor quality') || 
+          errorMessages.includes('blur') || errorMessages.includes('shadow')) {
+        return 'image_quality';
+      }
+      // Default to missing_fields if validation failed but no specific reason
+      return 'missing_fields';
+    }
+    return null;
+  };
+
   const handleProcess = async () => {
     if (files.length === 0) {
       setMessage('❌ Please select at least one file');
@@ -1256,7 +1331,33 @@ export default function EnhancedTableOCRSystem() {
           const result = await response.json();
           const normalizedTables = normalizeExtractionResponse(result);
           
-          if (result.success && normalizedTables.length > 0) {
+          // Extract validation status and SHG ID from result
+          let validationStatus = 'failed';
+          let failureReason = null;
+          let shgId = '';
+          
+          // Check if file was successfully converted (has extracted tables)
+          // Only files with extracted tables should be marked as validation successful
+          const isSuccessfullyConverted = result.success && normalizedTables.length > 0;
+          
+          if (isSuccessfullyConverted) {
+            // File was successfully converted and has extracted tables
+            // This means it will appear in "converted files" - mark as validation successful
+            validationStatus = 'success';
+            failureReason = null;
+            
+            // Extract SHG ID and validation details from first page result
+            if (result.files && result.files.length > 0) {
+              const firstFile = result.files[0];
+              if (firstFile.pages && firstFile.pages.length > 0) {
+                const firstPage = firstFile.pages[0];
+                
+                // Extract SHG ID from table data
+                if (firstPage.table_data && firstPage.table_data.metadata) {
+                  shgId = firstPage.table_data.metadata.shg_mbk_id || '';
+                }
+              }
+            }
             const monthKey = monthName;
             const yearKey = selectedYear ? String(selectedYear) : '';
             const duplicateKey = `${fileObj.name}-${monthKey}-${yearKey}`;
@@ -1269,6 +1370,11 @@ export default function EnhancedTableOCRSystem() {
             }
             normalizedTables.forEach((table, idx) => {
               if (table.dataframe && table.dataframe.length > 0) {
+                // Extract SHG ID from table metadata if available
+                if (table.metadata && table.metadata.shg_mbk_id) {
+                  shgId = table.metadata.shg_mbk_id;
+                }
+                
                 allResults.push({
                   id: Date.now() + idx + Math.random(),
                   filename: fileObj.name,
@@ -1286,7 +1392,7 @@ export default function EnhancedTableOCRSystem() {
                   htmlData: table.html,
                   headers: table.headers || Object.keys(table.dataframe[0] || {}),
                   headerRows: table.headerRows || null,
-                  shgMbkId: table.metadata?.shg_mbk_id || '',
+                  shgMbkId: table.metadata?.shg_mbk_id || shgId,
                   district: districtName,
                   mandal: mandalName,
                   village: villageName,
@@ -1301,19 +1407,92 @@ export default function EnhancedTableOCRSystem() {
             if (!skipDueToDuplicate) {
               successCount++;
               fileSuccess = true;
+              
+              // Update analytics Excel file after successful conversion
+              await updateAnalytics({
+                district: districtName,
+                mandal: mandalName,
+                village: villageName,
+                month: selectedMonth, // Use month number
+                year: selectedYear,
+                shgId: shgId,
+                validationStatus: validationStatus,
+                failureReason: failureReason,
+                syncedToMbk: false // Will be updated when submitted to MBK
+              });
             }
           } else {
-            errorCount++;
-            fileSuccess = false;
-            console.error('No tables found in response:', result);
-            newFailedFiles.push({
-              filename: fileObj.name,
-              size: fileObj.size,
-              error: 'No tables found in the document',
-              timestamp: new Date().toLocaleString(),
-              month: monthName,
-              year: selectedYear
-            });
+            // Check if file was processed but validation failed or no tables detected
+            const hasPages = result.files && result.files.some(f => 
+              f.pages && f.pages.length > 0
+            );
+            
+            if (hasPages) {
+              // File was processed but validation failed or no table structure detected
+              const firstPage = result.files[0]?.pages?.[0];
+              const validation = firstPage?.validation;
+              const validationError = validation?.is_valid === false 
+                ? 'Validation failed - form structure not detected'
+                : 'No table structure detected in document';
+              
+              // Extract failure reason from validation
+              const failureReason = getFailureReason(validation);
+              
+              // Update analytics for failed file
+              await updateAnalytics({
+                district: districtName,
+                mandal: mandalName,
+                village: villageName,
+                month: selectedMonth,
+                year: selectedYear,
+                shgId: '',
+                validationStatus: 'failed',
+                failureReason: failureReason || 'missing_fields',
+                syncedToMbk: false
+              });
+              
+              errorCount++;
+              fileSuccess = false;
+              console.warn('File processed but no tables extracted:', result);
+              newFailedFiles.push({
+                filename: fileObj.name,
+                size: fileObj.size,
+                error: validationError,
+                timestamp: new Date().toLocaleString(),
+                month: monthName,
+                year: selectedYear
+              });
+            } else {
+              // File processing completely failed
+              errorCount++;
+              fileSuccess = false;
+              const errorMsg = result.files?.[0]?.pages?.[0]?.error || 
+                             result.files?.[0]?.error || 
+                             'No tables found in the document';
+              
+              // Update analytics for failed file
+              await updateAnalytics({
+                district: districtName,
+                mandal: mandalName,
+                village: villageName,
+                month: selectedMonth,
+                year: selectedYear,
+                shgId: '',
+                validationStatus: 'failed',
+                failureReason: 'image_quality', // Assume image quality issue for extraction failures
+                syncedToMbk: false
+              });
+              
+              console.error('File processing failed:', result);
+              newFailedFiles.push({
+                filename: fileObj.name,
+                size: fileObj.size,
+                error: errorMsg,
+                timestamp: new Date().toLocaleString(),
+                month: monthName,
+                year: selectedYear
+              });
+            }
           }
         } catch (err) {
           console.error('Table extraction failed for', fileObj.name, err);
@@ -1724,7 +1903,7 @@ export default function EnhancedTableOCRSystem() {
                         Drop files here or click to upload
                       </p>
                       <p className="text-sm text-gray-600">
-                        Supports: PNG, JPG, PDF
+                        Supports: Images (PNG, JPG, JPEG, TIFF, BMP, WEBP) and PDF files
                       </p>
                     </div>
                     <input
@@ -1739,7 +1918,7 @@ export default function EnhancedTableOCRSystem() {
 
                   <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <p className="text-xs text-gray-500">
-                      On mobile, you can also use the camera to scan the table. Make sure the full table is visible and sharp.
+                      On mobile, you can also use the camera to scan the table. Make sure the full table is visible and sharp. PDF files are also supported for batch processing.
                     </p>
                     <button
                       type="button"
@@ -1860,6 +2039,7 @@ export default function EnhancedTableOCRSystem() {
               selectedMonth={selectedMonth}
               selectedYear={selectedYear}
               onUpdateResult={updateResultData}
+              onUpdateAnalytics={updateAnalytics}
             />
           )}
 
@@ -1950,20 +2130,30 @@ export default function EnhancedTableOCRSystem() {
             <div className="flex items-center justify-between p-4 border-b-2 border-gray-300">
               <h3 className="text-xl font-bold text-gray-800">{previewFile.name}</h3>
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
-                  <button
-                    onClick={() => rotateImage('left')}
-                    className="p-2 bg-white hover:bg-gray-200 text-gray-700 rounded transition-all"
-                  >
-                    <RotateCcw size={20} />
-                  </button>
-                  <button
-                    onClick={() => rotateImage('right')}
-                    className="p-2 bg-white hover:bg-gray-200 text-gray-700 rounded transition-all"
-                  >
-                    <RotateCw size={20} />
-                  </button>
-                </div>
+                {(() => {
+                  const isPDF = previewFile.name?.toLowerCase().endsWith('.pdf') || 
+                               previewFile.type === 'application/pdf';
+                  // Only show rotation buttons for images, not PDFs
+                  if (!isPDF) {
+                    return (
+                      <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+                        <button
+                          onClick={() => rotateImage('left')}
+                          className="p-2 bg-white hover:bg-gray-200 text-gray-700 rounded transition-all"
+                        >
+                          <RotateCcw size={20} />
+                        </button>
+                        <button
+                          onClick={() => rotateImage('right')}
+                          className="p-2 bg-white hover:bg-gray-200 text-gray-700 rounded transition-all"
+                        >
+                          <RotateCw size={20} />
+                        </button>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
                 <button
                   onClick={closePreview}
                   className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg"
@@ -1973,17 +2163,39 @@ export default function EnhancedTableOCRSystem() {
               </div>
             </div>
             <div className="p-4 overflow-auto max-h-[calc(90vh-80px)] flex items-center justify-center">
-              {previewFile.previewUrl && (
-                <img 
-                  src={previewFile.previewUrl} 
-                  alt={previewFile.name}
-                  className="max-w-full h-auto mx-auto"
-                  style={{ 
-                    transform: `rotate(${previewFile.rotation || 0}deg) scale(${previewZoom})`,
-                    maxHeight: 'calc(90vh - 120px)'
-                  }}
-                />
-              )}
+              {previewFile.previewUrl && (() => {
+                const isPDF = previewFile.name?.toLowerCase().endsWith('.pdf') || 
+                             previewFile.type === 'application/pdf';
+                
+                if (isPDF) {
+                  // Display PDF using iframe
+                  return (
+                    <iframe
+                      src={previewFile.previewUrl}
+                      title={previewFile.name}
+                      className="w-full"
+                      style={{
+                        height: 'calc(90vh - 120px)',
+                        minHeight: '600px',
+                        border: 'none'
+                      }}
+                    />
+                  );
+                } else {
+                  // Display image
+                  return (
+                    <img 
+                      src={previewFile.previewUrl} 
+                      alt={previewFile.name}
+                      className="max-w-full h-auto mx-auto"
+                      style={{ 
+                        transform: `rotate(${previewFile.rotation || 0}deg) scale(${previewZoom})`,
+                        maxHeight: 'calc(90vh - 120px)'
+                      }}
+                    />
+                  );
+                }
+              })()}
             </div>
           </div>
         </div>

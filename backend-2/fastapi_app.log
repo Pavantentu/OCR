@@ -1,0 +1,1108 @@
+2025-12-02 13:02:17,723 - WARNING - PDF support disabled - install PyMuPDF: pip install PyMuPDF
+2025-12-02 13:04:21,143 - ERROR - Failed to load Google service account credentials: Service account info was not in the expected format, missing fields client_email, token_uri.
+2025-12-02 13:04:21,144 - WARNING - ⚠ Google Vision API key missing — OCR will return empty text until configured
+2025-12-02 13:04:21,241 - INFO - Health check: {'status': 'healthy', 'pdf_support': False, 'validation_enabled': True, 'google_vision_configured': False}
+2025-12-02 14:01:09,773 - INFO - PDF support enabled (PyMuPDF)
+2025-12-02 14:04:49,028 - ERROR - Failed to load Google service account credentials: Service account info was not in the expected format, missing fields client_email, token_uri.
+2025-12-02 14:04:49,052 - WARNING - ⚠ Google Vision API key missing — OCR will return empty text until configured
+2025-12-02 14:04:49,075 - INFO - Health check: {'status': 'healthy', 'pdf_support': False, 'validation_enabled': True, 'google_vision_configured': False}
+2025-12-02 15:22:37,434 - ERROR - Failed to load Google service account credentials: Service account info was not in the expected format, missing fields client_email, token_uri.
+2025-12-02 15:22:37,603 - WARNING - ⚠ Google Vision API key missing — OCR will return empty text until configured
+2025-12-02 15:22:38,153 - INFO - Health check: {'status': 'healthy', 'pdf_support': False, 'validation_enabled': True, 'google_vision_configured': False}
+2025-12-02 15:47:04,651 - INFO - PDF support enabled (PyMuPDF)
+2025-12-02 15:47:11,818 - ERROR - Failed to load Google service account credentials: Service account info was not in the expected format, missing fields client_email, token_uri.
+2025-12-02 15:47:11,831 - WARNING - ⚠ Google Vision API key missing — OCR will return empty text until configured
+2025-12-02 15:47:11,892 - INFO - Health check: {'status': 'healthy', 'pdf_support': False, 'validation_enabled': True, 'google_vision_configured': False}
+2025-12-03 11:36:44,858 - INFO - PDF support enabled (PyMuPDF)
+2025-12-03 11:36:44,968 - DEBUG - Using proactor: IocpProactor
+2025-12-03 18:03:26,673 - INFO - PDF support enabled (PyMuPDF)
+2025-12-03 18:03:26,783 - DEBUG - Using proactor: IocpProactor
+2025-12-03 18:04:53,910 - INFO - Checking for sample file at: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:04:53,910 - INFO - Sample file exists: True
+2025-12-03 18:04:53,910 - INFO - Using sample file: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:04:55,965 - INFO - Analytics Excel columns found: ['Year', 'Month', 'District', 'Mandal', 'Village', 'SHG ID', 'Total Forms', 'Validation Successful', 'Validation Failed', 'Failed Incorrect Form', 'Failed Incorrect Values', 'Failed Missing Fields', 'Failed Image Quality', 'Forms Synced to MBK']
+2025-12-03 18:04:55,965 - INFO - Total rows: 66
+2025-12-03 18:04:55,965 - INFO - Found columns - Total Forms: Total Forms, Validation Successful: Validation Successful, Validation Failed: Validation Failed, Synced to MBK: Forms Synced to MBK
+2025-12-03 18:04:55,965 - INFO - Failure detail columns - Incorrect Form: Failed Incorrect Form, Incorrect Values: Failed Incorrect Values, Missing Fields: Failed Missing Fields, Image Quality: Failed Image Quality
+2025-12-03 18:04:56,033 - INFO - Total imports calculated from 'Total Forms': 1361
+2025-12-03 18:04:56,033 - INFO - Validation successful calculated from 'Validation Successful': 1056
+2025-12-03 18:04:56,033 - INFO - Validation failed calculated from 'Validation Failed': 305
+2025-12-03 18:04:56,033 - INFO - Synced to MBK calculated from 'Forms Synced to MBK': 1056
+2025-12-03 18:04:56,298 - INFO - Checking for sample file at: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:04:56,298 - INFO - Sample file exists: True
+2025-12-03 18:04:56,298 - INFO - Using sample file: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:04:56,326 - INFO - Analytics Excel columns found: ['Year', 'Month', 'District', 'Mandal', 'Village', 'SHG ID', 'Total Forms', 'Validation Successful', 'Validation Failed', 'Failed Incorrect Form', 'Failed Incorrect Values', 'Failed Missing Fields', 'Failed Image Quality', 'Forms Synced to MBK']
+2025-12-03 18:04:56,326 - INFO - Total rows: 66
+2025-12-03 18:04:56,328 - INFO - Found columns - Total Forms: Total Forms, Validation Successful: Validation Successful, Validation Failed: Validation Failed, Synced to MBK: Forms Synced to MBK
+2025-12-03 18:04:56,330 - INFO - Failure detail columns - Incorrect Form: Failed Incorrect Form, Incorrect Values: Failed Incorrect Values, Missing Fields: Failed Missing Fields, Image Quality: Failed Image Quality
+2025-12-03 18:04:56,333 - INFO - Total imports calculated from 'Total Forms': 1361
+2025-12-03 18:04:56,335 - INFO - Validation successful calculated from 'Validation Successful': 1056
+2025-12-03 18:04:56,336 - INFO - Validation failed calculated from 'Validation Failed': 305
+2025-12-03 18:04:56,337 - INFO - Synced to MBK calculated from 'Forms Synced to MBK': 1056
+2025-12-03 18:11:10,581 - INFO - Checking for sample file at: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:11:10,681 - INFO - Sample file exists: True
+2025-12-03 18:11:10,681 - INFO - Using sample file: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:11:11,664 - INFO - Analytics Excel columns found: ['Year', 'Month', 'District', 'Mandal', 'Village', 'SHG ID', 'Total Forms', 'Validation Successful', 'Validation Failed', 'Failed Incorrect Form', 'Failed Incorrect Values', 'Failed Missing Fields', 'Failed Image Quality', 'Forms Synced to MBK']
+2025-12-03 18:11:11,664 - INFO - Total rows: 66
+2025-12-03 18:11:11,664 - INFO - Found columns - Total Forms: Total Forms, Validation Successful: Validation Successful, Validation Failed: Validation Failed, Synced to MBK: Forms Synced to MBK
+2025-12-03 18:11:11,680 - INFO - Failure detail columns - Incorrect Form: Failed Incorrect Form, Incorrect Values: Failed Incorrect Values, Missing Fields: Failed Missing Fields, Image Quality: Failed Image Quality
+2025-12-03 18:11:11,821 - INFO - Total imports calculated from 'Total Forms': 1361
+2025-12-03 18:11:11,821 - INFO - Validation successful calculated from 'Validation Successful': 1056
+2025-12-03 18:11:11,836 - INFO - Validation failed calculated from 'Validation Failed': 305
+2025-12-03 18:11:11,836 - INFO - Synced to MBK calculated from 'Forms Synced to MBK': 1056
+2025-12-03 18:11:12,299 - INFO - Checking for sample file at: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:11:12,303 - INFO - Sample file exists: True
+2025-12-03 18:11:12,320 - INFO - Using sample file: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:11:12,396 - INFO - Analytics Excel columns found: ['Year', 'Month', 'District', 'Mandal', 'Village', 'SHG ID', 'Total Forms', 'Validation Successful', 'Validation Failed', 'Failed Incorrect Form', 'Failed Incorrect Values', 'Failed Missing Fields', 'Failed Image Quality', 'Forms Synced to MBK']
+2025-12-03 18:11:12,403 - INFO - Total rows: 66
+2025-12-03 18:11:12,403 - INFO - Found columns - Total Forms: Total Forms, Validation Successful: Validation Successful, Validation Failed: Validation Failed, Synced to MBK: Forms Synced to MBK
+2025-12-03 18:11:12,416 - INFO - Failure detail columns - Incorrect Form: Failed Incorrect Form, Incorrect Values: Failed Incorrect Values, Missing Fields: Failed Missing Fields, Image Quality: Failed Image Quality
+2025-12-03 18:11:12,419 - INFO - Total imports calculated from 'Total Forms': 1361
+2025-12-03 18:11:12,432 - INFO - Validation successful calculated from 'Validation Successful': 1056
+2025-12-03 18:11:12,434 - INFO - Validation failed calculated from 'Validation Failed': 305
+2025-12-03 18:11:12,437 - INFO - Synced to MBK calculated from 'Forms Synced to MBK': 1056
+2025-12-03 18:13:18,628 - INFO - PDF support enabled (PyMuPDF)
+2025-12-03 18:13:18,706 - DEBUG - Using proactor: IocpProactor
+2025-12-03 18:14:00,236 - INFO - ✓ OCR Processor initialized with Google Vision
+2025-12-03 18:14:00,251 - INFO - Health check: {'status': 'healthy', 'pdf_support': True, 'validation_enabled': True, 'google_vision_configured': True}
+2025-12-03 18:14:00,293 - DEBUG - Calling on_part_begin with no data
+2025-12-03 18:14:00,294 - DEBUG - Calling on_header_field with data[42:61]
+2025-12-03 18:14:00,296 - DEBUG - Calling on_header_value with data[63:107]
+2025-12-03 18:14:00,297 - DEBUG - Calling on_header_end with no data
+2025-12-03 18:14:00,299 - DEBUG - Calling on_header_field with data[109:121]
+2025-12-03 18:14:00,300 - DEBUG - Calling on_header_value with data[123:133]
+2025-12-03 18:14:00,301 - DEBUG - Calling on_header_end with no data
+2025-12-03 18:14:00,302 - DEBUG - Calling on_headers_finished with no data
+2025-12-03 18:14:00,304 - DEBUG - Calling on_part_data with data[137:131072]
+2025-12-03 18:14:00,308 - DEBUG - Calling on_part_data with data[0:16384]
+2025-12-03 18:14:00,317 - DEBUG - Calling on_part_data with data[0:3616]
+2025-12-03 18:14:00,317 - DEBUG - Calling on_part_end with no data
+2025-12-03 18:14:00,318 - DEBUG - Calling on_end with no data
+2025-12-03 18:17:09,834 - INFO - ✓ OCR Processor initialized with Google Vision
+2025-12-03 18:17:09,891 - INFO - Health check: {'status': 'healthy', 'pdf_support': True, 'validation_enabled': True, 'google_vision_configured': True}
+2025-12-03 18:17:09,952 - DEBUG - Calling on_part_begin with no data
+2025-12-03 18:17:09,954 - DEBUG - Calling on_header_field with data[42:61]
+2025-12-03 18:17:09,956 - DEBUG - Calling on_header_value with data[63:107]
+2025-12-03 18:17:09,958 - DEBUG - Calling on_header_end with no data
+2025-12-03 18:17:09,959 - DEBUG - Calling on_header_field with data[109:121]
+2025-12-03 18:17:09,960 - DEBUG - Calling on_header_value with data[123:133]
+2025-12-03 18:17:09,961 - DEBUG - Calling on_header_end with no data
+2025-12-03 18:17:09,962 - DEBUG - Calling on_headers_finished with no data
+2025-12-03 18:17:09,964 - DEBUG - Calling on_part_data with data[137:131072]
+2025-12-03 18:17:09,966 - DEBUG - Calling on_part_data with data[0:16384]
+2025-12-03 18:17:09,976 - DEBUG - Calling on_part_data with data[0:3616]
+2025-12-03 18:17:09,977 - DEBUG - Calling on_part_end with no data
+2025-12-03 18:17:09,980 - DEBUG - Calling on_end with no data
+2025-12-03 18:20:15,875 - INFO - ✓ OCR Processor initialized with Google Vision
+2025-12-03 18:20:15,875 - INFO - Health check: {'status': 'healthy', 'pdf_support': True, 'validation_enabled': True, 'google_vision_configured': True}
+2025-12-03 18:20:15,897 - DEBUG - Calling on_part_begin with no data
+2025-12-03 18:20:15,898 - DEBUG - Calling on_header_field with data[42:61]
+2025-12-03 18:20:15,899 - DEBUG - Calling on_header_value with data[63:105]
+2025-12-03 18:20:15,900 - DEBUG - Calling on_header_end with no data
+2025-12-03 18:20:15,901 - DEBUG - Calling on_header_field with data[107:119]
+2025-12-03 18:20:15,902 - DEBUG - Calling on_header_value with data[121:131]
+2025-12-03 18:20:15,903 - DEBUG - Calling on_header_end with no data
+2025-12-03 18:20:15,906 - DEBUG - Calling on_headers_finished with no data
+2025-12-03 18:20:15,907 - DEBUG - Calling on_part_data with data[135:65536]
+2025-12-03 18:20:15,915 - DEBUG - Calling on_part_data with data[0:32768]
+2025-12-03 18:20:15,919 - DEBUG - Calling on_part_data with data[0:10128]
+2025-12-03 18:20:15,920 - DEBUG - Calling on_part_end with no data
+2025-12-03 18:20:15,920 - DEBUG - Calling on_end with no data
+2025-12-03 18:20:15,959 - DEBUG - Calling on_part_begin with no data
+2025-12-03 18:20:15,960 - DEBUG - Calling on_header_field with data[42:61]
+2025-12-03 18:20:15,962 - DEBUG - Calling on_header_value with data[63:105]
+2025-12-03 18:20:15,964 - DEBUG - Calling on_header_end with no data
+2025-12-03 18:20:15,964 - DEBUG - Calling on_header_field with data[107:119]
+2025-12-03 18:20:15,990 - DEBUG - Calling on_header_value with data[121:131]
+2025-12-03 18:20:15,990 - DEBUG - Calling on_header_end with no data
+2025-12-03 18:20:15,990 - DEBUG - Calling on_headers_finished with no data
+2025-12-03 18:20:15,990 - DEBUG - Calling on_part_data with data[135:81920]
+2025-12-03 18:20:15,990 - DEBUG - Calling on_part_data with data[0:23224]
+2025-12-03 18:20:15,990 - DEBUG - Calling on_part_end with no data
+2025-12-03 18:20:15,990 - DEBUG - Calling on_end with no data
+2025-12-03 18:24:47,329 - INFO - PDF support enabled (PyMuPDF)
+2025-12-03 18:24:47,422 - DEBUG - Using proactor: IocpProactor
+2025-12-03 18:24:52,756 - INFO - Checking for sample file at: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:24:52,756 - INFO - Sample file exists: True
+2025-12-03 18:24:52,756 - INFO - Using sample file: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:24:54,427 - INFO - Analytics Excel columns found: ['Year', 'Month', 'District', 'Mandal', 'Village', 'SHG ID', 'Total Forms', 'Validation Successful', 'Validation Failed', 'Failed Incorrect Form', 'Failed Incorrect Values', 'Failed Missing Fields', 'Failed Image Quality', 'Forms Synced to MBK']
+2025-12-03 18:24:54,427 - INFO - Total rows: 66
+2025-12-03 18:24:54,427 - INFO - Found columns - Total Forms: Total Forms, Validation Successful: Validation Successful, Validation Failed: Validation Failed, Synced to MBK: Forms Synced to MBK
+2025-12-03 18:24:54,427 - INFO - Failure detail columns - Incorrect Form: Failed Incorrect Form, Incorrect Values: Failed Incorrect Values, Missing Fields: Failed Missing Fields, Image Quality: Failed Image Quality
+2025-12-03 18:24:54,492 - INFO - Total imports calculated from 'Total Forms': 1361
+2025-12-03 18:24:54,494 - INFO - Validation successful calculated from 'Validation Successful': 1056
+2025-12-03 18:24:54,494 - INFO - Validation failed calculated from 'Validation Failed': 305
+2025-12-03 18:24:54,494 - INFO - Synced to MBK calculated from 'Forms Synced to MBK': 1056
+2025-12-03 18:24:54,793 - INFO - Checking for sample file at: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:24:54,793 - INFO - Sample file exists: True
+2025-12-03 18:24:54,793 - INFO - Using sample file: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:24:54,841 - INFO - Analytics Excel columns found: ['Year', 'Month', 'District', 'Mandal', 'Village', 'SHG ID', 'Total Forms', 'Validation Successful', 'Validation Failed', 'Failed Incorrect Form', 'Failed Incorrect Values', 'Failed Missing Fields', 'Failed Image Quality', 'Forms Synced to MBK']
+2025-12-03 18:24:54,845 - INFO - Total rows: 66
+2025-12-03 18:24:54,847 - INFO - Found columns - Total Forms: Total Forms, Validation Successful: Validation Successful, Validation Failed: Validation Failed, Synced to MBK: Forms Synced to MBK
+2025-12-03 18:24:54,849 - INFO - Failure detail columns - Incorrect Form: Failed Incorrect Form, Incorrect Values: Failed Incorrect Values, Missing Fields: Failed Missing Fields, Image Quality: Failed Image Quality
+2025-12-03 18:24:54,851 - INFO - Total imports calculated from 'Total Forms': 1361
+2025-12-03 18:24:54,852 - INFO - Validation successful calculated from 'Validation Successful': 1056
+2025-12-03 18:24:54,855 - INFO - Validation failed calculated from 'Validation Failed': 305
+2025-12-03 18:24:54,857 - INFO - Synced to MBK calculated from 'Forms Synced to MBK': 1056
+2025-12-03 18:25:02,129 - INFO - Checking for sample file at: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:25:02,130 - INFO - Sample file exists: True
+2025-12-03 18:25:02,132 - INFO - Using sample file: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:25:02,176 - INFO - Analytics Excel columns found: ['Year', 'Month', 'District', 'Mandal', 'Village', 'SHG ID', 'Total Forms', 'Validation Successful', 'Validation Failed', 'Failed Incorrect Form', 'Failed Incorrect Values', 'Failed Missing Fields', 'Failed Image Quality', 'Forms Synced to MBK']
+2025-12-03 18:25:02,199 - INFO - Total rows: 66
+2025-12-03 18:25:02,201 - INFO - Found columns - Total Forms: Total Forms, Validation Successful: Validation Successful, Validation Failed: Validation Failed, Synced to MBK: Forms Synced to MBK
+2025-12-03 18:25:02,202 - INFO - Failure detail columns - Incorrect Form: Failed Incorrect Form, Incorrect Values: Failed Incorrect Values, Missing Fields: Failed Missing Fields, Image Quality: Failed Image Quality
+2025-12-03 18:25:02,204 - INFO - Total imports calculated from 'Total Forms': 1361
+2025-12-03 18:25:02,204 - INFO - Validation successful calculated from 'Validation Successful': 1056
+2025-12-03 18:25:02,205 - INFO - Validation failed calculated from 'Validation Failed': 305
+2025-12-03 18:25:02,206 - INFO - Synced to MBK calculated from 'Forms Synced to MBK': 1056
+2025-12-03 18:25:02,318 - INFO - Checking for sample file at: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:25:02,320 - INFO - Sample file exists: True
+2025-12-03 18:25:02,321 - INFO - Using sample file: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:25:02,367 - INFO - Analytics Excel columns found: ['Year', 'Month', 'District', 'Mandal', 'Village', 'SHG ID', 'Total Forms', 'Validation Successful', 'Validation Failed', 'Failed Incorrect Form', 'Failed Incorrect Values', 'Failed Missing Fields', 'Failed Image Quality', 'Forms Synced to MBK']
+2025-12-03 18:25:02,367 - INFO - Total rows: 66
+2025-12-03 18:25:02,369 - INFO - Found columns - Total Forms: Total Forms, Validation Successful: Validation Successful, Validation Failed: Validation Failed, Synced to MBK: Forms Synced to MBK
+2025-12-03 18:25:02,371 - INFO - Failure detail columns - Incorrect Form: Failed Incorrect Form, Incorrect Values: Failed Incorrect Values, Missing Fields: Failed Missing Fields, Image Quality: Failed Image Quality
+2025-12-03 18:25:02,372 - INFO - Total imports calculated from 'Total Forms': 1361
+2025-12-03 18:25:02,373 - INFO - Validation successful calculated from 'Validation Successful': 1056
+2025-12-03 18:25:02,374 - INFO - Validation failed calculated from 'Validation Failed': 305
+2025-12-03 18:25:02,377 - INFO - Synced to MBK calculated from 'Forms Synced to MBK': 1056
+2025-12-03 18:25:49,580 - INFO - ✓ OCR Processor initialized with Google Vision
+2025-12-03 18:25:49,581 - INFO - Health check: {'status': 'healthy', 'pdf_support': True, 'validation_enabled': True, 'google_vision_configured': True}
+2025-12-03 18:25:49,615 - DEBUG - Calling on_part_begin with no data
+2025-12-03 18:25:49,616 - DEBUG - Calling on_header_field with data[42:61]
+2025-12-03 18:25:49,617 - DEBUG - Calling on_header_value with data[63:107]
+2025-12-03 18:25:49,618 - DEBUG - Calling on_header_end with no data
+2025-12-03 18:25:49,618 - DEBUG - Calling on_header_field with data[109:121]
+2025-12-03 18:25:49,620 - DEBUG - Calling on_header_value with data[123:133]
+2025-12-03 18:25:49,623 - DEBUG - Calling on_header_end with no data
+2025-12-03 18:25:49,625 - DEBUG - Calling on_headers_finished with no data
+2025-12-03 18:25:49,626 - DEBUG - Calling on_part_data with data[137:131072]
+2025-12-03 18:25:49,627 - DEBUG - Calling on_part_data with data[0:16384]
+2025-12-03 18:25:49,636 - DEBUG - Calling on_part_data with data[0:3616]
+2025-12-03 18:25:49,636 - DEBUG - Calling on_part_end with no data
+2025-12-03 18:25:49,637 - DEBUG - Calling on_end with no data
+2025-12-03 18:25:49,678 - INFO - ================================================================================
+2025-12-03 18:25:49,679 - INFO - Received extract-tables request
+2025-12-03 18:25:49,682 - ERROR - Error: name 'files' is not defined
+2025-12-03 18:25:49,721 - ERROR - Traceback (most recent call last):
+  File "F:\Work\Samples\OCR-Custom\backend\main.py", line 703, in extract_tables
+    if not files:
+           ^^^^^
+NameError: name 'files' is not defined. Did you mean: 'file'?
+
+2025-12-03 18:27:57,199 - INFO - ✓ OCR Processor initialized with Google Vision
+2025-12-03 18:27:57,261 - INFO - Health check: {'status': 'healthy', 'pdf_support': True, 'validation_enabled': True, 'google_vision_configured': True}
+2025-12-03 18:27:57,304 - DEBUG - Calling on_part_begin with no data
+2025-12-03 18:27:57,305 - DEBUG - Calling on_header_field with data[42:61]
+2025-12-03 18:27:57,307 - DEBUG - Calling on_header_value with data[63:107]
+2025-12-03 18:27:57,309 - DEBUG - Calling on_header_end with no data
+2025-12-03 18:27:57,310 - DEBUG - Calling on_header_field with data[109:121]
+2025-12-03 18:27:57,310 - DEBUG - Calling on_header_value with data[123:133]
+2025-12-03 18:27:57,310 - DEBUG - Calling on_header_end with no data
+2025-12-03 18:27:57,311 - DEBUG - Calling on_headers_finished with no data
+2025-12-03 18:27:57,312 - DEBUG - Calling on_part_data with data[137:131072]
+2025-12-03 18:27:57,315 - DEBUG - Calling on_part_data with data[0:16384]
+2025-12-03 18:27:57,323 - DEBUG - Calling on_part_data with data[0:3616]
+2025-12-03 18:27:57,324 - DEBUG - Calling on_part_end with no data
+2025-12-03 18:27:57,325 - DEBUG - Calling on_end with no data
+2025-12-03 18:27:57,364 - INFO - ================================================================================
+2025-12-03 18:27:57,365 - INFO - Received extract-tables request
+2025-12-03 18:27:57,367 - ERROR - Error: name 'files' is not defined
+2025-12-03 18:27:57,434 - ERROR - Traceback (most recent call last):
+  File "F:\Work\Samples\OCR-Custom\backend\main.py", line 703, in extract_tables
+    if not file:
+           ^^^^^
+NameError: name 'files' is not defined. Did you mean: 'file'?
+
+2025-12-03 18:28:54,187 - INFO - PDF support enabled (PyMuPDF)
+2025-12-03 18:28:54,266 - DEBUG - Using proactor: IocpProactor
+2025-12-03 18:29:19,188 - INFO - ✓ OCR Processor initialized with Google Vision
+2025-12-03 18:29:19,188 - INFO - Health check: {'status': 'healthy', 'pdf_support': True, 'validation_enabled': True, 'google_vision_configured': True}
+2025-12-03 18:29:19,215 - DEBUG - Calling on_part_begin with no data
+2025-12-03 18:29:19,217 - DEBUG - Calling on_header_field with data[42:61]
+2025-12-03 18:29:19,217 - DEBUG - Calling on_header_value with data[63:107]
+2025-12-03 18:29:19,218 - DEBUG - Calling on_header_end with no data
+2025-12-03 18:29:19,219 - DEBUG - Calling on_header_field with data[109:121]
+2025-12-03 18:29:19,219 - DEBUG - Calling on_header_value with data[123:133]
+2025-12-03 18:29:19,220 - DEBUG - Calling on_header_end with no data
+2025-12-03 18:29:19,220 - DEBUG - Calling on_headers_finished with no data
+2025-12-03 18:29:19,220 - DEBUG - Calling on_part_data with data[137:114688]
+2025-12-03 18:29:19,228 - DEBUG - Calling on_part_data with data[0:36384]
+2025-12-03 18:29:19,229 - DEBUG - Calling on_part_end with no data
+2025-12-03 18:29:19,229 - DEBUG - Calling on_end with no data
+2025-12-03 18:29:19,265 - INFO - ================================================================================
+2025-12-03 18:29:19,265 - INFO - Received extract-tables request
+2025-12-03 18:29:19,266 - INFO - Processing 1 uploaded file(s)
+2025-12-03 18:29:19,268 - INFO - ✓ OCR Processor initialized with Google Vision
+2025-12-03 18:29:19,268 - INFO - 
+[File 1/1] Processing: demo.jpeg
+2025-12-03 18:29:19,298 - INFO -   Saved to: temp_processing\9f4c20bd7a9f444495155810baef7a3f\demo.jpeg
+2025-12-03 18:29:19,298 - INFO -   File type: Image
+2025-12-03 18:29:19,847 - INFO - Image validated: temp_processing\9f4c20bd7a9f444495155810baef7a3f\demo_converted.jpg
+2025-12-03 18:29:19,847 - INFO - 
+  [Page 1/1] Processing: demo_converted.jpg
+2025-12-03 18:29:19,847 - INFO - 
+======================================================================
+2025-12-03 18:29:19,864 - INFO - Processing image: temp_processing\9f4c20bd7a9f444495155810baef7a3f\demo_converted.jpg
+2025-12-03 18:29:19,864 - INFO - ======================================================================
+2025-12-03 18:30:45,255 - INFO - ✓ Successfully processed: 166 cells extracted
+2025-12-03 18:30:45,349 - INFO - Running Google Vision OCR on 166 cells...
+2025-12-03 18:30:46,229 - DEBUG - Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2025-12-03 18:30:47,888 - DEBUG - https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2025-12-03 18:30:47,916 - DEBUG - Starting new HTTPS connection (1): vision.googleapis.com:443
+2025-12-03 18:30:48,916 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:48,918 - DEBUG - Google Vision OCR [1/166]: '01141120040010' (conf=0.9)
+2025-12-03 18:30:49,381 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:49,382 - DEBUG - Google Vision OCR [2/166]: '1100' (conf=0.9)
+2025-12-03 18:30:49,557 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:49,559 - DEBUG - Google Vision OCR [3/166]: 'అనన్య' (conf=0.9)
+2025-12-03 18:30:49,797 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:49,799 - DEBUG - Google Vision OCR [4/166]: '200' (conf=0.9)
+2025-12-03 18:30:50,020 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:50,028 - DEBUG - Google Vision OCR [5/166]: '500' (conf=0.9)
+2025-12-03 18:30:50,222 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:50,223 - DEBUG - Google Vision OCR [6/166]: '18495' (conf=0.9)
+2025-12-03 18:30:50,609 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:50,612 - DEBUG - Google Vision OCR [7/166]: '1250' (conf=0.9)
+2025-12-03 18:30:51,018 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:51,019 - DEBUG - Google Vision OCR [8/166]: '22789' (conf=0.9)
+2025-12-03 18:30:51,240 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:51,241 - DEBUG - Google Vision OCR [9/166]: '34567' (conf=0.9)
+2025-12-03 18:30:51,430 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:51,431 - DEBUG - Google Vision OCR [10/166]: '12098' (conf=0.9)
+2025-12-03 18:30:51,633 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:51,634 - DEBUG - Google Vision OCR [11/166]: '23908' (conf=0.9)
+2025-12-03 18:30:51,831 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:51,832 - DEBUG - Google Vision OCR [12/166]: '21907' (conf=0.9)
+2025-12-03 18:30:52,027 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:52,027 - DEBUG - Google Vision OCR [13/166]: '1101' (conf=0.9)
+2025-12-03 18:30:52,427 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:52,431 - DEBUG - Google Vision OCR [14/166]: 'భార్గవి' (conf=0.9)
+2025-12-03 18:30:52,632 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:52,633 - DEBUG - Google Vision OCR [15/166]: '201' (conf=0.9)
+2025-12-03 18:30:52,840 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:52,844 - DEBUG - Google Vision OCR [16/166]: '501' (conf=0.9)
+2025-12-03 18:30:53,037 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:53,038 - DEBUG - Google Vision OCR [17/166]: '18496' (conf=0.9)
+2025-12-03 18:30:53,254 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:53,255 - DEBUG - Google Vision OCR [18/166]: '1251' (conf=0.9)
+2025-12-03 18:30:53,472 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:53,474 - DEBUG - Google Vision OCR [19/166]: '22790' (conf=0.9)
+2025-12-03 18:30:53,665 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:53,666 - DEBUG - Google Vision OCR [20/166]: '34568' (conf=0.9)
+2025-12-03 18:30:53,833 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:53,835 - DEBUG - Google Vision OCR [21/166]: '12099' (conf=0.9)
+2025-12-03 18:30:54,016 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:54,017 - DEBUG - Google Vision OCR [22/166]: '23909' (conf=0.9)
+2025-12-03 18:30:54,227 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:54,228 - DEBUG - Google Vision OCR [23/166]: '21907' (conf=0.9)
+2025-12-03 18:30:54,405 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:54,407 - DEBUG - Google Vision OCR [24/166]: '1102' (conf=0.9)
+2025-12-03 18:30:54,615 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:54,617 - DEBUG - Google Vision OCR [25/166]: 'τ చైతన్య' (conf=0.9)
+2025-12-03 18:30:54,808 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:54,811 - DEBUG - Google Vision OCR [26/166]: '202' (conf=0.9)
+2025-12-03 18:30:54,994 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:54,995 - DEBUG - Google Vision OCR [27/166]: '502' (conf=0.9)
+2025-12-03 18:30:55,167 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:55,168 - DEBUG - Google Vision OCR [28/166]: '18497' (conf=0.9)
+2025-12-03 18:30:55,360 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:55,361 - DEBUG - Google Vision OCR [29/166]: '1252' (conf=0.9)
+2025-12-03 18:30:55,779 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:55,781 - DEBUG - Google Vision OCR [30/166]: '22791' (conf=0.9)
+2025-12-03 18:30:55,954 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:55,955 - DEBUG - Google Vision OCR [31/166]: '34569' (conf=0.9)
+2025-12-03 18:30:56,333 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:56,334 - DEBUG - Google Vision OCR [32/166]: '12100' (conf=0.9)
+2025-12-03 18:30:56,520 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:56,521 - DEBUG - Google Vision OCR [33/166]: '23910' (conf=0.9)
+2025-12-03 18:30:56,728 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:56,730 - DEBUG - Google Vision OCR [34/166]: '21677' (conf=0.9)
+2025-12-03 18:30:56,903 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:56,904 - DEBUG - Google Vision OCR [35/166]: '1103' (conf=0.9)
+2025-12-03 18:30:57,325 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:57,328 - DEBUG - Google Vision OCR [36/166]: 'దీపిక' (conf=0.9)
+2025-12-03 18:30:57,534 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:57,536 - DEBUG - Google Vision OCR [37/166]: '203' (conf=0.9)
+2025-12-03 18:30:57,723 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:57,724 - DEBUG - Google Vision OCR [38/166]: '503' (conf=0.9)
+2025-12-03 18:30:57,952 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:57,958 - DEBUG - Google Vision OCR [39/166]: '18498' (conf=0.9)
+2025-12-03 18:30:58,171 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:58,173 - DEBUG - Google Vision OCR [40/166]: '1253' (conf=0.9)
+2025-12-03 18:30:58,348 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:58,349 - DEBUG - Google Vision OCR [41/166]: '22792' (conf=0.9)
+2025-12-03 18:30:58,743 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:58,745 - DEBUG - Google Vision OCR [42/166]: '34570' (conf=0.9)
+2025-12-03 18:30:58,935 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:58,936 - DEBUG - Google Vision OCR [43/166]: '12101' (conf=0.9)
+2025-12-03 18:30:59,293 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:59,294 - DEBUG - Google Vision OCR [44/166]: '23911' (conf=0.9)
+2025-12-03 18:30:59,496 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:59,497 - DEBUG - Google Vision OCR [45/166]: '22907' (conf=0.9)
+2025-12-03 18:30:59,702 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:59,706 - DEBUG - Google Vision OCR [46/166]: '1104' (conf=0.9)
+2025-12-03 18:30:59,869 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:30:59,871 - DEBUG - Google Vision OCR [47/166]: 'ఈశ్వర్' (conf=0.9)
+2025-12-03 18:31:00,065 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:00,066 - DEBUG - Google Vision OCR [48/166]: '204' (conf=0.9)
+2025-12-03 18:31:00,256 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:00,257 - DEBUG - Google Vision OCR [49/166]: '504' (conf=0.9)
+2025-12-03 18:31:00,436 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:00,440 - DEBUG - Google Vision OCR [50/166]: '18499' (conf=0.9)
+2025-12-03 18:31:00,881 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:00,893 - DEBUG - Google Vision OCR [51/166]: '1254' (conf=0.9)
+2025-12-03 18:31:01,088 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:01,090 - DEBUG - Google Vision OCR [52/166]: '22793' (conf=0.9)
+2025-12-03 18:31:01,243 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:01,244 - DEBUG - Google Vision OCR [53/166]: '34571' (conf=0.9)
+2025-12-03 18:31:01,436 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:01,437 - DEBUG - Google Vision OCR [54/166]: '12102' (conf=0.9)
+2025-12-03 18:31:01,624 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:01,627 - DEBUG - Google Vision OCR [55/166]: '23912' (conf=0.9)
+2025-12-03 18:31:01,918 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:01,920 - DEBUG - Google Vision OCR [56/166]: '21907' (conf=0.9)
+2025-12-03 18:31:02,108 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:02,113 - DEBUG - Google Vision OCR [57/166]: '1105' (conf=0.9)
+2025-12-03 18:31:02,363 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:02,364 - DEBUG - Google Vision OCR [58/166]: 'ఫణీంద్ర' (conf=0.9)
+2025-12-03 18:31:02,552 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:02,553 - DEBUG - Google Vision OCR [59/166]: '205' (conf=0.9)
+2025-12-03 18:31:02,738 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:02,740 - DEBUG - Google Vision OCR [60/166]: '505' (conf=0.9)
+2025-12-03 18:31:02,919 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:02,920 - DEBUG - Google Vision OCR [61/166]: '18500' (conf=0.9)
+2025-12-03 18:31:03,124 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:03,126 - DEBUG - Google Vision OCR [62/166]: '255' (conf=0.9)
+2025-12-03 18:31:03,328 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:03,330 - DEBUG - Google Vision OCR [63/166]: '22794' (conf=0.9)
+2025-12-03 18:31:03,494 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:03,496 - DEBUG - Google Vision OCR [64/166]: '34572' (conf=0.9)
+2025-12-03 18:31:03,676 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:03,678 - DEBUG - Google Vision OCR [65/166]: '12103' (conf=0.9)
+2025-12-03 18:31:04,052 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:04,054 - DEBUG - Google Vision OCR [66/166]: '23913' (conf=0.9)
+2025-12-03 18:31:04,224 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:04,224 - DEBUG - Google Vision OCR [67/166]: '21907' (conf=0.9)
+2025-12-03 18:31:04,644 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:04,645 - DEBUG - Google Vision OCR [68/166]: '1106' (conf=0.9)
+2025-12-03 18:31:04,848 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:04,850 - DEBUG - Google Vision OCR [69/166]: 'గౌతమి' (conf=0.9)
+2025-12-03 18:31:05,055 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:05,056 - DEBUG - Google Vision OCR [70/166]: '206' (conf=0.9)
+2025-12-03 18:31:05,504 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:05,506 - DEBUG - Google Vision OCR [71/166]: '506' (conf=0.9)
+2025-12-03 18:31:05,917 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:05,918 - DEBUG - Google Vision OCR [72/166]: '18501' (conf=0.9)
+2025-12-03 18:31:06,126 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:06,128 - DEBUG - Google Vision OCR [73/166]: '1256' (conf=0.9)
+2025-12-03 18:31:06,309 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:06,310 - DEBUG - Google Vision OCR [74/166]: '22795' (conf=0.9)
+2025-12-03 18:31:06,492 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:06,494 - DEBUG - Google Vision OCR [75/166]: '34573' (conf=0.9)
+2025-12-03 18:31:06,685 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:06,686 - DEBUG - Google Vision OCR [76/166]: '12104' (conf=0.9)
+2025-12-03 18:31:06,876 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:06,877 - DEBUG - Google Vision OCR [77/166]: '23914' (conf=0.9)
+2025-12-03 18:31:07,084 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:07,086 - DEBUG - Google Vision OCR [78/166]: '11907' (conf=0.9)
+2025-12-03 18:31:07,273 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:07,274 - DEBUG - Google Vision OCR [79/166]: '1107' (conf=0.9)
+2025-12-03 18:31:07,465 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:07,466 - DEBUG - Google Vision OCR [80/166]: 'హేమ' (conf=0.9)
+2025-12-03 18:31:07,634 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:07,637 - DEBUG - Google Vision OCR [81/166]: '207' (conf=0.9)
+2025-12-03 18:31:07,821 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:07,823 - DEBUG - Google Vision OCR [82/166]: '507' (conf=0.9)
+2025-12-03 18:31:08,086 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:08,088 - DEBUG - Google Vision OCR [83/166]: '18502' (conf=0.9)
+2025-12-03 18:31:08,293 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:08,295 - DEBUG - Google Vision OCR [84/166]: '1257' (conf=0.9)
+2025-12-03 18:31:08,476 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:08,477 - DEBUG - Google Vision OCR [85/166]: '22796' (conf=0.9)
+2025-12-03 18:31:08,646 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:08,648 - DEBUG - Google Vision OCR [86/166]: '34574' (conf=0.9)
+2025-12-03 18:31:08,841 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:08,844 - DEBUG - Google Vision OCR [87/166]: '12105' (conf=0.9)
+2025-12-03 18:31:09,042 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:09,044 - DEBUG - Google Vision OCR [88/166]: '23915' (conf=0.9)
+2025-12-03 18:31:09,261 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:09,263 - DEBUG - Google Vision OCR [89/166]: '21456' (conf=0.9)
+2025-12-03 18:31:09,654 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:09,655 - DEBUG - Google Vision OCR [90/166]: '1108' (conf=0.9)
+2025-12-03 18:31:09,830 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:09,831 - DEBUG - Google Vision OCR [91/166]: 'ఇంద్ర' (conf=0.9)
+2025-12-03 18:31:10,019 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:10,020 - DEBUG - Google Vision OCR [92/166]: '208' (conf=0.9)
+2025-12-03 18:31:10,210 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:10,212 - DEBUG - Google Vision OCR [93/166]: '508' (conf=0.9)
+2025-12-03 18:31:10,387 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:10,388 - DEBUG - Google Vision OCR [94/166]: '18503' (conf=0.9)
+2025-12-03 18:31:10,587 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:10,588 - DEBUG - Google Vision OCR [95/166]: '1258' (conf=0.9)
+2025-12-03 18:31:10,973 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:10,977 - DEBUG - Google Vision OCR [96/166]: '22797' (conf=0.9)
+2025-12-03 18:31:11,161 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:11,162 - DEBUG - Google Vision OCR [97/166]: '34575' (conf=0.9)
+2025-12-03 18:31:11,311 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:11,313 - DEBUG - Google Vision OCR [98/166]: '12106' (conf=0.9)
+2025-12-03 18:31:11,476 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:11,477 - DEBUG - Google Vision OCR [99/166]: '23916' (conf=0.9)
+2025-12-03 18:31:11,893 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:11,894 - DEBUG - Google Vision OCR [100/166]: '23907' (conf=0.9)
+2025-12-03 18:31:12,071 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:12,073 - DEBUG - Google Vision OCR [101/166]: '1109' (conf=0.9)
+2025-12-03 18:31:12,272 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:12,273 - DEBUG - Google Vision OCR [102/166]: 'జయ శ్రీ' (conf=0.9)
+2025-12-03 18:31:12,456 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:12,457 - DEBUG - Google Vision OCR [103/166]: '209' (conf=0.9)
+2025-12-03 18:31:12,664 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:12,665 - DEBUG - Google Vision OCR [104/166]: '509' (conf=0.9)
+2025-12-03 18:31:12,863 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:12,864 - DEBUG - Google Vision OCR [105/166]: '18504' (conf=0.9)
+2025-12-03 18:31:13,055 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:13,056 - DEBUG - Google Vision OCR [106/166]: '1259' (conf=0.9)
+2025-12-03 18:31:13,265 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:13,267 - DEBUG - Google Vision OCR [107/166]: '22798' (conf=0.9)
+2025-12-03 18:31:13,430 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:13,431 - DEBUG - Google Vision OCR [108/166]: '34576' (conf=0.9)
+2025-12-03 18:31:13,616 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:13,618 - DEBUG - Google Vision OCR [109/166]: '12107' (conf=0.9)
+2025-12-03 18:31:13,798 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:13,799 - DEBUG - Google Vision OCR [110/166]: '23917' (conf=0.9)
+2025-12-03 18:31:13,965 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:13,966 - DEBUG - Google Vision OCR [111/166]: '21007' (conf=0.9)
+2025-12-03 18:31:14,129 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:14,130 - DEBUG - Google Vision OCR [112/166]: '1110' (conf=0.9)
+2025-12-03 18:31:14,325 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:14,326 - DEBUG - Google Vision OCR [113/166]: 'উचाल' (conf=0.9)
+2025-12-03 18:31:14,521 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:14,524 - DEBUG - Google Vision OCR [114/166]: '210' (conf=0.9)
+2025-12-03 18:31:14,677 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:14,678 - DEBUG - Google Vision OCR [115/166]: '50' (conf=0.9)
+2025-12-03 18:31:14,873 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:14,874 - DEBUG - Google Vision OCR [116/166]: '18505' (conf=0.9)
+2025-12-03 18:31:15,059 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:15,060 - DEBUG - Google Vision OCR [117/166]: '1260' (conf=0.9)
+2025-12-03 18:31:15,235 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:15,236 - DEBUG - Google Vision OCR [118/166]: '22799' (conf=0.9)
+2025-12-03 18:31:15,412 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:15,413 - DEBUG - Google Vision OCR [119/166]: '34577' (conf=0.9)
+2025-12-03 18:31:15,583 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:15,584 - DEBUG - Google Vision OCR [120/166]: '12108' (conf=0.9)
+2025-12-03 18:31:15,787 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:15,789 - DEBUG - Google Vision OCR [121/166]: '23918' (conf=0.9)
+2025-12-03 18:31:15,963 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:15,964 - DEBUG - Google Vision OCR [122/166]: '21907' (conf=0.9)
+2025-12-03 18:31:16,166 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:16,171 - DEBUG - Google Vision OCR [123/166]: '' (conf=0.0)
+2025-12-03 18:31:16,354 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:16,355 - DEBUG - Google Vision OCR [124/166]: 'లక్ష్మి' (conf=0.9)
+2025-12-03 18:31:16,558 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:16,560 - DEBUG - Google Vision OCR [125/166]: '211' (conf=0.9)
+2025-12-03 18:31:16,706 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:16,707 - DEBUG - Google Vision OCR [126/166]: '511' (conf=0.9)
+2025-12-03 18:31:16,893 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:16,902 - DEBUG - Google Vision OCR [127/166]: '18506' (conf=0.9)
+2025-12-03 18:31:17,092 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:17,094 - DEBUG - Google Vision OCR [128/166]: '1261' (conf=0.9)
+2025-12-03 18:31:17,293 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:17,295 - DEBUG - Google Vision OCR [129/166]: '22800' (conf=0.9)
+2025-12-03 18:31:17,463 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:17,464 - DEBUG - Google Vision OCR [130/166]: '34578' (conf=0.9)
+2025-12-03 18:31:17,612 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:17,614 - DEBUG - Google Vision OCR [131/166]: '12109' (conf=0.9)
+2025-12-03 18:31:17,824 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:17,827 - DEBUG - Google Vision OCR [132/166]: '23919' (conf=0.9)
+2025-12-03 18:31:18,045 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:18,050 - DEBUG - Google Vision OCR [133/166]: '24919' (conf=0.9)
+2025-12-03 18:31:18,226 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:18,227 - DEBUG - Google Vision OCR [134/166]: '11/2' (conf=0.9)
+2025-12-03 18:31:18,386 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:18,387 - DEBUG - Google Vision OCR [135/166]: 'మాధవి' (conf=0.9)
+2025-12-03 18:31:18,583 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:18,585 - DEBUG - Google Vision OCR [136/166]: '2/2' (conf=0.9)
+2025-12-03 18:31:18,749 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:18,751 - DEBUG - Google Vision OCR [137/166]: '512' (conf=0.9)
+2025-12-03 18:31:18,948 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:18,950 - DEBUG - Google Vision OCR [138/166]: '18507' (conf=0.9)
+2025-12-03 18:31:19,152 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:19,154 - DEBUG - Google Vision OCR [139/166]: '1262' (conf=0.9)
+2025-12-03 18:31:19,543 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:19,559 - DEBUG - Google Vision OCR [140/166]: '22801' (conf=0.9)
+2025-12-03 18:31:19,782 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:19,786 - DEBUG - Google Vision OCR [141/166]: '34579' (conf=0.9)
+2025-12-03 18:31:19,968 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:19,969 - DEBUG - Google Vision OCR [142/166]: '12110' (conf=0.9)
+2025-12-03 18:31:20,182 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:20,185 - DEBUG - Google Vision OCR [143/166]: '23920' (conf=0.9)
+2025-12-03 18:31:20,368 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:20,370 - DEBUG - Google Vision OCR [144/166]: '23919' (conf=0.9)
+2025-12-03 18:31:20,582 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:20,585 - DEBUG - Google Vision OCR [145/166]: '1113' (conf=0.9)
+2025-12-03 18:31:20,749 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:20,750 - DEBUG - Google Vision OCR [146/166]: 'నరేష్' (conf=0.9)
+2025-12-03 18:31:20,941 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:20,944 - DEBUG - Google Vision OCR [147/166]: '213' (conf=0.9)
+2025-12-03 18:31:21,120 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:21,122 - DEBUG - Google Vision OCR [148/166]: '5/3' (conf=0.9)
+2025-12-03 18:31:21,309 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:21,310 - DEBUG - Google Vision OCR [149/166]: '18508' (conf=0.9)
+2025-12-03 18:31:21,496 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:21,498 - DEBUG - Google Vision OCR [150/166]: '1263' (conf=0.9)
+2025-12-03 18:31:21,684 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:21,685 - DEBUG - Google Vision OCR [151/166]: '22802' (conf=0.9)
+2025-12-03 18:31:22,070 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:22,071 - DEBUG - Google Vision OCR [152/166]: '34580' (conf=0.9)
+2025-12-03 18:31:22,248 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:22,249 - DEBUG - Google Vision OCR [153/166]: '12111' (conf=0.9)
+2025-12-03 18:31:22,420 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:22,424 - DEBUG - Google Vision OCR [154/166]: '23921' (conf=0.9)
+2025-12-03 18:31:22,617 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:22,618 - DEBUG - Google Vision OCR [155/166]: '22111' (conf=0.9)
+2025-12-03 18:31:22,823 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:22,829 - DEBUG - Google Vision OCR [156/166]: '1114' (conf=0.9)
+2025-12-03 18:31:23,025 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:23,027 - DEBUG - Google Vision OCR [157/166]: 'дебоча' (conf=0.9)
+2025-12-03 18:31:23,203 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:23,204 - DEBUG - Google Vision OCR [158/166]: '214' (conf=0.9)
+2025-12-03 18:31:23,373 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:23,377 - DEBUG - Google Vision OCR [159/166]: '514' (conf=0.9)
+2025-12-03 18:31:23,553 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:23,555 - DEBUG - Google Vision OCR [160/166]: '18509' (conf=0.9)
+2025-12-03 18:31:23,742 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:23,743 - DEBUG - Google Vision OCR [161/166]: '264' (conf=0.9)
+2025-12-03 18:31:23,947 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:23,948 - DEBUG - Google Vision OCR [162/166]: '22803' (conf=0.9)
+2025-12-03 18:31:24,130 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:24,132 - DEBUG - Google Vision OCR [163/166]: '34581' (conf=0.9)
+2025-12-03 18:31:24,376 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:24,378 - DEBUG - Google Vision OCR [164/166]: '12112' (conf=0.9)
+2025-12-03 18:31:24,560 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:24,561 - DEBUG - Google Vision OCR [165/166]: '23922' (conf=0.9)
+2025-12-03 18:31:24,770 - DEBUG - https://vision.googleapis.com:443 "POST /v1/images:annotate HTTP/1.1" 200 None
+2025-12-03 18:31:24,771 - DEBUG - Google Vision OCR [166/166]: '21134' (conf=0.9)
+2025-12-03 18:31:24,773 - INFO - ✓ Completed Google Vision OCR on 166 cells
+2025-12-03 18:31:24,780 - INFO - 
+📋 Scanned Table Output (File: demo.jpeg, Page: 1)
+2025-12-03 18:31:24,782 - INFO - +--------------------+------------------+----------------+---------------------+-----------------------------------+-------------------------------+-----------------------------------------+-----------------------------------------+-------------------------------------+------------------------------------+---------------------------+----------------------------------+-------------+----------+-----------+---------------------------------+--------------------------------------------+
+2025-12-03 18:31:24,783 - INFO - | సభ్యురాలి MBK ID   | సభ్యురాలు పేరు   | ఈ నెల పొదుపు   | ఈ నెల వరకు పొదుపు   | SHG అంతర్గత అప్పు కట్టిన మొత్తం   | బ్యాంక్ అప్పు కట్టిన మొత్తం   | స్త్రీనిధి మైక్రో అప్పు కట్టిన మొత్తం   | స్త్రీనిధి టెన్నీ అప్పు కట్టిన మొత్తం   | ఉన్నతి (SCSP) అప్పు కట్టిన మొత్తం   | ఉన్నతి (TSP) అప్పు కట్టిన మొత్తం   | CIF అప్పు కట్టిన మొత్తం   | VO అంతర్గత అప్పు కట్టిన మొత్తం   | అప్పు రకం   | మొత్తం   | జరిమానా   | సభ్యులకు తిరిగి ఇచ్చిన మొత్తం   | సభ్యుల ఇతర పొదుపులు (SN+VO+Other Saving)   |
+2025-12-03 18:31:24,785 - INFO - +--------------------+------------------+----------------+---------------------+-----------------------------------+-------------------------------+-----------------------------------------+-----------------------------------------+-------------------------------------+------------------------------------+---------------------------+----------------------------------+-------------+----------+-----------+---------------------------------+--------------------------------------------+
+2025-12-03 18:31:24,786 - INFO - | 1100               | అనన్య            | 200            |                     | 500                               | 18495                         | 1250                                    | 22789                                   | 34567                               | 12098                              | 23908                     | 21907                            |             |          |           |                                 |                                            |
+2025-12-03 18:31:24,787 - INFO - | 1101               | భార్గవి          | 201            |                     | 501                               | 18496                         | 1251                                    | 22790                                   | 34568                               | 12099                              | 23909                     | 21907                            |             |          |           |                                 |                                            |
+2025-12-03 18:31:24,788 - INFO - | 1102               | τ చైతన్య         | 202            |                     | 502                               | 18497                         | 1252                                    | 22791                                   | 34569                               | 12100                              | 23910                     | 21677                            |             |          |           |                                 |                                            |
+2025-12-03 18:31:24,789 - INFO - | 1103               | దీపిక            | 203            |                     | 503                               | 18498                         | 1253                                    | 22792                                   | 34570                               | 12101                              | 23911                     | 22907                            |             |          |           |                                 |                                            |
+2025-12-03 18:31:24,790 - INFO - | 1104               | ఈశ్వర్           | 204            |                     | 504                               | 18499                         | 1254                                    | 22793                                   | 34571                               | 12102                              | 23912                     | 21907                            |             |          |           |                                 |                                            |
+2025-12-03 18:31:24,793 - INFO - | 1105               | ఫణీంద్ర          | 205            |                     | 505                               | 18500                         | 255                                     | 22794                                   | 34572                               | 12103                              | 23913                     | 21907                            |             |          |           |                                 |                                            |
+2025-12-03 18:31:24,793 - INFO - | 1106               | గౌతమి            | 206            |                     | 506                               | 18501                         | 1256                                    | 22795                                   | 34573                               | 12104                              | 23914                     | 11907                            |             |          |           |                                 |                                            |
+2025-12-03 18:31:24,794 - INFO - | 1107               | హేమ              | 207            |                     | 507                               | 18502                         | 1257                                    | 22796                                   | 34574                               | 12105                              | 23915                     | 21456                            |             |          |           |                                 |                                            |
+2025-12-03 18:31:24,795 - INFO - | 1108               | ఇంద్ర            | 208            |                     | 508                               | 18503                         | 1258                                    | 22797                                   | 34575                               | 12106                              | 23916                     | 23907                            |             |          |           |                                 |                                            |
+2025-12-03 18:31:24,796 - INFO - | 1109               | జయ శ్రీ          | 209            |                     | 509                               | 18504                         | 1259                                    | 22798                                   | 34576                               | 12107                              | 23917                     | 21007                            |             |          |           |                                 |                                            |
+2025-12-03 18:31:24,799 - INFO - | 1110               | উचाल             | 210            |                     | 50                                | 18505                         | 1260                                    | 22799                                   | 34577                               | 12108                              | 23918                     | 21907                            |             |          |           |                                 |                                            |
+2025-12-03 18:31:24,801 - INFO - |                    | లక్ష్మి          | 211            |                     | 511                               | 18506                         | 1261                                    | 22800                                   | 34578                               | 12109                              | 23919                     | 24919                            |             |          |           |                                 |                                            |
+2025-12-03 18:31:24,802 - INFO - | 11/2               | మాధవి            | 2/2            |                     | 512                               | 18507                         | 1262                                    | 22801                                   | 34579                               | 12110                              | 23920                     | 23919                            |             |          |           |                                 |                                            |
+2025-12-03 18:31:24,803 - INFO - | 1113               | నరేష్            | 213            |                     | 5/3                               | 18508                         | 1263                                    | 22802                                   | 34580                               | 12111                              | 23921                     | 22111                            |             |          |           |                                 |                                            |
+2025-12-03 18:31:24,804 - INFO - | 1114               | дебоча           | 214            |                     | 514                               | 18509                         | 264                                     | 22803                                   | 34581                               | 12112                              | 23922                     | 21134                            |             |          |           |                                 |                                            |
+2025-12-03 18:31:24,805 - INFO - +--------------------+------------------+----------------+---------------------+-----------------------------------+-------------------------------+-----------------------------------------+-----------------------------------------+-------------------------------------+------------------------------------+---------------------------+----------------------------------+-------------+----------+-----------+---------------------------------+--------------------------------------------+
+2025-12-03 18:31:24,807 - INFO - 
+================================================================================
+2025-12-03 18:31:24,807 - INFO - Processing complete: 1/1 pages successful
+2025-12-03 18:31:24,808 - INFO - ================================================================================
+
+2025-12-03 18:36:39,400 - INFO - Checking for sample file at: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:36:39,495 - INFO - Sample file exists: True
+2025-12-03 18:36:39,496 - INFO - Using sample file: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:36:42,719 - INFO - Checking for sample file at: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:36:42,739 - INFO - Sample file exists: True
+2025-12-03 18:36:42,742 - INFO - Using sample file: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:36:42,929 - INFO - Analytics Excel columns found: ['Year', 'Month', 'District', 'Mandal', 'Village', 'SHG ID', 'Total Forms', 'Validation Successful', 'Validation Failed', 'Failed Incorrect Form', 'Failed Incorrect Values', 'Failed Missing Fields', 'Failed Image Quality', 'Forms Synced to MBK']
+2025-12-03 18:36:42,953 - INFO - Total rows: 66
+2025-12-03 18:36:42,976 - INFO - Analytics Excel columns found: ['Year', 'Month', 'District', 'Mandal', 'Village', 'SHG ID', 'Total Forms', 'Validation Successful', 'Validation Failed', 'Failed Incorrect Form', 'Failed Incorrect Values', 'Failed Missing Fields', 'Failed Image Quality', 'Forms Synced to MBK']
+2025-12-03 18:36:43,010 - INFO - Total rows: 66
+2025-12-03 18:36:43,108 - INFO - Found columns - Total Forms: Total Forms, Validation Successful: Validation Successful, Validation Failed: Validation Failed, Synced to MBK: Forms Synced to MBK
+2025-12-03 18:36:43,141 - INFO - Found columns - Total Forms: Total Forms, Validation Successful: Validation Successful, Validation Failed: Validation Failed, Synced to MBK: Forms Synced to MBK
+2025-12-03 18:36:43,142 - INFO - Failure detail columns - Incorrect Form: Failed Incorrect Form, Incorrect Values: Failed Incorrect Values, Missing Fields: Failed Missing Fields, Image Quality: Failed Image Quality
+2025-12-03 18:36:43,143 - INFO - Failure detail columns - Incorrect Form: Failed Incorrect Form, Incorrect Values: Failed Incorrect Values, Missing Fields: Failed Missing Fields, Image Quality: Failed Image Quality
+2025-12-03 18:36:43,153 - INFO - Total imports calculated from 'Total Forms': 1361
+2025-12-03 18:36:43,157 - INFO - Total imports calculated from 'Total Forms': 0
+2025-12-03 18:36:43,158 - INFO - Validation successful calculated from 'Validation Successful': 1056
+2025-12-03 18:36:43,159 - INFO - Validation successful calculated from 'Validation Successful': 0
+2025-12-03 18:36:43,160 - INFO - Validation failed calculated from 'Validation Failed': 305
+2025-12-03 18:36:43,162 - INFO - Validation failed calculated from 'Validation Failed': 0
+2025-12-03 18:36:43,163 - INFO - Synced to MBK calculated from 'Forms Synced to MBK': 1056
+2025-12-03 18:36:43,164 - INFO - Synced to MBK calculated from 'Forms Synced to MBK': 0
+2025-12-03 18:36:43,410 - INFO - Checking for sample file at: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:36:43,414 - INFO - Sample file exists: True
+2025-12-03 18:36:43,414 - INFO - Using sample file: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:36:43,608 - INFO - Analytics Excel columns found: ['Year', 'Month', 'District', 'Mandal', 'Village', 'SHG ID', 'Total Forms', 'Validation Successful', 'Validation Failed', 'Failed Incorrect Form', 'Failed Incorrect Values', 'Failed Missing Fields', 'Failed Image Quality', 'Forms Synced to MBK']
+2025-12-03 18:36:43,668 - INFO - Total rows: 66
+2025-12-03 18:36:43,792 - INFO - Found columns - Total Forms: Total Forms, Validation Successful: Validation Successful, Validation Failed: Validation Failed, Synced to MBK: Forms Synced to MBK
+2025-12-03 18:36:43,814 - INFO - Failure detail columns - Incorrect Form: Failed Incorrect Form, Incorrect Values: Failed Incorrect Values, Missing Fields: Failed Missing Fields, Image Quality: Failed Image Quality
+2025-12-03 18:36:43,815 - INFO - Total imports calculated from 'Total Forms': 0
+2025-12-03 18:36:43,816 - INFO - Validation successful calculated from 'Validation Successful': 0
+2025-12-03 18:36:43,817 - INFO - Validation failed calculated from 'Validation Failed': 0
+2025-12-03 18:36:43,821 - INFO - Synced to MBK calculated from 'Forms Synced to MBK': 0
+2025-12-03 18:36:53,114 - INFO - Checking for sample file at: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:36:53,117 - INFO - Sample file exists: True
+2025-12-03 18:36:53,118 - INFO - Using sample file: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:36:53,165 - INFO - Analytics Excel columns found: ['Year', 'Month', 'District', 'Mandal', 'Village', 'SHG ID', 'Total Forms', 'Validation Successful', 'Validation Failed', 'Failed Incorrect Form', 'Failed Incorrect Values', 'Failed Missing Fields', 'Failed Image Quality', 'Forms Synced to MBK']
+2025-12-03 18:36:53,165 - INFO - Total rows: 66
+2025-12-03 18:36:53,177 - INFO - Found columns - Total Forms: Total Forms, Validation Successful: Validation Successful, Validation Failed: Validation Failed, Synced to MBK: Forms Synced to MBK
+2025-12-03 18:36:53,177 - INFO - Failure detail columns - Incorrect Form: Failed Incorrect Form, Incorrect Values: Failed Incorrect Values, Missing Fields: Failed Missing Fields, Image Quality: Failed Image Quality
+2025-12-03 18:36:53,179 - INFO - Total imports calculated from 'Total Forms': 1361
+2025-12-03 18:36:53,181 - INFO - Validation successful calculated from 'Validation Successful': 1056
+2025-12-03 18:36:53,183 - INFO - Validation failed calculated from 'Validation Failed': 305
+2025-12-03 18:36:53,184 - INFO - Synced to MBK calculated from 'Forms Synced to MBK': 1056
+2025-12-03 18:36:57,567 - INFO - Checking for sample file at: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:36:57,568 - INFO - Sample file exists: True
+2025-12-03 18:36:57,573 - INFO - Using sample file: F:\Work\Samples\OCR-Custom\backend\analytics_data\Sample Data SHG Data Capture.xlsx
+2025-12-03 18:36:57,653 - INFO - Analytics Excel columns found: ['Year', 'Month', 'District', 'Mandal', 'Village', 'SHG ID', 'Total Forms', 'Validation Successful', 'Validation Failed', 'Failed Incorrect Form', 'Failed Incorrect Values', 'Failed Missing Fields', 'Failed Image Quality', 'Forms Synced to MBK']
+2025-12-03 18:36:57,653 - INFO - Total rows: 66
+2025-12-03 18:36:57,662 - INFO - Found columns - Total Forms: Total Forms, Validation Successful: Validation Successful, Validation Failed: Validation Failed, Synced to MBK: Forms Synced to MBK
+2025-12-03 18:36:57,664 - INFO - Failure detail columns - Incorrect Form: Failed Incorrect Form, Incorrect Values: Failed Incorrect Values, Missing Fields: Failed Missing Fields, Image Quality: Failed Image Quality
+2025-12-03 18:36:57,665 - INFO - Total imports calculated from 'Total Forms': 1361
+2025-12-03 18:36:57,666 - INFO - Validation successful calculated from 'Validation Successful': 1056
+2025-12-03 18:36:57,668 - INFO - Validation failed calculated from 'Validation Failed': 305
+2025-12-03 18:36:57,673 - INFO - Synced to MBK calculated from 'Forms Synced to MBK': 1056
+2025-12-04 14:10:52,148 - INFO - PDF support enabled (PyMuPDF)
+2025-12-04 14:10:52,266 - DEBUG - Using proactor: IocpProactor
+2025-12-04 14:10:52,598 - INFO - Starting up: Initializing OCRProcessor...
+2025-12-04 14:10:52,598 - ERROR - Failed to load Google service account credentials: Service account info was not in the expected format, missing fields token_uri, client_email.
+2025-12-04 14:10:52,613 - WARNING - ⚠ Google Vision API key missing — OCR will return empty text until configured
+2025-12-04 14:11:39,472 - INFO - Health check: {'status': 'healthy', 'pdf_support': True, 'validation_enabled': True, 'google_vision_configured': False}
+2025-12-04 14:11:39,660 - DEBUG - Calling on_part_begin with no data
+2025-12-04 14:11:39,661 - DEBUG - Calling on_header_field with data[42:61]
+2025-12-04 14:11:39,662 - DEBUG - Calling on_header_value with data[63:105]
+2025-12-04 14:11:39,664 - DEBUG - Calling on_header_end with no data
+2025-12-04 14:11:39,665 - DEBUG - Calling on_header_field with data[107:119]
+2025-12-04 14:11:39,665 - DEBUG - Calling on_header_value with data[121:131]
+2025-12-04 14:11:39,666 - DEBUG - Calling on_header_end with no data
+2025-12-04 14:11:39,667 - DEBUG - Calling on_headers_finished with no data
+2025-12-04 14:11:39,668 - DEBUG - Calling on_part_data with data[135:105144]
+2025-12-04 14:11:39,668 - DEBUG - Calling on_part_end with no data
+2025-12-04 14:11:39,670 - DEBUG - Calling on_end with no data
+2025-12-04 14:11:39,712 - INFO - ================================================================================
+2025-12-04 14:11:39,721 - INFO - Received extract-tables request
+2025-12-04 14:11:39,722 - INFO - Processing 1 uploaded file(s) - OPTIMIZED PARALLEL MODE
+2025-12-04 14:11:39,724 - INFO - 
+[File 2/1] Processing: f3.jpeg
+2025-12-04 14:11:39,727 - INFO -   Saved to: temp_processing\4bdcc460e69c450fa45d580b1342584b\f3.jpeg
+2025-12-04 14:11:39,727 - INFO -   File type: Image
+2025-12-04 14:11:40,229 - INFO - Image validated: temp_processing\4bdcc460e69c450fa45d580b1342584b\f3_converted.jpg
+2025-12-04 14:11:40,230 - INFO - 
+  [Page 2/1] Processing: f3_converted.jpg
+2025-12-04 14:11:40,232 - INFO - 
+======================================================================
+2025-12-04 14:11:40,233 - INFO - Processing image: temp_processing\4bdcc460e69c450fa45d580b1342584b\f3_converted.jpg
+2025-12-04 14:11:40,234 - INFO - ======================================================================
+2025-12-04 14:12:36,582 - INFO - ✓ Successfully processed: 166 cells extracted
+2025-12-04 14:12:36,583 - INFO - Running async Google Vision OCR on 166 cells...
+2025-12-04 14:12:36,584 - ERROR - Google Vision API key is not configured — OCR results will be empty.
+2025-12-04 14:12:36,595 - INFO - 
+📋 Scanned Table Output (File: f3.jpeg, Page: 2)
+2025-12-04 14:12:36,626 - INFO - +--------------------+------------------+----------------+---------------------+-----------------------------------+-------------------------------+-----------------------------------------+-----------------------------------------+-------------------------------------+------------------------------------+---------------------------+----------------------------------+-------------+----------+-----------+---------------------------------+--------------------------------------------+
+2025-12-04 14:12:36,628 - INFO - | సభ్యురాలి MBK ID   | సభ్యురాలు పేరు   | ఈ నెల పొదుపు   | ఈ నెల వరకు పొదుపు   | SHG అంతర్గత అప్పు కట్టిన మొత్తం   | బ్యాంక్ అప్పు కట్టిన మొత్తం   | స్త్రీనిధి మైక్రో అప్పు కట్టిన మొత్తం   | స్త్రీనిధి టెన్నీ అప్పు కట్టిన మొత్తం   | ఉన్నతి (SCSP) అప్పు కట్టిన మొత్తం   | ఉన్నతి (TSP) అప్పు కట్టిన మొత్తం   | CIF అప్పు కట్టిన మొత్తం   | VO అంతర్గత అప్పు కట్టిన మొత్తం   | అప్పు రకం   | మొత్తం   | జరిమానా   | సభ్యులకు తిరిగి ఇచ్చిన మొత్తం   | సభ్యుల ఇతర పొదుపులు (SN+VO+Other Saving)   |
+2025-12-04 14:12:36,630 - INFO - +--------------------+------------------+----------------+---------------------+-----------------------------------+-------------------------------+-----------------------------------------+-----------------------------------------+-------------------------------------+------------------------------------+---------------------------+----------------------------------+-------------+----------+-----------+---------------------------------+--------------------------------------------+
+2025-12-04 14:12:36,633 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:12:36,634 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:12:36,637 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:12:36,638 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:12:36,639 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:12:36,640 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:12:36,640 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:12:36,641 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:12:36,642 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:12:36,643 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:12:36,644 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:12:36,645 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:12:36,646 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:12:36,647 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:12:36,648 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:12:36,648 - INFO - +--------------------+------------------+----------------+---------------------+-----------------------------------+-------------------------------+-----------------------------------------+-----------------------------------------+-------------------------------------+------------------------------------+---------------------------+----------------------------------+-------------+----------+-----------+---------------------------------+--------------------------------------------+
+2025-12-04 14:12:36,651 - INFO - 
+================================================================================
+2025-12-04 14:12:36,654 - INFO - Processing complete: 1/1 pages successful
+2025-12-04 14:12:36,655 - INFO - ================================================================================
+
+2025-12-04 14:15:29,195 - INFO - PDF support enabled (PyMuPDF)
+2025-12-04 14:15:29,318 - DEBUG - Using proactor: IocpProactor
+2025-12-04 14:15:29,476 - INFO - Starting up: Initializing OCRProcessor...
+2025-12-04 14:15:29,493 - INFO - ✓ OCR Processor initialized with Google Vision
+2025-12-04 14:15:58,403 - INFO - Health check: {'status': 'healthy', 'pdf_support': True, 'validation_enabled': True, 'google_vision_configured': True}
+2025-12-04 14:15:58,454 - DEBUG - Calling on_part_begin with no data
+2025-12-04 14:15:58,454 - DEBUG - Calling on_header_field with data[42:61]
+2025-12-04 14:15:58,455 - DEBUG - Calling on_header_value with data[63:105]
+2025-12-04 14:15:58,455 - DEBUG - Calling on_header_end with no data
+2025-12-04 14:15:58,456 - DEBUG - Calling on_header_field with data[107:119]
+2025-12-04 14:15:58,456 - DEBUG - Calling on_header_value with data[121:131]
+2025-12-04 14:15:58,456 - DEBUG - Calling on_header_end with no data
+2025-12-04 14:15:58,457 - DEBUG - Calling on_headers_finished with no data
+2025-12-04 14:15:58,458 - DEBUG - Calling on_part_data with data[135:49152]
+2025-12-04 14:15:58,460 - DEBUG - Calling on_part_data with data[0:81920]
+2025-12-04 14:15:58,467 - DEBUG - Calling on_part_data with data[0:32768]
+2025-12-04 14:15:58,481 - DEBUG - Calling on_part_data with data[0:6277]
+2025-12-04 14:15:58,481 - DEBUG - Calling on_part_end with no data
+2025-12-04 14:15:58,482 - DEBUG - Calling on_end with no data
+2025-12-04 14:15:58,521 - INFO - ================================================================================
+2025-12-04 14:15:58,521 - INFO - Received extract-tables request
+2025-12-04 14:15:58,522 - INFO - Processing 1 uploaded file(s) - OPTIMIZED PARALLEL MODE
+2025-12-04 14:15:58,522 - INFO - 
+[File 2/1] Processing: f5.jpeg
+2025-12-04 14:15:58,538 - INFO -   Saved to: temp_processing\bb32436c02c740689ef65e927d86e596\f5.jpeg
+2025-12-04 14:15:58,538 - INFO -   File type: Image
+2025-12-04 14:15:58,993 - INFO - Image validated: temp_processing\bb32436c02c740689ef65e927d86e596\f5_converted.jpg
+2025-12-04 14:15:58,995 - INFO - 
+  [Page 2/1] Processing: f5_converted.jpg
+2025-12-04 14:15:58,996 - INFO - 
+======================================================================
+2025-12-04 14:15:58,998 - INFO - Processing image: temp_processing\bb32436c02c740689ef65e927d86e596\f5_converted.jpg
+2025-12-04 14:15:58,998 - INFO - ======================================================================
+2025-12-04 14:15:59,845 - INFO - 
+================================================================================
+2025-12-04 14:15:59,846 - INFO - Processing complete: 0/1 pages successful
+2025-12-04 14:15:59,849 - INFO - ================================================================================
+
+2025-12-04 14:15:59,918 - DEBUG - Calling on_part_begin with no data
+2025-12-04 14:15:59,919 - DEBUG - Calling on_header_field with data[42:61]
+2025-12-04 14:15:59,920 - DEBUG - Calling on_header_value with data[63:105]
+2025-12-04 14:15:59,921 - DEBUG - Calling on_header_end with no data
+2025-12-04 14:15:59,922 - DEBUG - Calling on_header_field with data[107:119]
+2025-12-04 14:15:59,924 - DEBUG - Calling on_header_value with data[121:131]
+2025-12-04 14:15:59,924 - DEBUG - Calling on_header_end with no data
+2025-12-04 14:15:59,926 - DEBUG - Calling on_headers_finished with no data
+2025-12-04 14:15:59,928 - DEBUG - Calling on_part_data with data[135:16384]
+2025-12-04 14:15:59,929 - DEBUG - Calling on_part_data with data[0:81920]
+2025-12-04 14:15:59,930 - DEBUG - Calling on_part_data with data[0:131072]
+2025-12-04 14:15:59,932 - DEBUG - Calling on_part_data with data[0:114688]
+2025-12-04 14:15:59,961 - DEBUG - Calling on_part_data with data[0:4155]
+2025-12-04 14:15:59,961 - DEBUG - Calling on_part_end with no data
+2025-12-04 14:15:59,962 - DEBUG - Calling on_end with no data
+2025-12-04 14:15:59,962 - INFO - ================================================================================
+2025-12-04 14:15:59,963 - INFO - Received extract-tables request
+2025-12-04 14:15:59,963 - INFO - Processing 1 uploaded file(s) - OPTIMIZED PARALLEL MODE
+2025-12-04 14:15:59,964 - INFO - 
+[File 2/1] Processing: f6.jpeg
+2025-12-04 14:15:59,969 - INFO -   Saved to: temp_processing\be701e7c4a8a4ea29891583ebc189dae\f6.jpeg
+2025-12-04 14:15:59,970 - INFO -   File type: Image
+2025-12-04 14:16:00,104 - INFO - Image validated: temp_processing\be701e7c4a8a4ea29891583ebc189dae\f6_converted.jpg
+2025-12-04 14:16:00,108 - INFO - 
+  [Page 2/1] Processing: f6_converted.jpg
+2025-12-04 14:16:00,110 - INFO - 
+======================================================================
+2025-12-04 14:16:00,111 - INFO - Processing image: temp_processing\be701e7c4a8a4ea29891583ebc189dae\f6_converted.jpg
+2025-12-04 14:16:00,113 - INFO - ======================================================================
+2025-12-04 14:16:00,319 - INFO - 
+================================================================================
+2025-12-04 14:16:00,319 - INFO - Processing complete: 0/1 pages successful
+2025-12-04 14:16:00,320 - INFO - ================================================================================
+
+2025-12-04 14:24:38,367 - INFO - Health check: {'status': 'healthy', 'pdf_support': True, 'validation_enabled': True, 'google_vision_configured': True}
+2025-12-04 14:24:47,606 - ERROR - Exception in callback _ProactorBasePipeTransport._call_connection_lost(None)
+handle: <Handle _ProactorBasePipeTransport._call_connection_lost(None)>
+Traceback (most recent call last):
+  File "F:\Python 3.12\Lib\asyncio\events.py", line 88, in _run
+    self._context.run(self._callback, *self._args)
+  File "F:\Python 3.12\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+    self._sock.shutdown(socket.SHUT_RDWR)
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+2025-12-04 14:29:49,404 - INFO - PDF support enabled (PyMuPDF)
+2025-12-04 14:29:49,525 - DEBUG - Using proactor: IocpProactor
+2025-12-04 14:29:49,702 - INFO - Starting up: Initializing OCRProcessor...
+2025-12-04 14:29:49,702 - ERROR - Failed to load Google service account credentials: Service account info was not in the expected format, missing fields token_uri, client_email.
+2025-12-04 14:29:49,715 - WARNING - ⚠ Google Vision API key missing — OCR will return empty text until configured
+2025-12-04 14:30:15,194 - INFO - Health check: {'status': 'healthy', 'pdf_support': True, 'validation_enabled': True, 'google_vision_configured': False}
+2025-12-04 14:30:15,247 - DEBUG - Calling on_part_begin with no data
+2025-12-04 14:30:15,247 - DEBUG - Calling on_header_field with data[42:61]
+2025-12-04 14:30:15,248 - DEBUG - Calling on_header_value with data[63:105]
+2025-12-04 14:30:15,249 - DEBUG - Calling on_header_end with no data
+2025-12-04 14:30:15,249 - DEBUG - Calling on_header_field with data[107:119]
+2025-12-04 14:30:15,250 - DEBUG - Calling on_header_value with data[121:131]
+2025-12-04 14:30:15,250 - DEBUG - Calling on_header_end with no data
+2025-12-04 14:30:15,251 - DEBUG - Calling on_headers_finished with no data
+2025-12-04 14:30:15,251 - DEBUG - Calling on_part_data with data[135:49152]
+2025-12-04 14:30:15,253 - DEBUG - Calling on_part_data with data[0:81920]
+2025-12-04 14:30:15,254 - DEBUG - Calling on_part_data with data[0:131072]
+2025-12-04 14:30:15,256 - DEBUG - Calling on_part_data with data[0:81920]
+2025-12-04 14:30:15,289 - DEBUG - Calling on_part_data with data[0:4155]
+2025-12-04 14:30:15,289 - DEBUG - Calling on_part_end with no data
+2025-12-04 14:30:15,291 - DEBUG - Calling on_end with no data
+2025-12-04 14:30:15,294 - INFO - ================================================================================
+2025-12-04 14:30:15,294 - INFO - Received extract-tables request
+2025-12-04 14:30:15,295 - INFO - Processing 1 uploaded file(s) - OPTIMIZED PARALLEL MODE
+2025-12-04 14:30:15,296 - INFO - 
+[File 2/1] Processing: f6.jpeg
+2025-12-04 14:30:15,300 - INFO -   Saved to: temp_processing\d888bc49901a4227bee406cb35a8ff17\f6.jpeg
+2025-12-04 14:30:15,302 - INFO -   File type: Image
+2025-12-04 14:30:15,591 - INFO - Image validated: temp_processing\d888bc49901a4227bee406cb35a8ff17\f6_converted.jpg
+2025-12-04 14:30:15,592 - INFO - 
+  [Page 2/1] Processing: f6_converted.jpg
+2025-12-04 14:30:15,593 - INFO - 
+======================================================================
+2025-12-04 14:30:15,594 - INFO - Processing image: temp_processing\d888bc49901a4227bee406cb35a8ff17\f6_converted.jpg
+2025-12-04 14:30:15,596 - INFO - ======================================================================
+2025-12-04 14:30:15,966 - INFO - 
+================================================================================
+2025-12-04 14:30:15,966 - INFO - Processing complete: 0/1 pages successful
+2025-12-04 14:30:15,967 - INFO - ================================================================================
+
+2025-12-04 14:30:16,039 - INFO - Received analytics update: 9 items
+2025-12-04 14:31:58,051 - INFO - Health check: {'status': 'healthy', 'pdf_support': True, 'validation_enabled': True, 'google_vision_configured': False}
+2025-12-04 14:31:58,071 - DEBUG - Calling on_part_begin with no data
+2025-12-04 14:31:58,071 - DEBUG - Calling on_header_field with data[42:61]
+2025-12-04 14:31:58,073 - DEBUG - Calling on_header_value with data[63:105]
+2025-12-04 14:31:58,074 - DEBUG - Calling on_header_end with no data
+2025-12-04 14:31:58,075 - DEBUG - Calling on_header_field with data[107:119]
+2025-12-04 14:31:58,077 - DEBUG - Calling on_header_value with data[121:131]
+2025-12-04 14:31:58,078 - DEBUG - Calling on_header_end with no data
+2025-12-04 14:31:58,079 - DEBUG - Calling on_headers_finished with no data
+2025-12-04 14:31:58,080 - DEBUG - Calling on_part_data with data[135:65536]
+2025-12-04 14:31:58,088 - DEBUG - Calling on_part_data with data[0:131072]
+2025-12-04 14:31:58,089 - DEBUG - Calling on_part_data with data[0:131072]
+2025-12-04 14:31:58,090 - DEBUG - Calling on_part_data with data[0:16384]
+2025-12-04 14:31:58,112 - DEBUG - Calling on_part_data with data[0:4155]
+2025-12-04 14:31:58,113 - DEBUG - Calling on_part_end with no data
+2025-12-04 14:31:58,114 - DEBUG - Calling on_end with no data
+2025-12-04 14:31:58,117 - INFO - ================================================================================
+2025-12-04 14:31:58,119 - INFO - Received extract-tables request
+2025-12-04 14:31:58,119 - INFO - Processing 1 uploaded file(s) - OPTIMIZED PARALLEL MODE
+2025-12-04 14:31:58,120 - INFO - 
+[File 2/1] Processing: f6.jpeg
+2025-12-04 14:31:58,129 - INFO -   Saved to: temp_processing\c0e92372114f4181a393f54d07688ea7\f6.jpeg
+2025-12-04 14:31:58,130 - INFO -   File type: Image
+2025-12-04 14:31:58,229 - INFO - Image validated: temp_processing\c0e92372114f4181a393f54d07688ea7\f6_converted.jpg
+2025-12-04 14:31:58,231 - INFO - 
+  [Page 2/1] Processing: f6_converted.jpg
+2025-12-04 14:31:58,231 - INFO - 
+======================================================================
+2025-12-04 14:31:58,232 - INFO - Processing image: temp_processing\c0e92372114f4181a393f54d07688ea7\f6_converted.jpg
+2025-12-04 14:31:58,233 - INFO - ======================================================================
+2025-12-04 14:31:58,384 - INFO - 
+================================================================================
+2025-12-04 14:31:58,385 - INFO - Processing complete: 0/1 pages successful
+2025-12-04 14:31:58,386 - INFO - ================================================================================
+
+2025-12-04 14:31:58,429 - INFO - Received analytics update: 9 items
+2025-12-04 14:32:41,254 - INFO - Health check: {'status': 'healthy', 'pdf_support': True, 'validation_enabled': True, 'google_vision_configured': False}
+2025-12-04 14:32:41,274 - DEBUG - Calling on_part_begin with no data
+2025-12-04 14:32:41,274 - DEBUG - Calling on_header_field with data[42:61]
+2025-12-04 14:32:41,276 - DEBUG - Calling on_header_value with data[63:105]
+2025-12-04 14:32:41,278 - DEBUG - Calling on_header_end with no data
+2025-12-04 14:32:41,280 - DEBUG - Calling on_header_field with data[107:119]
+2025-12-04 14:32:41,283 - DEBUG - Calling on_header_value with data[121:131]
+2025-12-04 14:32:41,284 - DEBUG - Calling on_header_end with no data
+2025-12-04 14:32:41,288 - DEBUG - Calling on_headers_finished with no data
+2025-12-04 14:32:41,290 - DEBUG - Calling on_part_data with data[135:65536]
+2025-12-04 14:32:41,293 - DEBUG - Calling on_part_data with data[0:131072]
+2025-12-04 14:32:41,296 - DEBUG - Calling on_part_data with data[0:131072]
+2025-12-04 14:32:41,301 - DEBUG - Calling on_part_data with data[0:16384]
+2025-12-04 14:32:41,308 - DEBUG - Calling on_part_data with data[0:4155]
+2025-12-04 14:32:41,308 - DEBUG - Calling on_part_end with no data
+2025-12-04 14:32:41,308 - DEBUG - Calling on_end with no data
+2025-12-04 14:32:41,308 - INFO - ================================================================================
+2025-12-04 14:32:41,308 - INFO - Received extract-tables request
+2025-12-04 14:32:41,308 - INFO - Processing 1 uploaded file(s) - OPTIMIZED PARALLEL MODE
+2025-12-04 14:32:41,308 - INFO - 
+[File 2/1] Processing: f6.jpeg
+2025-12-04 14:32:41,323 - INFO -   Saved to: temp_processing\91115e1453764d28b0c54da6640c8ca9\f6.jpeg
+2025-12-04 14:32:41,324 - INFO -   File type: Image
+2025-12-04 14:32:41,429 - INFO - Image validated: temp_processing\91115e1453764d28b0c54da6640c8ca9\f6_converted.jpg
+2025-12-04 14:32:41,430 - INFO - 
+  [Page 2/1] Processing: f6_converted.jpg
+2025-12-04 14:32:41,433 - INFO - 
+======================================================================
+2025-12-04 14:32:41,433 - INFO - Processing image: temp_processing\91115e1453764d28b0c54da6640c8ca9\f6_converted.jpg
+2025-12-04 14:32:41,434 - INFO - ======================================================================
+2025-12-04 14:32:41,626 - INFO - 
+================================================================================
+2025-12-04 14:32:41,626 - INFO - Processing complete: 0/1 pages successful
+2025-12-04 14:32:41,628 - INFO - ================================================================================
+
+2025-12-04 14:32:41,677 - INFO - Received analytics update: 9 items
+2025-12-04 14:33:43,722 - INFO - Shutting down: Cleaning up OCRProcessor resources...
+2025-12-04 14:34:06,557 - INFO - PDF support enabled (PyMuPDF)
+2025-12-04 14:34:06,624 - DEBUG - Using proactor: IocpProactor
+2025-12-04 14:34:06,778 - INFO - Starting up: Initializing OCRProcessor...
+2025-12-04 14:34:06,779 - ERROR - Failed to load Google service account credentials: Service account info was not in the expected format, missing fields client_email, token_uri.
+2025-12-04 14:34:06,785 - WARNING - ⚠ Google Vision API key missing — OCR will return empty text until configured
+2025-12-04 14:37:22,385 - INFO - Health check: {'status': 'healthy', 'pdf_support': True, 'validation_enabled': True, 'google_vision_configured': False}
+2025-12-04 14:37:22,528 - DEBUG - Calling on_part_begin with no data
+2025-12-04 14:37:22,529 - DEBUG - Calling on_header_field with data[42:61]
+2025-12-04 14:37:22,530 - DEBUG - Calling on_header_value with data[63:105]
+2025-12-04 14:37:22,530 - DEBUG - Calling on_header_end with no data
+2025-12-04 14:37:22,531 - DEBUG - Calling on_header_field with data[107:119]
+2025-12-04 14:37:22,531 - DEBUG - Calling on_header_value with data[121:131]
+2025-12-04 14:37:22,531 - DEBUG - Calling on_header_end with no data
+2025-12-04 14:37:22,531 - DEBUG - Calling on_headers_finished with no data
+2025-12-04 14:37:22,544 - DEBUG - Calling on_part_data with data[135:131072]
+2025-12-04 14:37:22,549 - DEBUG - Calling on_part_data with data[0:131072]
+2025-12-04 14:37:22,550 - DEBUG - Calling on_part_data with data[0:86075]
+2025-12-04 14:37:22,551 - DEBUG - Calling on_part_end with no data
+2025-12-04 14:37:22,551 - DEBUG - Calling on_end with no data
+2025-12-04 14:37:22,696 - INFO - ================================================================================
+2025-12-04 14:37:22,696 - INFO - Received extract-tables request
+2025-12-04 14:37:22,697 - INFO - Processing 1 uploaded file(s) - OPTIMIZED PARALLEL MODE
+2025-12-04 14:37:22,699 - INFO - 
+[File 2/1] Processing: f6.jpeg
+2025-12-04 14:37:22,913 - INFO -   Saved to: temp_processing\ce23c6bc161f4b4ea22024e2d4c0d99a\f6.jpeg
+2025-12-04 14:37:22,914 - INFO -   File type: Image
+2025-12-04 14:37:24,039 - INFO - Image validated: temp_processing\ce23c6bc161f4b4ea22024e2d4c0d99a\f6_converted.jpg
+2025-12-04 14:37:24,103 - INFO - 
+  [Page 2/1] Processing: f6_converted.jpg
+2025-12-04 14:37:24,103 - INFO - 
+======================================================================
+2025-12-04 14:37:24,104 - INFO - Processing image: temp_processing\ce23c6bc161f4b4ea22024e2d4c0d99a\f6_converted.jpg
+2025-12-04 14:37:24,106 - INFO - ======================================================================
+2025-12-04 14:38:18,397 - INFO - ✓ Successfully processed: 166 cells extracted
+2025-12-04 14:38:18,452 - INFO - Running async Google Vision OCR on 166 cells...
+2025-12-04 14:38:18,452 - ERROR - Google Vision API key is not configured — OCR results will be empty.
+2025-12-04 14:38:18,461 - INFO - 
+📋 Scanned Table Output (File: f6.jpeg, Page: 2)
+2025-12-04 14:38:18,469 - INFO - +--------------------+------------------+----------------+---------------------+-----------------------------------+-------------------------------+-----------------------------------------+-----------------------------------------+-------------------------------------+------------------------------------+---------------------------+----------------------------------+-------------+----------+-----------+---------------------------------+--------------------------------------------+
+2025-12-04 14:38:18,470 - INFO - | సభ్యురాలి MBK ID   | సభ్యురాలు పేరు   | ఈ నెల పొదుపు   | ఈ నెల వరకు పొదుపు   | SHG అంతర్గత అప్పు కట్టిన మొత్తం   | బ్యాంక్ అప్పు కట్టిన మొత్తం   | స్త్రీనిధి మైక్రో అప్పు కట్టిన మొత్తం   | స్త్రీనిధి టెన్నీ అప్పు కట్టిన మొత్తం   | ఉన్నతి (SCSP) అప్పు కట్టిన మొత్తం   | ఉన్నతి (TSP) అప్పు కట్టిన మొత్తం   | CIF అప్పు కట్టిన మొత్తం   | VO అంతర్గత అప్పు కట్టిన మొత్తం   | అప్పు రకం   | మొత్తం   | జరిమానా   | సభ్యులకు తిరిగి ఇచ్చిన మొత్తం   | సభ్యుల ఇతర పొదుపులు (SN+VO+Other Saving)   |
+2025-12-04 14:38:18,471 - INFO - +--------------------+------------------+----------------+---------------------+-----------------------------------+-------------------------------+-----------------------------------------+-----------------------------------------+-------------------------------------+------------------------------------+---------------------------+----------------------------------+-------------+----------+-----------+---------------------------------+--------------------------------------------+
+2025-12-04 14:38:18,472 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:38:18,473 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:38:18,474 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:38:18,474 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:38:18,475 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:38:18,476 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:38:18,476 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:38:18,478 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:38:18,478 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:38:18,481 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:38:18,484 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:38:18,485 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:38:18,486 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:38:18,486 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:38:18,487 - INFO - |                    |                  |                |                     |                                   |                               |                                         |                                         |                                     |                                    |                           |                                  |             |          |           |                                 |                                            |
+2025-12-04 14:38:18,488 - INFO - +--------------------+------------------+----------------+---------------------+-----------------------------------+-------------------------------+-----------------------------------------+-----------------------------------------+-------------------------------------+------------------------------------+---------------------------+----------------------------------+-------------+----------+-----------+---------------------------------+--------------------------------------------+
+2025-12-04 14:38:18,490 - INFO - 
+================================================================================
+2025-12-04 14:38:18,491 - INFO - Processing complete: 1/1 pages successful
+2025-12-04 14:38:18,492 - INFO - ================================================================================
+
+2025-12-04 14:38:18,618 - INFO - Received analytics update: 9 items
+2025-12-04 14:50:51,403 - INFO - PDF support enabled (PyMuPDF)
+2025-12-04 14:50:51,494 - DEBUG - Using proactor: IocpProactor
+2025-12-04 14:50:51,724 - INFO - Starting up: Initializing OCRProcessor...
+2025-12-04 14:50:51,750 - INFO - ✓ OCR Processor initialized with Google Vision
+2025-12-04 14:52:10,476 - INFO - Health check: {'status': 'healthy', 'pdf_support': True, 'validation_enabled': True, 'google_vision_configured': True}
+2025-12-04 14:52:10,535 - DEBUG - Calling on_part_begin with no data
+2025-12-04 14:52:10,546 - DEBUG - Calling on_header_field with data[42:61]
+2025-12-04 14:52:10,549 - DEBUG - Calling on_header_value with data[63:105]
+2025-12-04 14:52:10,549 - DEBUG - Calling on_header_end with no data
+2025-12-04 14:52:10,550 - DEBUG - Calling on_header_field with data[107:119]
+2025-12-04 14:52:10,550 - DEBUG - Calling on_header_value with data[121:131]
+2025-12-04 14:52:10,550 - DEBUG - Calling on_header_end with no data
+2025-12-04 14:52:10,550 - DEBUG - Calling on_headers_finished with no data
+2025-12-04 14:52:10,551 - DEBUG - Calling on_part_data with data[135:131072]
+2025-12-04 14:52:10,551 - DEBUG - Calling on_part_data with data[0:32768]
+2025-12-04 14:52:10,555 - DEBUG - Calling on_part_data with data[0:6277]
+2025-12-04 14:52:10,556 - DEBUG - Calling on_part_end with no data
+2025-12-04 14:52:10,556 - DEBUG - Calling on_end with no data
+2025-12-04 14:52:10,593 - INFO - ================================================================================
+2025-12-04 14:52:10,598 - INFO - Received extract-tables request
+2025-12-04 14:52:10,599 - INFO - Processing 1 uploaded file(s) - OPTIMIZED PARALLEL MODE
+2025-12-04 14:52:10,605 - INFO - 
+[File 2/1] Processing: f5.jpeg
+2025-12-04 14:52:10,633 - INFO -   Saved to: temp_processing\a92b1e16833d48a4b0a7458a2cc6e0f9\f5.jpeg
+2025-12-04 14:52:10,633 - INFO -   File type: Image
+2025-12-04 14:52:11,197 - INFO - Image validated: temp_processing\a92b1e16833d48a4b0a7458a2cc6e0f9\f5_converted.jpg
+2025-12-04 14:52:11,201 - INFO - 
+  [Page 2/1] Processing: f5_converted.jpg
+2025-12-04 14:52:11,201 - INFO - 
+======================================================================
+2025-12-04 14:52:11,203 - INFO - Processing image: temp_processing\a92b1e16833d48a4b0a7458a2cc6e0f9\f5_converted.jpg
+2025-12-04 14:52:11,203 - INFO - ======================================================================
+2025-12-04 14:53:47,899 - INFO - ✓ Successfully processed: 166 cells extracted
+2025-12-04 14:53:47,983 - INFO - Running async Google Vision OCR on 166 cells...
+2025-12-04 14:53:48,908 - DEBUG - Starting new HTTPS connection (1): oauth2.googleapis.com:443
+2025-12-04 14:53:50,522 - DEBUG - https://oauth2.googleapis.com:443 "POST /token HTTP/1.1" 200 None
+2025-12-04 14:53:56,333 - INFO - ✓ Completed async Google Vision OCR on 166 cells
+2025-12-04 14:53:56,358 - INFO - 
+📋 Scanned Table Output (File: f5.jpeg, Page: 2)
+2025-12-04 14:53:56,359 - INFO - +--------------------+------------------+----------------+---------------------+-----------------------------------+-------------------------------+-----------------------------------------+-----------------------------------------+-------------------------------------+------------------------------------+---------------------------+----------------------------------+-------------+----------+-----------+---------------------------------+--------------------------------------------+
+2025-12-04 14:53:56,359 - INFO - | సభ్యురాలి MBK ID   | సభ్యురాలు పేరు   | ఈ నెల పొదుపు   | ఈ నెల వరకు పొదుపు   | SHG అంతర్గత అప్పు కట్టిన మొత్తం   | బ్యాంక్ అప్పు కట్టిన మొత్తం   | స్త్రీనిధి మైక్రో అప్పు కట్టిన మొత్తం   | స్త్రీనిధి టెన్నీ అప్పు కట్టిన మొత్తం   | ఉన్నతి (SCSP) అప్పు కట్టిన మొత్తం   | ఉన్నతి (TSP) అప్పు కట్టిన మొత్తం   | CIF అప్పు కట్టిన మొత్తం   | VO అంతర్గత అప్పు కట్టిన మొత్తం   | అప్పు రకం   | మొత్తం   | జరిమానా   | సభ్యులకు తిరిగి ఇచ్చిన మొత్తం   | సభ్యుల ఇతర పొదుపులు (SN+VO+Other Saving)   |
+2025-12-04 14:53:56,383 - INFO - +--------------------+------------------+----------------+---------------------+-----------------------------------+-------------------------------+-----------------------------------------+-----------------------------------------+-------------------------------------+------------------------------------+---------------------------+----------------------------------+-------------+----------+-----------+---------------------------------+--------------------------------------------+
+2025-12-04 14:53:56,383 - INFO - | 1130               | ప్రసాద్          | 230            |                     | 530                               | 18525                         | 0821                                    | 22819                                   | 34597                               | 12128                              | 23938                     | 21909                            |             |          |           |                                 |                                            |
+2025-12-04 14:53:56,383 - INFO - | 1131               | آي پھر           | 231            |                     | 531                               | 18576                         | 1281                                    | 22820                                   | 34578                               | 12129                              | 23959                     | 21909                            |             |          |           |                                 |                                            |
+2025-12-04 14:53:56,383 - INFO - | - 1132             | శరత్             | 232            |                     | 532                               | 18527.                        | 1282                                    | 22821                                   | 34599                               | 12130                              | 23940                     | 21679                            |             |          |           |                                 |                                            |
+2025-12-04 14:53:56,383 - INFO - | 1133               | నుంజుల           | 2.33           |                     | 533                               | 18528                         | 1283                                    | 22822                                   | *34600                              | 12131                              | 23941                     | 22909                            |             |          |           |                                 |                                            |
+2025-12-04 14:53:56,383 - INFO - | 1134               | - D              | 234            |                     | 534                               | 18529                         | 1284                                    | 22823                                   | 34601                               | 12132                              | 23942                     | 121909                           |             |          |           |                                 |                                            |
+2025-12-04 14:53:56,383 - INFO - | 1135               | కవిల్            | 235            |                     | 535                               |                               | 1285                                    | 22824                                   | 34602.                              | 12133                              | 23943                     | 21909                            |             |          |           |                                 |                                            |
+2025-12-04 14:53:56,383 - INFO - | 1136               | సంధ              | 236            |                     | 536                               | 18531                         | 1286                                    | 22825                                   | 34603                               | 121331                             | 23944                     | 11909                            |             |          |           |                                 |                                            |
+2025-12-04 14:53:56,383 - INFO - | 1137               | కిరణ్            | 237            |                     | 537                               | 18532                         | 1287                                    | 22826                                   | 34604                               | 12135                              | 23945                     | schi.                            |             |          |           |                                 |                                            |
+2025-12-04 14:53:56,383 - INFO - | 1138               | దీప్తి 021       | 238            |                     | 538                               | 18533                         |                                         | 22827                                   | 34605                               | $12136                             | 23946                     | 23909                            |             |          |           |                                 |                                            |
+2025-12-04 14:53:56,399 - INFO - | 1139               | విజయ్            | 239            |                     | 539                               | महदहा                         | 1289                                    | 22828                                   |                                     | 12137                              | 23947                     | :21009                           |             |          |           |                                 |                                            |
+2025-12-04 14:53:56,409 - INFO - |                    |                  | 240            |                     | 540                               | 18535                         | 1290                                    | 22829                                   | 34607.                              | .12138                             | 23945                     | $ 21909                          |             |          |           |                                 |                                            |
+2025-12-04 14:53:56,409 - INFO - | 1141               | రమేష్            | 241            |                     | 1 क्या                            | 18536                         | 1291                                    | 22830                                   | 34608                               | 12139                              | 23949                     | .13921                           |             |          |           |                                 |                                            |
+2025-12-04 14:53:56,409 - INFO - | 1142.              | . హర్షిల్        | 242            |                     | 542                               | 18537                         |                                         | 22831                                   | 54609                               | 121340                             | 23950                     | 22224                            |             |          |           |                                 |                                            |
+2025-12-04 14:53:56,409 - INFO - |                    | శ్రీ సుధీర్      | 243            |                     | 543                               | 18538                         | 1293                                    | 22832                                   | 34610                               | 12141                              | 23951                     | 21121                            |             |          |           |                                 |                                            |
+2025-12-04 14:53:56,409 - INFO - | "                  | ! అంజలి          | 2 Կկ           |                     | 544                               | 18539                         | 1294                                    | 22833                                   | 34611                               | 12142                              | 23952                     | 24669                            |             |          |           |                                 |                                            |
+2025-12-04 14:53:56,409 - INFO - +--------------------+------------------+----------------+---------------------+-----------------------------------+-------------------------------+-----------------------------------------+-----------------------------------------+-------------------------------------+------------------------------------+---------------------------+----------------------------------+-------------+----------+-----------+---------------------------------+--------------------------------------------+
+2025-12-04 14:53:56,409 - INFO - 
+================================================================================
+2025-12-04 14:53:56,409 - INFO - Processing complete: 1/1 pages successful
+2025-12-04 14:53:56,425 - INFO - ================================================================================
+
+2025-12-04 14:53:57,301 - INFO - Received analytics update: 9 items
+2025-12-04 14:53:57,420 - DEBUG - Calling on_part_begin with no data
+2025-12-04 14:53:57,420 - DEBUG - Calling on_header_field with data[42:61]
+2025-12-04 14:53:57,420 - DEBUG - Calling on_header_value with data[63:105]
+2025-12-04 14:53:57,420 - DEBUG - Calling on_header_end with no data
+2025-12-04 14:53:57,431 - DEBUG - Calling on_header_field with data[107:119]
+2025-12-04 14:53:57,431 - DEBUG - Calling on_header_value with data[121:131]
+2025-12-04 14:53:57,431 - DEBUG - Calling on_header_end with no data
+2025-12-04 14:53:57,431 - DEBUG - Calling on_headers_finished with no data
+2025-12-04 14:53:57,433 - DEBUG - Calling on_part_data with data[135:16384]
+2025-12-04 14:53:57,461 - DEBUG - Calling on_part_data with data[0:98304]
+2025-12-04 14:53:57,462 - DEBUG - Calling on_part_data with data[0:81920]
+2025-12-04 14:53:57,465 - DEBUG - Calling on_part_data with data[0:131072]
+2025-12-04 14:53:57,466 - DEBUG - Calling on_part_data with data[0:16384]
+2025-12-04 14:53:57,481 - DEBUG - Calling on_part_data with data[0:4155]
+2025-12-04 14:53:57,482 - DEBUG - Calling on_part_end with no data
+2025-12-04 14:53:57,483 - DEBUG - Calling on_end with no data
+2025-12-04 14:53:57,711 - INFO - ================================================================================
+2025-12-04 14:53:57,711 - INFO - Received extract-tables request
+2025-12-04 14:53:57,721 - INFO - Processing 1 uploaded file(s) - OPTIMIZED PARALLEL MODE
+2025-12-04 14:53:57,721 - INFO - 
+[File 2/1] Processing: f6.jpeg
+2025-12-04 14:53:57,769 - INFO -   Saved to: temp_processing\8fbfe9dbc4a942e48564782ca6eb67d7\f6.jpeg
+2025-12-04 14:53:57,769 - INFO -   File type: Image
+2025-12-04 14:53:58,431 - INFO - Image validated: temp_processing\8fbfe9dbc4a942e48564782ca6eb67d7\f6_converted.jpg
+2025-12-04 14:53:58,433 - INFO - 
+  [Page 2/1] Processing: f6_converted.jpg
+2025-12-04 14:53:58,433 - INFO - 
+======================================================================
+2025-12-04 14:53:58,435 - INFO - Processing image: temp_processing\8fbfe9dbc4a942e48564782ca6eb67d7\f6_converted.jpg
+2025-12-04 14:53:58,435 - INFO - ======================================================================
+2025-12-04 14:54:54,883 - INFO - ✓ Successfully processed: 166 cells extracted
+2025-12-04 14:54:54,953 - INFO - Running async Google Vision OCR on 166 cells...
+2025-12-04 14:55:01,334 - INFO - ✓ Completed async Google Vision OCR on 166 cells
+2025-12-04 14:55:01,334 - INFO - 
+📋 Scanned Table Output (File: f6.jpeg, Page: 2)
+2025-12-04 14:55:01,334 - INFO - +--------------------+------------------+----------------+---------------------+-----------------------------------+-------------------------------+-----------------------------------------+-----------------------------------------+-------------------------------------+------------------------------------+---------------------------+----------------------------------+-------------+----------+-----------+---------------------------------+--------------------------------------------+
+2025-12-04 14:55:01,334 - INFO - | సభ్యురాలి MBK ID   | సభ్యురాలు పేరు   | ఈ నెల పొదుపు   | ఈ నెల వరకు పొదుపు   | SHG అంతర్గత అప్పు కట్టిన మొత్తం   | బ్యాంక్ అప్పు కట్టిన మొత్తం   | స్త్రీనిధి మైక్రో అప్పు కట్టిన మొత్తం   | స్త్రీనిధి టెన్నీ అప్పు కట్టిన మొత్తం   | ఉన్నతి (SCSP) అప్పు కట్టిన మొత్తం   | ఉన్నతి (TSP) అప్పు కట్టిన మొత్తం   | CIF అప్పు కట్టిన మొత్తం   | VO అంతర్గత అప్పు కట్టిన మొత్తం   | అప్పు రకం   | మొత్తం   | జరిమానా   | సభ్యులకు తిరిగి ఇచ్చిన మొత్తం   | సభ్యుల ఇతర పొదుపులు (SN+VO+Other Saving)   |
+2025-12-04 14:55:01,334 - INFO - +--------------------+------------------+----------------+---------------------+-----------------------------------+-------------------------------+-----------------------------------------+-----------------------------------------+-------------------------------------+------------------------------------+---------------------------+----------------------------------+-------------+----------+-----------+---------------------------------+--------------------------------------------+
+2025-12-04 14:55:01,334 - INFO - | 1145               | · వినయ్          | 245            |                     | 545                               | 18540                         | 1295                                    | 22834                                   | 34612                               | 12143                              | 23953                     | 21910                            |             |          |           |                                 |                                            |
+2025-12-04 14:55:01,350 - INFO - | 1146               | శ్వేత            | 246            |                     | 546                               | 18541                         | 1296                                    | 22835                                   | 34613                               | 12144                              | 23954                     | 21910                            |             |          |           |                                 |                                            |
+2025-12-04 14:55:01,353 - INFO - | 1147               | మోహన్            | 247            |                     | ths                               | 18542                         | 1297                                    | 22836                                   | 34614                               | 12145'                             | 23955                     | 121680                           |             |          |           |                                 |                                            |
+2025-12-04 14:55:01,353 - INFO - | 1148               | సావిత్రి,        | 248            |                     | 548                               | 18543                         | 1298                                    | 22837                                   | 34615                               | 12146                              | 23956                     | 22910                            |             |          |           |                                 |                                            |
+2025-12-04 14:55:01,353 - INFO - | 1149               | దినేష్           | 249            |                     | 549                               | 18544                         | 1299                                    | 22838                                   | 34616                               | 12147                              | 23957                     | 21910                            |             |          |           |                                 |                                            |
+2025-12-04 14:55:01,358 - INFO - | 1150               | చంద్ర 2          | 250            |                     | 550                               | 18545                         | 1300                                    | 22839                                   | 34617                               | 12148                              | 23958                     | 21910                            |             |          |           |                                 |                                            |
+2025-12-04 14:55:01,358 - INFO - | 1151               | टर               | 251            |                     | 551                               | 18546.                        | .1301                                   | 22840                                   | 34618                               | 12149                              | 23959                     | 1190                             |             |          |           |                                 |                                            |
+2025-12-04 14:55:01,358 - INFO - | 1152               | ప్రణయ్           | 252            |                     | 552                               | 18547                         | 1302                                    | 22841                                   | 34619                               | 12150                              | 23960                     | 21459                            |             |          |           |                                 |                                            |
+2025-12-04 14:55:01,358 - INFO - | 1153               | రమ్య             | 253            |                     | 553                               | 18548                         | 1303                                    | 22842                                   | 34620                               | 12:51                              | 23961                     | 23909                            |             |          |           |                                 |                                            |
+2025-12-04 14:55:01,358 - INFO - | 1154               | m 823 Ө          | 254            |                     | 554                               | 18549                         | 1304                                    | 22843                                   | 34621                               | 12152                              | 23962                     | 2/009                            |             |          |           |                                 |                                            |
+2025-12-04 14:55:01,358 - INFO - | 1155               | లిఖిత            | 255            |                     | 555                               | 18550                         | :1305                                   | 22844                                   | 34622                               | 12153                              | 23963                     | 21910                            |             |          |           |                                 |                                            |
+2025-12-04 14:55:01,358 - INFO - | 1156               | విక్రమ్          | 256            |                     | 556                               | 18551                         | 306                                     | 22845                                   | 34623                               | 12154                              | 23964                     | 13922                            |             |          |           |                                 |                                            |
+2025-12-04 14:55:01,358 - INFO - | 1157               | భావన             | 257            |                     | 557                               | 18552                         | 1307                                    | 22846                                   | 34624                               | 12155                              | 23965                     | 22225                            |             |          |           |                                 |                                            |
+2025-12-04 14:55:01,358 - INFO - | 1158               | వరుణ్            | 258            |                     | 558                               | 18553                         | .1308                                   | 22847                                   | 34625                               | 12156                              | 23965                     | , 21122                          |             |          |           |                                 |                                            |
+2025-12-04 14:55:01,358 - INFO - | 1159               | మధు              | 259            |                     | 559                               | 18554                         | 1309                                    | 22848                                   | 34626                               | 12157                              | 23967                     | 24667                            |             |          |           |                                 |                                            |
+2025-12-04 14:55:01,358 - INFO - +--------------------+------------------+----------------+---------------------+-----------------------------------+-------------------------------+-----------------------------------------+-----------------------------------------+-------------------------------------+------------------------------------+---------------------------+----------------------------------+-------------+----------+-----------+---------------------------------+--------------------------------------------+
+2025-12-04 14:55:01,358 - INFO - 
+================================================================================
+2025-12-04 14:55:01,358 - INFO - Processing complete: 1/1 pages successful
+2025-12-04 14:55:01,358 - INFO - ================================================================================
+
+2025-12-04 14:55:01,501 - INFO - Received analytics update: 9 items

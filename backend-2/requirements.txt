@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+python-multipart
+opencv-python
+numpy
+google-cloud-vision
+google-auth
+pymupdf
+Pillow
+requests
+pandas
+openpyxl
+psutil
+aiohttp

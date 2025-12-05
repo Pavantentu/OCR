@@ -1,0 +1,2238 @@
+import cv2
+import numpy as np
+import functools
+import hashlib
+
+class ImageEnhancementMixin:
+    """Enhanced mixin with cell margin analysis for better text preservation"""
+    
+    def _init_enhancement_cache(self):
+        """Initialize caching structures (called from main class __init__)"""
+        if not hasattr(self, '_clahe_cache'):
+            # Cache for CLAHE objects (by tile size)
+            self._clahe_cache = {}
+            # Cache for blur variance calculations (by image hash)
+            self._blur_cache = {}
+            # Cache for morphological kernels
+            self._kernel_cache = {}
+            # Cache for sharpened images (by image hash + params)
+            self._sharpening_cache = {}
+            # Maximum cache size
+            self._max_cache_size = 32
+    
+    def _get_image_hash(self, image):
+        """Get hash of image for caching (fast approximation using shape + sample pixels)"""
+        h, w = image.shape[:2]
+        # Use shape + sample pixels for fast hashing
+        sample = image[::max(1, h//10), ::max(1, w//10)].tobytes()
+        return hashlib.md5(f"{image.shape}{sample[:1000]}".encode()).hexdigest()[:16]
+    
+    def _get_clahe(self, tile_size=(4, 4)):
+        """Get cached CLAHE object"""
+        self._init_enhancement_cache()  # Ensure cache is initialized
+        if tile_size not in self._clahe_cache:
+            self._clahe_cache[tile_size] = cv2.createCLAHE(clipLimit=2.0, tileGridSize=tile_size)
+        return self._clahe_cache[tile_size]
+    
+    def _get_morphological_kernel(self, shape, size):
+        """Get cached morphological kernel"""
+        self._init_enhancement_cache()  # Ensure cache is initialized
+        key = (shape, size)
+        if key not in self._kernel_cache:
+            if shape == 'rect':
+                self._kernel_cache[key] = cv2.getStructuringElement(cv2.MORPH_RECT, size)
+            elif shape == 'ellipse':
+                self._kernel_cache[key] = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, size)
+            else:
+                self._kernel_cache[key] = cv2.getStructuringElement(cv2.MORPH_RECT, size)
+        return self._kernel_cache[key]
+    
+    def _calculate_blur_variance_cached(self, image):
+        """Calculate blur variance with caching"""
+        self._init_enhancement_cache()  # Ensure cache is initialized
+        img_hash = self._get_image_hash(image)
+        if img_hash in self._blur_cache:
+            return self._blur_cache[img_hash]
+        
+        # Calculate blur variance
+        laplacian = cv2.Laplacian(image, cv2.CV_64F)
+        variance = float(laplacian.var())
+        
+        # Cache result (limit cache size)
+        if len(self._blur_cache) >= self._max_cache_size:
+            # Remove oldest entry (simple FIFO)
+            oldest_key = next(iter(self._blur_cache))
+            del self._blur_cache[oldest_key]
+        
+        self._blur_cache[img_hash] = variance
+        return variance
+    
+    def _apply_adaptive_sharpening(self, image, img_name=None, strict_validation=False):
+        """
+        Apply adaptive sharpening based on blur detection (from line_detection.py).
+        This sharpens the image before text/line detection for better accuracy.
+        
+        OPTIMIZED: Uses caching to avoid duplicate calculations for the same image.
+        
+        Args:
+            image: Input image (BGR or grayscale)
+            img_name: Optional image name for debug output
+            strict_validation: Optional flag for strict validation (currently unused)
+        
+        Returns:
+            Sharpened image
+        """
+        # OPTIMIZED: Check cache first to avoid duplicate calculations
+        self._init_enhancement_cache()
+        image_hash = self._get_image_hash(image)
+        cache_key = (image_hash, strict_validation)
+        
+        if cache_key in self._sharpening_cache:
+            if self.debug:
+                print(f"    Using cached sharpening result (hash: {image_hash[:8]}...)")
+            cached_result = self._sharpening_cache[cache_key]
+            # Still save debug image if requested (but skip expensive calculation)
+            if self.debug and img_name:
+                debug_filename = f"{img_name}_sharpened_for_detection.jpg"
+                # Use cached grayscale version for debug save
+                if len(cached_result.shape) == 3:
+                    cached_gray = cv2.cvtColor(cached_result, cv2.COLOR_BGR2GRAY)
+                else:
+                    cached_gray = cached_result
+                self.save_debug_image(cached_gray, debug_filename, 
+                                    "Sharpened image (from cache)")
+            return cached_result
+        
+        if len(image.shape) == 3:
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            is_color = True
+        else:
+            gray = image.copy()
+            is_color = False
+        
+        h, w = gray.shape
+        image_area = h * w
+        
+        # Step 1: CLAHE enhancement
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        enhanced = clahe.apply(gray)
+        
+        # Step 2: Global blur detection
+        laplacian_global = cv2.Laplacian(enhanced, cv2.CV_64F)
+        global_blur_variance = float(laplacian_global.var())
+        
+        if self.debug:
+            print(f"    Global blur detection: variance={global_blur_variance:.2f}")
+        
+        # Step 3: Create local blur map
+        window_size = max(15, min(h, w) // 20)
+        window_size = window_size if window_size % 2 == 1 else window_size + 1
+        
+        # Compute local blur variance
+        laplacian_local = cv2.Laplacian(enhanced, cv2.CV_64F)
+        laplacian_squared = laplacian_local ** 2
+        kernel = np.ones((window_size, window_size), dtype=np.float32) / (window_size * window_size)
+        mean_squared = cv2.filter2D(laplacian_squared, -1, kernel)
+        mean_val = cv2.filter2D(laplacian_local, -1, kernel)
+        blur_map = mean_squared - (mean_val ** 2)
+        
+        # Normalize blur map
+        blur_map_max = blur_map.max()
+        blur_map_min = blur_map.min()
+        if blur_map_max > blur_map_min:
+            blur_map_normalized = (blur_map - blur_map_min) / (blur_map_max - blur_map_min)
+        else:
+            blur_map_normalized = np.ones_like(blur_map) * 0.5
+        
+        # Step 4: Create sharpening mask
+        sharpening_mask = 1.0 - blur_map_normalized
+        blur_radius_mask = max(3, window_size // 4)
+        blur_radius_mask = blur_radius_mask if blur_radius_mask % 2 == 1 else blur_radius_mask + 1
+        sharpening_mask = cv2.GaussianBlur(sharpening_mask, (blur_radius_mask, blur_radius_mask), 0)
+        
+        # Threshold and enhance mask
+        blur_threshold = 0.3
+        sharpening_mask = np.clip((sharpening_mask - blur_threshold) / (1.0 - blur_threshold), 0, 1)
+        gamma = 0.7
+        sharpening_mask_enhanced = np.power(sharpening_mask, gamma)
+        min_sharpening_level = 0.3
+        sharpening_mask_enhanced = np.clip(sharpening_mask_enhanced + min_sharpening_level, 0, 1)
+        if sharpening_mask_enhanced.max() > 0:
+            sharpening_mask_enhanced = sharpening_mask_enhanced / sharpening_mask_enhanced.max()
+        
+        # Step 5: Determine sharpening strength based on image size
+        if image_area > 2000000:
+            base_max_strength = 5.0
+            kernel_size = 5
+        elif image_area > 1000000:
+            base_max_strength = 4.5
+            kernel_size = 3
+        elif image_area > 500000:
+            base_max_strength = 4.0
+            kernel_size = 3
+        else:
+            base_max_strength = 3.5
+            kernel_size = 3
+        
+        variable_strength_mask = sharpening_mask_enhanced * base_max_strength
+        
+        # Step 6: Apply adaptive sharpening
+        enhanced_float = enhanced.astype(np.float32)
+        
+        # Determine number of passes based on blur level
+        if global_blur_variance < 100:
+            num_passes = 2
+        elif global_blur_variance < 200:
+            num_passes = 2
+        else:
+            num_passes = 1
+        
+        for pass_num in range(num_passes):
+            if global_blur_variance < 100 and pass_num == 0:
+                blur_radius = 5
+            else:
+                blur_radius = 3
+            
+            blurred = cv2.GaussianBlur(enhanced_float, (0, 0), sigmaX=blur_radius, sigmaY=blur_radius)
+            unsharp_diff = enhanced_float - blurred
+            pass_strength_multiplier = 1.0 if pass_num == 0 else 0.8
+            variable_strength_pass = variable_strength_mask * pass_strength_multiplier
+            enhanced_sharpened = enhanced_float + unsharp_diff * variable_strength_pass
+            enhanced_float = np.clip(enhanced_sharpened, 0, 255).astype(np.float32)
+        
+        sharpened_gray = enhanced_float.astype(np.uint8)
+        
+        # Convert back to color if needed
+        if is_color:
+            # Convert grayscale back to BGR
+            sharpened_result = cv2.cvtColor(sharpened_gray, cv2.COLOR_GRAY2BGR)
+        else:
+            sharpened_result = sharpened_gray
+        
+        if self.debug:
+            laplacian_after = cv2.Laplacian(sharpened_gray, cv2.CV_64F)
+            blur_variance_after = float(laplacian_after.var())
+            improvement = ((blur_variance_after - global_blur_variance) / max(global_blur_variance, 1.0)) * 100
+            print(f"    Sharpening applied: strength={base_max_strength:.1f}, passes={num_passes}")
+            print(f"    Improvement: {improvement:+.1f}% (variance: {global_blur_variance:.1f} -> {blur_variance_after:.1f})")
+            debug_filename = f"{img_name}_sharpened_for_detection.jpg" if img_name else "sharpened_for_detection.jpg"
+            self.save_debug_image(sharpened_gray, debug_filename, 
+                                f"Sharpened image (improvement: {improvement:+.1f}%)")
+        
+        # OPTIMIZED: Cache the result to avoid duplicate calculations
+        if len(self._sharpening_cache) >= self._max_cache_size:
+            # Remove oldest entry (simple FIFO)
+            oldest_key = next(iter(self._sharpening_cache))
+            del self._sharpening_cache[oldest_key]
+        self._sharpening_cache[cache_key] = sharpened_result
+        
+        return sharpened_result
+
+    def _is_text_extending_into_cell(self, component_mask, line_mask, cells=None):
+        """
+        Check if text component extends into cell area (away from line).
+        This helps distinguish real text touching cell edges from line artifacts.
+        
+        Args:
+            component_mask: Binary mask of text component
+            line_mask: Binary mask of lines (horizontal or vertical)
+            cells: Optional list of cell dicts with 'bbox' keys
+        
+        Returns:
+            True if text extends into cell, False otherwise
+        """
+        img_h, img_w = component_mask.shape[:2]
+        
+        # Find overlap with line
+        overlap = cv2.bitwise_and(component_mask, line_mask)
+        overlap_pixels = np.count_nonzero(overlap)
+        
+        if overlap_pixels == 0:
+            # No overlap with line, can't determine
+            return False
+        
+        # If cells provided, check if text extends into any cell
+        if cells:
+            for cell in cells:
+                x, y, w, h = cell['bbox']
+                cell_mask = np.zeros((img_h, img_w), dtype=np.uint8)
+                cv2.rectangle(cell_mask, (int(x), int(y)), (int(x+w), int(y+h)), 255, -1)
+                
+                # Check if text extends into cell (not just on edge)
+                text_in_cell = cv2.bitwise_and(component_mask, cell_mask)
+                text_on_line = cv2.bitwise_and(component_mask, line_mask)
+                
+                # If text extends significantly into cell interior
+                text_in_cell_pixels = np.count_nonzero(text_in_cell)
+                text_on_line_pixels = np.count_nonzero(text_on_line)
+                
+                if text_in_cell_pixels > 0:
+                    # Check extension distance: how far text extends from line into cell
+                    # Determine line orientation
+                    h_line_roi = line_mask[max(0, img_h//2-5):min(img_h, img_h//2+6), :]
+                    v_line_roi = line_mask[:, max(0, img_w//2-5):min(img_w, img_w//2+6)]
+                    
+                    is_horizontal = np.count_nonzero(h_line_roi) > np.count_nonzero(v_line_roi)
+                    
+                    if is_horizontal:
+                        # Check vertical extension into cell
+                        component_coords = np.column_stack(np.where(component_mask > 0))
+                        line_coords = np.column_stack(np.where(line_mask > 0))
+                        
+                        if len(component_coords) > 0 and len(line_coords) > 0:
+                            line_y_center = np.mean(line_coords[:, 0])
+                            component_y_min = np.min(component_coords[:, 0])
+                            component_y_max = np.max(component_coords[:, 0])
+                            
+                            # Extension distance: how far text extends from line
+                            extension_below = max(0, component_y_max - line_y_center)
+                            extension_above = max(0, line_y_center - component_y_min)
+                            max_extension = max(extension_below, extension_above)
+                            
+                            # If extends more than 3 pixels, it's real text
+                            if max_extension >= 3:
+                                return True
+                    else:
+                        # Check horizontal extension into cell
+                        component_coords = np.column_stack(np.where(component_mask > 0))
+                        line_coords = np.column_stack(np.where(line_mask > 0))
+                        
+                        if len(component_coords) > 0 and len(line_coords) > 0:
+                            line_x_center = np.mean(line_coords[:, 1])
+                            component_x_min = np.min(component_coords[:, 1])
+                            component_x_max = np.max(component_coords[:, 1])
+                            
+                            extension_right = max(0, component_x_max - line_x_center)
+                            extension_left = max(0, line_x_center - component_x_min)
+                            max_extension = max(extension_right, extension_left)
+                            
+                            if max_extension >= 3:
+                                return True
+        
+        # Fallback: check if text extends away from line (without cell info)
+        coords = np.column_stack(np.where(component_mask > 0))
+        if len(coords) == 0:
+            return False
+        
+        y_min, y_max = np.min(coords[:, 0]), np.max(coords[:, 0])
+        x_min, x_max = np.min(coords[:, 1]), np.max(coords[:, 1])
+        
+        # Check line orientation
+        line_coords = np.column_stack(np.where(line_mask > 0))
+        if len(line_coords) == 0:
+            return False
+        
+        line_y_span = np.max(line_coords[:, 0]) - np.min(line_coords[:, 0])
+        line_x_span = np.max(line_coords[:, 1]) - np.min(line_coords[:, 1])
+        
+        is_horizontal = line_y_span < line_x_span
+        
+        if is_horizontal:
+            # Check vertical extension
+            line_y = np.mean(line_coords[:, 0])
+            extension = max(abs(y_max - line_y), abs(y_min - line_y))
+            return extension >= 3
+        else:
+            # Check horizontal extension
+            line_x = np.mean(line_coords[:, 1])
+            extension = max(abs(x_max - line_x), abs(x_min - line_x))
+            return extension >= 3
+
+    def _has_text_internal_structure(self, component_mask):
+        """
+        Check if text component has internal structure (holes, width variations).
+        This helps distinguish text from line artifacts.
+        
+        Args:
+            component_mask: Binary mask of text component
+        
+        Returns:
+            True if text has internal structure, False otherwise
+        """
+        # Find contours
+        contours, hierarchy = cv2.findContours(component_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        
+        if len(contours) == 0:
+            return False
+        
+        # Check for holes (internal contours) - strongest indicator
+        if hierarchy is not None and len(hierarchy) > 0:
+            # Check if any contour has a parent (indicating hole)
+            has_holes = np.any(hierarchy[0][:, 3] >= 0)
+            if has_holes:
+                return True
+        
+        # Check for width variations along the component
+        coords = np.column_stack(np.where(component_mask > 0))
+        if len(coords) < 10:  # Too small to analyze
+            return False
+        
+        # Project onto axes to check width variations
+        y_coords = coords[:, 0]
+        x_coords = coords[:, 1]
+        
+        y_span = np.max(y_coords) - np.min(y_coords) + 1
+        x_span = np.max(x_coords) - np.min(x_coords) + 1
+        
+        # Determine if component is more horizontal or vertical
+        is_horizontal = x_span > y_span
+        
+        # Check width variations - more reliable than compactness
+        if is_horizontal and len(np.unique(y_coords)) > 3:
+            # For horizontal component, check vertical width variations
+            widths_y = []
+            for y in np.unique(y_coords):
+                x_at_y = x_coords[y_coords == y]
+                if len(x_at_y) > 0:
+                    widths_y.append(np.max(x_at_y) - np.min(x_at_y) + 1)
+            
+            if len(widths_y) > 0:
+                mean_width = np.mean(widths_y)
+                std_width = np.std(widths_y)
+                # Significant variation: std > 30% of mean AND variation > 2 pixels
+                if mean_width > 0 and std_width / mean_width > 0.3 and std_width > 2:
+                    return True
+        elif not is_horizontal and len(np.unique(x_coords)) > 3:
+            # For vertical component, check horizontal width variations
+            widths_x = []
+            for x in np.unique(x_coords):
+                y_at_x = y_coords[x_coords == x]
+                if len(y_at_x) > 0:
+                    widths_x.append(np.max(y_at_x) - np.min(y_at_x) + 1)
+            
+            if len(widths_x) > 0:
+                mean_width = np.mean(widths_x)
+                std_width = np.std(widths_x)
+                # Significant variation: std > 30% of mean AND variation > 2 pixels
+                if mean_width > 0 and std_width / mean_width > 0.3 and std_width > 2:
+                    return True
+        
+        # Check aspect ratio and dimensions
+        # Lines are very elongated (high aspect ratio) AND very thin in one dimension
+        area = np.count_nonzero(component_mask)
+        bounding_area = y_span * x_span
+        
+        if bounding_area > 0:
+            compactness = area / bounding_area
+            aspect_ratio = max(x_span / (y_span + 1e-5), y_span / (x_span + 1e-5))
+            min_dimension = min(x_span, y_span)
+            max_dimension = max(x_span, y_span)
+            
+            # Lines: very high aspect ratio (>8) AND very thin (<3 pixels in one dimension)
+            if aspect_ratio > 8 and min_dimension <= 3:
+                return False  # Likely a line (very thin and elongated)
+            
+            # Text: either has holes (already checked), has width variation (already checked),
+            # OR is reasonably compact with moderate aspect ratio
+            if compactness > 0.4 and aspect_ratio < 6:
+                return True  # Compact and not too elongated = likely text
+        
+        return False
+
+    def _detect_text_blobs(self, image, cells=None):
+        """
+        Enhanced text detection using multiple methods:
+        1. Remove elongated line structures
+        2. Filter by aspect ratio (text is compact, not elongated)
+        3. Filter by size (remove noise and very large regions)
+        4. Use connected components analysis for better accuracy
+        5. Filter out isolated text ON lines (line artifacts, not real text)
+        6. NEW: Check if text extends into cells or has internal structure
+        
+        IMPORTANT: Text is inside cells and may touch cell edges.
+        Isolated text that is ON lines (part of line structure) is filtered out.
+        However, text that extends into cells or has internal structure is preserved.
+        
+        Args:
+            image: Input image
+            cells: Optional list of cell dicts with 'bbox' keys for better detection
+        
+        Returns a binary mask where text blobs are white (255).
+        """
+        # OPTIMIZED: Avoid unnecessary copy if already grayscale and contiguous
+        if len(image.shape) == 3:
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        else:
+            gray = image if image.flags['C_CONTIGUOUS'] else image.copy()
+        
+        # Use cached dimensions
+        img_h, img_w, img_diagonal, img_area = self.get_image_dimensions(gray)
+        
+        # Binarize - get all dark content
+        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+        
+        # Method 1: Remove elongated line-like structures
+        # OPTIMIZED: Use cached kernels
+        h_kernel_size = (max(img_w // 15, 25), 1)
+        v_kernel_size = (1, max(img_h // 15, 25))
+        h_kernel = self._get_morphological_kernel('rect', h_kernel_size)
+        v_kernel = self._get_morphological_kernel('rect', v_kernel_size)
+        horizontal = cv2.morphologyEx(binary, cv2.MORPH_OPEN, h_kernel)
+        vertical = cv2.morphologyEx(binary, cv2.MORPH_OPEN, v_kernel)
+        
+        # Remove lines from original binary
+        lines = cv2.bitwise_or(horizontal, vertical)
+        text_candidates = cv2.bitwise_and(binary, cv2.bitwise_not(lines))
+        
+        # Method 2: Use connected components to filter text by characteristics
+        num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(
+            text_candidates, connectivity=8
+        )
+        
+        # Filter criteria for text regions (use cached img_area)
+        min_area = max(5, int(round(img_diagonal / 1000)))  # Minimum text area
+        max_area = int(round(img_area / 20))  # Maximum text area (5% of image)
+        max_aspect_ratio = 8.0  # Text regions shouldn't be too elongated
+        
+        text_mask = np.zeros_like(text_candidates, dtype=np.uint8)
+        
+        for i in range(1, num_labels):  # Skip background (label 0)
+            area = stats[i, cv2.CC_STAT_AREA]
+            width = stats[i, cv2.CC_STAT_WIDTH]
+            height = stats[i, cv2.CC_STAT_HEIGHT]
+            
+            # Skip if too small or too large
+            if area < min_area or area > max_area:
+                continue
+            
+            # Skip if too elongated (likely a line remnant)
+            if width > 0 and height > 0:
+                aspect_ratio = max(width / height, height / width)
+                if aspect_ratio > max_aspect_ratio:
+                    continue
+            
+            # This is likely text - add to mask
+            text_mask[labels == i] = 255
+        
+        # Method 3: Clean up small noise
+        # OPTIMIZED: Use cached kernels
+        kernel_clean = self._get_morphological_kernel('ellipse', (2, 2))
+        text_mask = cv2.morphologyEx(text_mask, cv2.MORPH_OPEN, kernel_clean)
+        
+        # Method 4: Close small gaps in text (connect nearby characters)
+        kernel_close = self._get_morphological_kernel('ellipse', (3, 3))
+        text_mask = cv2.morphologyEx(text_mask, cv2.MORPH_CLOSE, kernel_close)
+        
+        # Method 5: Filter out isolated text that is ON lines (line artifacts, not real text)
+        # OPTIMIZED: Use cached kernels
+        h_line_kernel_size = (max(img_w // 20, 20), 1)
+        v_line_kernel_size = (1, max(img_h // 20, 20))
+        h_line_kernel = self._get_morphological_kernel('rect', h_line_kernel_size)
+        v_line_kernel = self._get_morphological_kernel('rect', v_line_kernel_size)
+        h_lines_detected = cv2.morphologyEx(binary, cv2.MORPH_OPEN, h_line_kernel, iterations=1)
+        v_lines_detected = cv2.morphologyEx(binary, cv2.MORPH_OPEN, v_line_kernel, iterations=1)
+        # Dilate lines to catch text that's directly on lines
+        h_dilate_kernel = self._get_morphological_kernel('rect', (1, 5))
+        v_dilate_kernel = self._get_morphological_kernel('rect', (5, 1))
+        h_lines_dilated = cv2.dilate(h_lines_detected, h_dilate_kernel, iterations=1)
+        v_lines_dilated = cv2.dilate(v_lines_detected, v_dilate_kernel, iterations=1)
+        all_lines = cv2.bitwise_or(h_lines_dilated, v_lines_dilated)
+        
+        # Check each text component: if it's isolated AND on a line, it's not real text
+        text_labels, text_labeled, text_stats, text_centroids = cv2.connectedComponentsWithStats(
+            text_mask, connectivity=8
+        )
+        
+        filtered_text_mask = np.zeros_like(text_mask, dtype=np.uint8)
+        
+        # Image size-based thresholds
+        img_area = img_h * img_w
+        max_isolated_area = max(30, int(round(img_area * 0.0001)))  # 0.01% of image area, min 30px
+        min_text_area = max(10, int(round(img_area * 0.00005)))  # Minimum real text area
+        
+        # OPTIMIZED: Pre-compute line alignment maps to avoid repeated ROI extractions
+        # Create sparse maps for faster lookups
+        h_line_y_positions = set()
+        v_line_x_positions = set()
+        h_line_y_map = np.zeros(img_h, dtype=bool)
+        v_line_x_map = np.zeros(img_w, dtype=bool)
+        
+        # Extract line positions once (much faster than checking ROIs for each component)
+        h_line_coords = np.where(h_lines_dilated > 0)
+        v_line_coords = np.where(v_lines_dilated > 0)
+        if len(h_line_coords[0]) > 0:
+            h_line_y_map[np.unique(h_line_coords[0])] = True
+        if len(v_line_coords[1]) > 0:
+            v_line_x_map[np.unique(v_line_coords[1])] = True
+        
+        # OPTIMIZED: Batch process components - early exit for non-isolated components
+        for i in range(1, text_labels):  # Skip background
+            area = text_stats[i, cv2.CC_STAT_AREA]
+            width = text_stats[i, cv2.CC_STAT_WIDTH]
+            height = text_stats[i, cv2.CC_STAT_HEIGHT]
+            x = text_stats[i, cv2.CC_STAT_LEFT]
+            y = text_stats[i, cv2.CC_STAT_TOP]
+            cx = int(text_centroids[i][0])
+            cy = int(text_centroids[i][1])
+            
+            # Check 1: Is it isolated? (small area) - FAST CHECK FIRST
+            is_isolated = area <= max_isolated_area
+            
+            # OPTIMIZED: Skip expensive checks if not isolated (non-isolated = real text)
+            if not is_isolated:
+                # Large components are always real text - add directly
+                filtered_text_mask[text_labeled == i] = 255
+                continue
+            
+            # Check 2: Is it actually text-like? (not just a line)
+            # Text should be compact, not too elongated
+            if width > 0 and height > 0:
+                aspect_ratio = max(width / height, height / width)
+                is_text_like = aspect_ratio < 6.0  # Text is not too elongated
+                # Text should have reasonable dimensions
+                is_text_like = is_text_like and (width >= 3 and height >= 3)
+            else:
+                is_text_like = False
+            
+            # Check 3: Is it ON a line? (not just touching)
+            # OPTIMIZED: Use pre-computed line maps instead of ROI extractions
+            h_line_aligned = (0 <= cy < img_h) and h_line_y_map[cy]
+            v_line_aligned = (0 <= cx < img_w) and v_line_x_map[cx]
+            
+            # OPTIMIZED: Only compute overlap if alignment check suggests it might be on line
+            if h_line_aligned or v_line_aligned:
+                component_mask = (text_labeled == i).astype(np.uint8) * 255
+                component_on_line = cv2.bitwise_and(component_mask, all_lines)
+                overlap_pixels = np.count_nonzero(component_on_line)
+                component_pixels = area  # Use stats area instead of counting
+                overlap_ratio = overlap_pixels / component_pixels if component_pixels > 0 else 0
+                is_on_line = (overlap_ratio > 0.6) or (h_line_aligned and overlap_ratio > 0.3) or (v_line_aligned and overlap_ratio > 0.3)
+            else:
+                # Not aligned with lines = not on line = real text
+                filtered_text_mask[text_labeled == i] = 255
+                continue
+            
+            # NEW: Before filtering, check if text extends into cell or has internal structure
+            # These are strong indicators of real text, not line artifacts
+            extends_into_cell = False
+            has_structure = False
+            
+            if is_on_line:
+                # OPTIMIZED: Only check extension/structure if actually on line
+                component_mask = (text_labeled == i).astype(np.uint8) * 255
+                
+                # Check if text extends into cell (away from line)
+                if cells is not None:
+                    # OPTIMIZED: Check both lines in one call if possible
+                    extends_into_cell = (self._is_text_extending_into_cell(component_mask, h_lines_dilated, cells) or
+                                        self._is_text_extending_into_cell(component_mask, v_lines_dilated, cells))
+                else:
+                    # Without cell info, check extension from line
+                    extends_into_cell = (self._is_text_extending_into_cell(component_mask, h_lines_dilated, None) or
+                                        self._is_text_extending_into_cell(component_mask, v_lines_dilated, None))
+                
+                # Check if text has internal structure (holes, width variations)
+                # OPTIMIZED: Only check structure if not extending into cell (early exit)
+                if not extends_into_cell:
+                    has_structure = self._has_text_internal_structure(component_mask)
+            
+            # Filter out if: isolated AND on line AND (not text-like OR too small)
+            # BUT preserve if text extends into cell OR has internal structure
+            if is_isolated and is_on_line:
+                if not is_text_like or area < min_text_area:
+                    # Only filter if it doesn't extend into cell AND doesn't have structure
+                    if not extends_into_cell and not has_structure:
+                        # This is isolated non-text on a line - it's a line artifact
+                        if self.debug:
+                            print(f"    Filtered out isolated artifact on line: area={area}, "
+                                  f"overlap={overlap_ratio:.2f}, text_like={is_text_like}, "
+                                  f"extends_into_cell={extends_into_cell}, has_structure={has_structure}")
+                        continue
+                else:
+                    # Preserve text that extends into cell or has structure
+                    if self.debug:
+                        print(f"    Preserved text on line: area={area}, "
+                              f"extends_into_cell={extends_into_cell}, has_structure={has_structure}")
+            
+            # This is real text (either not isolated, not on a line, or text-like)
+            filtered_text_mask[text_labeled == i] = 255
+        
+        if self.debug:
+            removed_count = np.count_nonzero(text_mask) - np.count_nonzero(filtered_text_mask)
+            filtered_out_mask = cv2.bitwise_and(text_mask, cv2.bitwise_not(filtered_text_mask))
+            if removed_count > 0:
+                print(f"    Filtered {removed_count} pixels of isolated artifacts on lines")
+                print(f"    Image size: {img_w}x{img_h}, area={img_area}, "
+                      f"max_isolated_area={max_isolated_area}, min_text_area={min_text_area}")
+            self.save_debug_image(text_candidates, 
+                                "text_candidates_before_filtering.jpg", 
+                                "Text candidates (before filtering)")
+            self.save_debug_image(filtered_text_mask, 
+                                "text_detected_final.jpg", 
+                                "Text detected (after filtering)")
+            if removed_count > 0:
+                self.save_debug_image(filtered_out_mask, 
+                                    "text_filtered_out.jpg", 
+                                    "Filtered out: isolated artifacts on lines")
+        
+        # Return filtered text mask (text inside cells, not isolated on lines)
+        return filtered_text_mask
+
+    def _thin_lines_near_text(self, h_lines, v_lines, text_mask, protection_radius):
+        """
+        OPTIMIZED: Smart line thinning near text instead of complete protection.
+        Thins horizontal lines vertically and vertical lines horizontally when near text.
+        This allows removing most of the line while protecting text.
+        
+        IMPORTANT: Text is inside cells and may touch cell edges (lines).
+        Text pixels are NEVER part of lines and must be preserved.
+        
+        Strategy:
+        - Create a protection zone around text
+        - In this zone, reduce line width (erode perpendicular to line direction)
+        - Remove any text pixels from line masks (text is never part of lines)
+        - This removes most of the line while preserving text
+        
+        Args:
+            h_lines: Binary mask of horizontal lines
+            v_lines: Binary mask of vertical lines
+            text_mask: Binary mask of text regions (inside cells, may touch edges)
+            protection_radius: Radius around text to thin lines
+        
+        Returns:
+            Tuple of (thinned_h_lines, thinned_v_lines) - lines ready for removal (NO text pixels)
+        """
+        # OPTIMIZED: Use cached kernels
+        # Create thinning zone around text (faster than distance transform)
+        # Use dilation to create zone where we'll thin lines
+        kernel_size = max(3, protection_radius * 2 - 1)  # Ensure odd size
+        kernel = self._get_morphological_kernel('ellipse', (kernel_size, kernel_size))
+        text_thinning_zone = cv2.dilate(text_mask, kernel, iterations=1)
+        
+        # For horizontal lines: thin vertically (reduce height) when near text
+        # Erode vertically to reduce thickness
+        h_thin_kernel = self._get_morphological_kernel('rect', (1, 3))
+        
+        # Lines outside thinning zone: keep full width
+        h_lines_outside = cv2.bitwise_and(h_lines, cv2.bitwise_not(text_thinning_zone))
+        
+        # Lines inside thinning zone: reduce vertical thickness
+        h_lines_inside = cv2.bitwise_and(h_lines, text_thinning_zone)
+        h_lines_thinned = cv2.erode(h_lines_inside, h_thin_kernel, iterations=1)
+        
+        # Combine: full lines outside + thinned lines inside
+        thinned_h_lines = cv2.bitwise_or(h_lines_outside, h_lines_thinned)
+        
+        # For vertical lines: thin horizontally (reduce width) when near text
+        # Erode horizontally to reduce thickness
+        v_thin_kernel = self._get_morphological_kernel('rect', (3, 1))
+        
+        # Lines outside thinning zone: keep full width
+        v_lines_outside = cv2.bitwise_and(v_lines, cv2.bitwise_not(text_thinning_zone))
+        
+        # Lines inside thinning zone: reduce horizontal thickness
+        v_lines_inside = cv2.bitwise_and(v_lines, text_thinning_zone)
+        v_lines_thinned = cv2.erode(v_lines_inside, v_thin_kernel, iterations=1)
+        
+        # Combine: full lines outside + thinned lines inside
+        thinned_v_lines = cv2.bitwise_or(v_lines_outside, v_lines_thinned)
+        
+        # CRITICAL: Text is inside cells and may touch cell edges, but text pixels are NEVER part of lines
+        # Remove any text pixels from thinned line masks (text must be preserved)
+        thinned_h_lines = cv2.bitwise_and(thinned_h_lines, cv2.bitwise_not(text_mask))
+        thinned_v_lines = cv2.bitwise_and(thinned_v_lines, cv2.bitwise_not(text_mask))
+        
+        if self.debug:
+            pixels_h_thinned = np.count_nonzero(h_lines) - np.count_nonzero(thinned_h_lines)
+            pixels_v_thinned = np.count_nonzero(v_lines) - np.count_nonzero(thinned_v_lines)
+            total_thinned = pixels_h_thinned + pixels_v_thinned
+            print(f"    Line thinning: Reduced {total_thinned} line pixels near text ({pixels_h_thinned}H + {pixels_v_thinned}V)")
+        
+        return thinned_h_lines, thinned_v_lines
+
+    def _remove_small_noise_spots(self, result_image, text_mask):
+        """
+        Remove small isolated dark spots/noise pixels FIRST.
+        These are one-pixel or small dark dots surrounded by grey/light color.
+        They appear as noise artifacts and should be removed before line cleanup.
+        
+        Args:
+            result_image: Image to clean
+            text_mask: Binary mask of text regions (to protect)
+        
+        Returns:
+            Cleaned image with small noise spots removed
+        """
+        if len(result_image.shape) == 3:
+            gray = cv2.cvtColor(result_image, cv2.COLOR_BGR2GRAY)
+            is_color = True
+        else:
+            gray = result_image.copy()
+            is_color = False
+        
+        # Use cached dimensions
+        img_h, img_w, img_diagonal, img_area = self.get_image_dimensions(gray)
+        
+        # Binarize to find dark pixels
+        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+        
+        # Use connected components to find small isolated spots
+        num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(
+            binary, connectivity=8
+        )
+        
+        # Filter: remove very small isolated dark spots (1-5 pixels typically)
+        # These are noise, not text
+        max_noise_area = max(3, int(round(img_area * 0.00005)))  # Very small: 0.005% of image
+        
+        # OPTIMIZED: Use cached kernel
+        # Expand text mask slightly to protect text
+        protection_kernel = self._get_morphological_kernel('ellipse', (3, 3))
+        text_protection = cv2.dilate(text_mask, protection_kernel, iterations=1)
+        
+        noise_mask = np.zeros_like(binary, dtype=np.uint8)
+        
+        for i in range(1, num_labels):  # Skip background
+            area = stats[i, cv2.CC_STAT_AREA]
+            
+            # Check if this is a small isolated spot
+            if area <= max_noise_area:
+                segment_mask = (labels == i).astype(np.uint8) * 255
+                # Check if it overlaps with text
+                segment_overlaps_text = cv2.bitwise_and(segment_mask, text_protection)
+                
+                # Only remove if it doesn't overlap with text (it's isolated noise)
+                if np.count_nonzero(segment_overlaps_text) == 0:
+                    noise_mask[labels == i] = 255
+        
+        # Remove noise spots by inpainting
+        if np.count_nonzero(noise_mask) > 0:
+            if is_color:
+                cleaned_result = cv2.inpaint(result_image, noise_mask, 
+                                            inpaintRadius=1, flags=cv2.INPAINT_TELEA)
+            else:
+                cleaned_result = cv2.inpaint(gray, noise_mask, 
+                                            inpaintRadius=1, flags=cv2.INPAINT_TELEA)
+        else:
+            cleaned_result = result_image.copy()
+        
+        # Now remove grey areas around noise spots
+        # Convert to grayscale if needed
+        if len(cleaned_result.shape) == 3:
+            gray_cleaned = cv2.cvtColor(cleaned_result, cv2.COLOR_BGR2GRAY)
+        else:
+            gray_cleaned = cleaned_result.copy()
+        
+        # Detect grey pixels (not pure white, not pure black)
+        # Grey is typically between 50-200 (adjustable threshold)
+        grey_threshold_low = 50
+        grey_threshold_high = 200
+        
+        # Create mask for grey pixels
+        grey_mask = cv2.inRange(gray_cleaned, grey_threshold_low, grey_threshold_high)
+        
+        # OPTIMIZED: Use cached kernels
+        # Expand noise mask to include surrounding grey areas
+        dilate_kernel = self._get_morphological_kernel('ellipse', (5, 5))
+        noise_expanded = cv2.dilate(noise_mask, dilate_kernel, iterations=2)
+        
+        # Combine: grey areas around noise spots
+        grey_around_noise = cv2.bitwise_and(grey_mask, noise_expanded)
+        
+        # Protect text areas - don't whiten grey near text
+        text_protection_grey = cv2.dilate(text_mask, dilate_kernel, iterations=2)
+        
+        # Only whiten grey areas that don't overlap with text
+        grey_to_whiten = cv2.bitwise_and(grey_around_noise, cv2.bitwise_not(text_protection_grey))
+        
+        # Whiten grey areas (set to 255)
+        if np.count_nonzero(grey_to_whiten) > 0:
+            if is_color:
+                cleaned_result[grey_to_whiten > 0] = [255, 255, 255]
+            else:
+                cleaned_result[grey_to_whiten > 0] = 255
+        
+        if self.debug:
+            noise_pixels = np.count_nonzero(noise_mask)
+            grey_pixels = np.count_nonzero(grey_to_whiten)
+            if noise_pixels > 0:
+                print(f"    Noise spot cleanup: Removed {noise_pixels} small isolated noise pixels")
+            if grey_pixels > 0:
+                print(f"    Grey area cleanup: Whitened {grey_pixels} grey pixels around noise spots")
+        
+        return cleaned_result
+
+    def _remove_grey_line_remnants(self, result_image, text_mask):
+        """
+        Remove grey line remnants left after inpainting.
+        These are grey pixels (not pure white/black) that form line-like structures
+        where table lines were removed. They should be whitened for better OCR.
+        
+        Strategy:
+        1. Detect grey pixels (intermediate intensity values)
+        2. Check if they form horizontal or vertical line-like structures
+        3. Whitening grey lines while protecting text areas
+        
+        Args:
+            result_image: Image after line removal and inpainting
+            text_mask: Binary mask of text regions (to protect)
+        
+        Returns:
+            Cleaned image with grey line remnants whitened
+        """
+        if len(result_image.shape) == 3:
+            gray = cv2.cvtColor(result_image, cv2.COLOR_BGR2GRAY)
+            is_color = True
+        else:
+            gray = result_image.copy()
+            is_color = False
+        
+        img_h, img_w = gray.shape[:2]
+        img_diagonal = np.sqrt(img_h**2 + img_w**2)
+        
+        # Detect grey pixels (not pure white 255, not pure black 0)
+        # Use wider range to catch faint grey: 40-245 (more aggressive)
+        grey_threshold_low = 40
+        grey_threshold_high = 245
+        grey_mask = cv2.inRange(gray, grey_threshold_low, grey_threshold_high)
+        
+        # OPTIMIZED: Use cached kernels
+        # Protect text areas - don't whiten grey near text
+        protection_kernel_5 = self._get_morphological_kernel('ellipse', (5, 5))
+        text_protection = cv2.dilate(text_mask, protection_kernel_5, iterations=2)
+        
+        # Only process grey pixels that are NOT near text
+        grey_to_process = cv2.bitwise_and(grey_mask, cv2.bitwise_not(text_protection))
+        
+        if np.count_nonzero(grey_to_process) == 0:
+            return result_image.copy()
+        
+        # Detect line-like structures in grey areas (more aggressive detection)
+        # Horizontal grey lines - use longer kernels to catch more segments
+        h_kernel_length = max(img_w // 20, 20)  # Longer kernel
+        h_kernel = self._get_morphological_kernel('rect', (h_kernel_length, 1))
+        h_grey_lines = cv2.morphologyEx(grey_to_process, cv2.MORPH_OPEN, h_kernel, iterations=1)
+        # More aggressive dilation to connect broken segments
+        h_dilate = self._get_morphological_kernel('rect', (max(img_w // 30, 8), 1))
+        h_grey_lines = cv2.dilate(h_grey_lines, h_dilate, iterations=2)  # More iterations
+        
+        # Vertical grey lines - use longer kernels
+        v_kernel_length = max(img_h // 20, 20)  # Longer kernel
+        v_kernel = self._get_morphological_kernel('rect', (1, v_kernel_length))
+        v_grey_lines = cv2.morphologyEx(grey_to_process, cv2.MORPH_OPEN, v_kernel, iterations=1)
+        # More aggressive dilation to connect broken segments
+        v_dilate = self._get_morphological_kernel('rect', (1, max(img_h // 30, 8)))
+        v_grey_lines = cv2.dilate(v_grey_lines, v_dilate, iterations=2)  # More iterations
+        
+        # Combine grey lines
+        grey_lines = cv2.bitwise_or(h_grey_lines, v_grey_lines)
+        
+        # Use connected components to filter by characteristics
+        num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(
+            grey_lines, connectivity=8
+        )
+        
+        min_length = max(8, int(round(img_diagonal / 120)))  # Lower threshold to catch shorter segments
+        max_area = int(round(img_h * img_w / 20))  # More lenient area threshold
+        
+        grey_to_whiten = np.zeros_like(grey_lines, dtype=np.uint8)
+        
+        for i in range(1, num_labels):  # Skip background
+            area = stats[i, cv2.CC_STAT_AREA]
+            width = stats[i, cv2.CC_STAT_WIDTH]
+            height = stats[i, cv2.CC_STAT_HEIGHT]
+            
+            if width > 0 and height > 0:
+                aspect_ratio = max(width / height, height / width)
+                length = max(width, height)
+                
+                # Check overlap with text protection
+                segment_mask = (labels == i).astype(np.uint8) * 255
+                segment_overlaps_text = cv2.bitwise_and(segment_mask, text_protection)
+                overlap_pixels = np.count_nonzero(segment_overlaps_text)
+                segment_pixels = np.count_nonzero(segment_mask)
+                overlap_ratio = overlap_pixels / segment_pixels if segment_pixels > 0 else 0
+                
+                # More lenient: whiten if it's line-like AND doesn't overlap significantly with text
+                # Lower aspect ratio threshold (1.8 instead of 2.0) to catch more grey lines
+                if (aspect_ratio >= 1.8 and length >= min_length and area <= max_area and 
+                    overlap_ratio < 0.2):  # Allow up to 20% overlap
+                    grey_to_whiten[labels == i] = 255
+        
+        # Also whiten isolated grey pixels that are clearly not text (very small grey spots)
+        isolated_grey = cv2.bitwise_and(grey_to_process, cv2.bitwise_not(grey_lines))
+        isolated_labels, isolated_labeled, isolated_stats, _ = cv2.connectedComponentsWithStats(
+            isolated_grey, connectivity=8
+        )
+        
+        # More aggressive: whiten larger isolated grey spots
+        max_isolated_area = max(10, int(round(img_h * img_w * 0.0002)))  # Larger threshold for isolated spots
+        
+        for i in range(1, isolated_labels):
+            area = isolated_stats[i, cv2.CC_STAT_AREA]
+            if area <= max_isolated_area:
+                isolated_mask = (isolated_labeled == i).astype(np.uint8) * 255
+                isolated_overlaps_text = cv2.bitwise_and(isolated_mask, text_protection)
+                overlap_pixels = np.count_nonzero(isolated_overlaps_text)
+                isolated_pixels = np.count_nonzero(isolated_mask)
+                overlap_ratio = overlap_pixels / isolated_pixels if isolated_pixels > 0 else 0
+                
+                # Whitening if it doesn't significantly overlap with text
+                if overlap_ratio < 0.1:  # Allow small overlap
+                    grey_to_whiten[isolated_labeled == i] = 255
+        
+        # Whitening grey lines (set to 255)
+        cleaned_result = result_image.copy()
+        if np.count_nonzero(grey_to_whiten) > 0:
+            if is_color:
+                cleaned_result[grey_to_whiten > 0] = [255, 255, 255]
+            else:
+                cleaned_result[grey_to_whiten > 0] = 255
+        
+        if self.debug:
+            grey_pixels_whitened = np.count_nonzero(grey_to_whiten)
+            if grey_pixels_whitened > 0:
+                print(f"    Grey line cleanup: Whitened {grey_pixels_whitened} grey remnant pixels")
+        
+        return cleaned_result
+
+    def _remove_remaining_line_artifacts(self, result_image, text_mask):
+        """
+        Remove leftover line artifacts from the result image AFTER line removal.
+        These are faint line segments that remain after inpainting and can be mistaken 
+        for "1" or other characters by OCR.
+        
+        Strategy:
+        1. Detect horizontal and vertical line-like structures in the result
+        2. Use aggressive detection to catch even faint lines
+        3. Protect text by checking if lines actually intersect text pixels
+        4. Remove only line artifacts that don't significantly overlap with text
+        
+        Args:
+            result_image: Final image after line removal and inpainting
+            text_mask: Binary mask of text regions (to protect)
+        
+        Returns:
+            Cleaned result image with line artifacts removed
+        """
+        if len(result_image.shape) == 3:
+            gray = cv2.cvtColor(result_image, cv2.COLOR_BGR2GRAY)
+            is_color = True
+        else:
+            gray = result_image.copy()
+            is_color = False
+        
+        img_h, img_w = gray.shape[:2]
+        img_diagonal = np.sqrt(img_h**2 + img_w**2)
+        
+        # Binarize to find dark content (including faint lines)
+        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+        
+        # OPTIMIZED: Use cached kernels
+        # AGGRESSIVE detection of horizontal line artifacts (catch even faint lines)
+        h_kernel_length = max(img_w // 30, 20)  # Longer kernel to catch more segments
+        h_kernel = self._get_morphological_kernel('rect', (h_kernel_length, 1))
+        h_artifacts = cv2.morphologyEx(binary, cv2.MORPH_OPEN, h_kernel, iterations=1)
+        # Dilate to connect broken segments
+        h_dilate = self._get_morphological_kernel('rect', (max(img_w // 50, 5), 1))
+        h_artifacts = cv2.dilate(h_artifacts, h_dilate, iterations=1)
+        
+        # AGGRESSIVE detection of vertical line artifacts
+        v_kernel_length = max(img_h // 30, 20)  # Longer kernel to catch more segments
+        v_kernel = self._get_morphological_kernel('rect', (1, v_kernel_length))
+        v_artifacts = cv2.morphologyEx(binary, cv2.MORPH_OPEN, v_kernel, iterations=1)
+        # Dilate to connect broken segments
+        v_dilate = self._get_morphological_kernel('rect', (1, max(img_h // 50, 5)))
+        v_artifacts = cv2.dilate(v_artifacts, v_dilate, iterations=1)
+        
+        # Combine artifacts
+        line_artifacts = cv2.bitwise_or(h_artifacts, v_artifacts)
+        
+        # Use connected components to check each segment individually
+        num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(
+            line_artifacts, connectivity=8
+        )
+        
+        removal_mask = np.zeros_like(line_artifacts, dtype=np.uint8)
+        
+        # Filter criteria for line artifacts
+        min_length = max(8, int(round(img_diagonal / 120)))  # Lower threshold to catch shorter segments
+        max_area = int(round(img_h * img_w / 30))  # Max 3.3% of image (more lenient)
+        
+        # OPTIMIZED: Use cached kernel
+        # Small protection buffer around text (only 2-3 pixels)
+        protection_kernel_3 = self._get_morphological_kernel('ellipse', (3, 3))
+        text_protection_small = cv2.dilate(text_mask, protection_kernel_3, iterations=1)
+        
+        for i in range(1, num_labels):  # Skip background
+            area = stats[i, cv2.CC_STAT_AREA]
+            width = stats[i, cv2.CC_STAT_WIDTH]
+            height = stats[i, cv2.CC_STAT_HEIGHT]
+            
+            # Check if it's line-like (elongated)
+            if width > 0 and height > 0:
+                aspect_ratio = max(width / height, height / width)
+                length = max(width, height)
+                
+                # Check if this segment overlaps significantly with text
+                segment_mask = (labels == i).astype(np.uint8) * 255
+                segment_overlaps_text = cv2.bitwise_and(segment_mask, text_protection_small)
+                overlap_pixels = np.count_nonzero(segment_overlaps_text)
+                segment_pixels = np.count_nonzero(segment_mask)
+                overlap_ratio = overlap_pixels / segment_pixels if segment_pixels > 0 else 0
+                
+                # Remove if it's line-like AND doesn't significantly overlap with text
+                # Allow up to 20% overlap (lines can be very close to text)
+                if (aspect_ratio >= 2.5 and length >= min_length and area <= max_area and 
+                    overlap_ratio < 0.2):
+                    removal_mask[labels == i] = 255
+        
+        # Remove artifacts via inpainting
+        if np.count_nonzero(removal_mask) > 0:
+            if is_color:
+                cleaned_result = cv2.inpaint(result_image, removal_mask, 
+                                            inpaintRadius=3, flags=cv2.INPAINT_TELEA)
+            else:
+                cleaned_result = cv2.inpaint(gray, removal_mask, 
+                                            inpaintRadius=3, flags=cv2.INPAINT_TELEA)
+        else:
+            cleaned_result = result_image.copy()
+        
+        if self.debug:
+            artifacts_removed = np.count_nonzero(removal_mask)
+            if artifacts_removed > 0:
+                print(f"    Artifact cleanup: Removed {artifacts_removed} leftover line artifact pixels")
+        
+        return cleaned_result
+
+    def _detect_table_lines_aggressive(self, image):
+        """
+        Aggressive table line detection - prioritizes finding lines over caution.
+        """
+        # OPTIMIZED: Avoid unnecessary copy if already grayscale and contiguous
+        if len(image.shape) == 3:
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        else:
+            gray = image if image.flags['C_CONTIGUOUS'] else image.copy()
+        
+        # Binarize
+        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+        
+        img_h, img_w = image.shape[:2]
+        
+        # OPTIMIZED: Use cached kernels
+        # AGGRESSIVE horizontal line detection
+        # Use shorter kernel to catch even partial lines
+        h_kernel_length = max(img_w // 30, 20)
+        h_kernel = self._get_morphological_kernel('rect', (h_kernel_length, 1))
+        horizontal_lines = cv2.morphologyEx(binary, cv2.MORPH_OPEN, h_kernel, iterations=1)
+        
+        # Dilate horizontally to connect broken lines
+        h_dilate_kernel = self._get_morphological_kernel('rect', (max(img_w // 40, 10), 1))
+        horizontal_lines = cv2.dilate(horizontal_lines, h_dilate_kernel, iterations=2)
+        
+        # Make lines thicker vertically to ensure full coverage
+        h_thicken = self._get_morphological_kernel('rect', (1, 5))
+        horizontal_lines = cv2.dilate(horizontal_lines, h_thicken, iterations=1)
+        
+        # AGGRESSIVE vertical line detection
+        v_kernel_length = max(img_h // 30, 20)
+        v_kernel = self._get_morphological_kernel('rect', (1, v_kernel_length))
+        vertical_lines = cv2.morphologyEx(binary, cv2.MORPH_OPEN, v_kernel, iterations=1)
+        
+        # Dilate vertically to connect broken lines
+        v_dilate_kernel = self._get_morphological_kernel('rect', (1, max(img_h // 40, 10)))
+        vertical_lines = cv2.dilate(vertical_lines, v_dilate_kernel, iterations=2)
+        
+        # Make lines thicker horizontally to ensure full coverage
+        v_thicken = self._get_morphological_kernel('rect', (5, 1))
+        vertical_lines = cv2.dilate(vertical_lines, v_thicken, iterations=1)
+        
+        if self.debug:
+            self.save_debug_image(horizontal_lines, 
+                                "detected_h_lines_aggressive.jpg", 
+                                "Aggressive horizontal line detection")
+            self.save_debug_image(vertical_lines, 
+                                "detected_v_lines_aggressive.jpg", 
+                                "Aggressive vertical line detection")
+        
+        return horizontal_lines, vertical_lines
+
+    def remove_table_lines(self, image):
+        """
+        OPTIMIZED: Smart table line removal with intelligent thinning near text.
+        
+        Algorithm:
+        1. Apply adaptive sharpening (from line_detection.py approach)
+        2. Detect lines aggressively (catch all possible lines)
+        3. Detect text blobs accurately
+        4. Thin lines near text (reduce width instead of complete protection)
+        5. Remove thinned lines - this preserves text while removing most of the line
+        6. Inpaint safely
+        """
+        # Work with color image
+        if len(image.shape) == 2:
+            image_color = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+        else:
+            image_color = image.copy()
+        
+        # Use cached dimensions
+        img_h, img_w, img_diagonal, img_area = self.get_image_dimensions(image)
+        
+        if self.debug:
+            print("  Using smart line thinning near text (optimized)...")
+        
+        # Step 0: Apply adaptive sharpening to original image
+        if self.debug:
+            print("  Applying adaptive sharpening to original image...")
+        sharpened_image = self._apply_adaptive_sharpening(image, img_name=None, strict_validation=False)
+        
+        # Step 1: Detect lines aggressively (on sharpened image)
+        h_lines, v_lines = self._detect_table_lines_aggressive(sharpened_image)
+        
+        # Step 2: Detect text blobs accurately (on sharpened image)
+        text_mask = self._detect_text_blobs(sharpened_image, cells=None)
+        
+        # Step 3: Calculate protection radius (adaptive)
+        protection_radius = max(5, int(round(img_diagonal / 400)))
+        
+        if self.debug:
+            print(f"    Protection radius around text: {protection_radius} pixels")
+        
+        # Step 4: Thin lines near text (smart approach - reduces width, not complete removal)
+        thinned_h_lines, thinned_v_lines = self._thin_lines_near_text(
+            h_lines, v_lines, text_mask, protection_radius
+        )
+        
+        # Step 5: Combine thinned lines for removal
+        removal_mask = cv2.bitwise_or(thinned_h_lines, thinned_v_lines)
+        
+        # Step 6: Final safety check - never remove text itself
+        removal_mask = cv2.bitwise_and(removal_mask, cv2.bitwise_not(text_mask))
+        
+        if self.debug:
+            self.save_debug_image(cv2.bitwise_or(h_lines, v_lines), 
+                                "combined_lines_detected.jpg", 
+                                "All detected lines (original)")
+            self.save_debug_image(removal_mask, 
+                                "removal_mask_thinned.jpg", 
+                                "Lines to remove (thinned near text)")
+            
+            # Visualization
+            vis = image_color.copy()
+            vis[removal_mask > 0] = [0, 255, 0]  # Green = will remove
+            vis[text_mask > 0] = [255, 0, 0]  # Red = protected text
+            # Show original lines that were thinned (cyan)
+            original_lines = cv2.bitwise_or(h_lines, v_lines)
+            thinned_away = cv2.bitwise_and(original_lines, cv2.bitwise_not(removal_mask))
+            thinned_away = cv2.bitwise_and(thinned_away, cv2.bitwise_not(text_mask))
+            vis[thinned_away > 0] = [255, 255, 0]  # Cyan = thinned away near text
+            self.save_debug_image(vis, 
+                                "removal_preview_thinned.jpg", 
+                                "Green=Remove, Red=Text, Cyan=Thinned")
+        
+        # Step 7: Safe inpainting with improved parameters
+        inpaint_radius = max(5, int(round(img_diagonal / 350)))  # Slightly larger radius for better coverage
+        
+        result = cv2.inpaint(image_color, removal_mask, 
+                           inpaintRadius=inpaint_radius, 
+                           flags=cv2.INPAINT_TELEA)
+        
+        # Additional pass: whiten very light grey areas (close to white) that might remain
+        if len(result.shape) == 3:
+            gray_result = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
+        else:
+            gray_result = result.copy()
+        
+        # OPTIMIZED: Use cached kernel
+        # Whitening very light grey (200-254) that's not near text
+        very_light_grey = cv2.inRange(gray_result, 200, 254)
+        protection_kernel_3 = self._get_morphological_kernel('ellipse', (3, 3))
+        text_protection_light = cv2.dilate(text_mask, protection_kernel_3, iterations=1)
+        light_grey_to_whiten = cv2.bitwise_and(very_light_grey, cv2.bitwise_not(text_protection_light))
+        
+        if np.count_nonzero(light_grey_to_whiten) > 0:
+            if len(result.shape) == 3:
+                result[light_grey_to_whiten > 0] = [255, 255, 255]
+            else:
+                result[light_grey_to_whiten > 0] = 255
+        
+        # Step 8: Remove grey line remnants left after inpainting
+        result = self._remove_grey_line_remnants(result, text_mask)
+        
+        # Step 9: Remove small isolated noise spots FIRST (one-pixel dark dots)
+        result = self._remove_small_noise_spots(result, text_mask)
+        
+        # Step 10: Remove leftover line artifacts (cleanup for OCR)
+        result = self._remove_remaining_line_artifacts(result, text_mask)
+        
+        if self.debug:
+            pixels_removed = np.count_nonzero(removal_mask)
+            pixels_thinned = np.count_nonzero(cv2.bitwise_and(
+                cv2.bitwise_or(h_lines, v_lines), 
+                cv2.bitwise_not(removal_mask)
+            ))
+            img_area = img_h * img_w
+            removal_percent = (pixels_removed / img_area) * 100
+            print(f"    ✓ Removed {pixels_removed} pixels ({removal_percent:.2f}%)")
+            print(f"    ✓ Thinned {pixels_thinned} line pixels near text (preserved)")
+        
+        return result
+
+    def _filter_text_using_smart_cell_analysis(self, text_mask, h_lines, v_lines, cells, image_shape):
+        """
+        OPTIMIZED: Smart filtering of text to remove line artifacts while preserving real text.
+        
+        Optimizations:
+        - Quick bounding box checks before creating masks
+        - Spatial cell filtering (only check nearby cells)
+        - Cache component coordinates
+        - Simplified line thickness calculation
+        
+        Args:
+            text_mask: Binary mask of detected text
+            h_lines: Horizontal lines mask (dilated)
+            v_lines: Vertical lines mask (dilated)
+            cells: List of cell dicts with 'bbox' keys
+            image_shape: Shape of image (h, w)
+        
+        Returns:
+            Filtered text mask with line artifacts removed
+        """
+        img_h, img_w = image_shape[:2]
+        
+        # Step 1: Simplified line thickness calculation (faster approximation)
+        h_line_thickness = self._calculate_line_thickness_fast(h_lines)
+        v_line_thickness = self._calculate_line_thickness_fast(v_lines)
+        avg_line_thickness = (h_line_thickness + v_line_thickness) / 2
+        
+        if self.debug:
+            print(f"    Line thickness: H={h_line_thickness:.1f}px, V={v_line_thickness:.1f}px, Avg={avg_line_thickness:.1f}px")
+        
+        # Step 2: Create reduced cells (shrink by line thickness)
+        reduced_cells = self._create_cells_reduced_by_line_thickness(
+            cells, avg_line_thickness, img_h, img_w
+        )
+        
+        # Step 3: Pre-compute line regions for fast spatial queries
+        # Create ROI masks for lines (only where lines exist)
+        all_lines = cv2.bitwise_or(h_lines, v_lines)
+        
+        # Step 4: Analyze each text component with optimizations
+        num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(
+            text_mask, connectivity=8
+        )
+        
+        filtered_text_mask = np.zeros_like(text_mask, dtype=np.uint8)
+        
+        stats_tracking = {
+            'total_components': num_labels - 1,
+            'extends_into_cell': 0,
+            'isolated_on_line': 0,
+            'not_touching_line': 0,
+            'kept_for_safety': 0
+        }
+        
+        # OPTIMIZED: Vectorized bbox extraction (faster than loop)
+        areas = stats[1:num_labels, cv2.CC_STAT_AREA]
+        widths = stats[1:num_labels, cv2.CC_STAT_WIDTH]
+        heights = stats[1:num_labels, cv2.CC_STAT_HEIGHT]
+        xs = stats[1:num_labels, cv2.CC_STAT_LEFT]
+        ys = stats[1:num_labels, cv2.CC_STAT_TOP]
+        
+        for i in range(1, num_labels):  # Skip background
+            idx = i - 1  # Index into vectorized arrays
+            area = areas[idx]
+            width = widths[idx]
+            height = heights[idx]
+            x = xs[idx]
+            y = ys[idx]
+            bbox = (x, y, x + width, y + height)
+            
+            # OPTIMIZATION 1: Quick bounding box check for line overlap (no mask creation)
+            touching_result = self._check_text_touching_lines_fast(
+                labels, i, bbox, all_lines, h_lines, v_lines, width, height
+            )
+            
+            if not touching_result['is_touching']:
+                # Not touching any line - it's real text, KEEP (fast path)
+                filtered_text_mask[labels == i] = 255
+                stats_tracking['not_touching_line'] += 1
+                continue
+            
+            # OPTIMIZATION 2: Only create component mask if we need detailed analysis
+            component_mask = (labels == i).astype(np.uint8) * 255
+            
+            # OPTIMIZATION 3: Spatial cell filtering - only check nearby cells
+            nearby_cells = self._get_nearby_cells(bbox, reduced_cells, cells, margin=20)
+            
+            # Step 4b: Text touches line - check if it extends into reduced cell (only nearby cells)
+            extension_info = self._check_extension_into_reduced_cells_fast(
+                component_mask, nearby_cells, touching_result['line_direction']
+            )
+            
+            if extension_info['extends_into_cell']:
+                # Extends into cell interior - real text, KEEP
+                filtered_text_mask[labels == i] = 255
+                stats_tracking['extends_into_cell'] += 1
+                
+                if self.debug:
+                    print(f"      ✓ KEEP: Text extends {extension_info['extension_distance']:.1f}px into cell")
+                continue
+            
+            # Step 4c: Check if it's isolated line artifact (use cached coords if available)
+            is_artifact = self._is_isolated_line_artifact_fast(
+                component_mask, area, width, height,
+                touching_result, extension_info
+            )
+            
+            if is_artifact:
+                # Isolated line artifact - REMOVE
+                stats_tracking['isolated_on_line'] += 1
+                
+                if self.debug:
+                    print(f"      ✗ REMOVE: Isolated artifact on line (area={area}, "
+                          f"aspect={touching_result['aspect_ratio']:.2f}, "
+                          f"overlap={touching_result['overlap_ratio']:.2f})")
+                continue
+            
+            # Step 4d: Uncertain case - keep for safety
+            filtered_text_mask[labels == i] = 255
+            stats_tracking['kept_for_safety'] += 1
+            
+            if self.debug:
+                print(f"      ? KEEP (uncertain): area={area}, touching={touching_result['is_touching']}")
+        
+        # Print statistics
+        if self.debug:
+            print(f"    Smart filtering results:")
+            print(f"      Total components: {stats_tracking['total_components']}")
+            print(f"      ✓ Extends into cell: {stats_tracking['extends_into_cell']}")
+            print(f"      ✓ Not touching lines: {stats_tracking['not_touching_line']}")
+            print(f"      ✗ Isolated on line (removed): {stats_tracking['isolated_on_line']}")
+            print(f"      ? Kept for safety: {stats_tracking['kept_for_safety']}")
+            
+            # Save debug visualization
+            self._save_filtering_visualization(
+                text_mask, filtered_text_mask, all_lines, reduced_cells, cells, image_shape
+            )
+        
+        return filtered_text_mask
+
+    def _calculate_line_thickness_fast(self, line_mask):
+        """
+        Fast approximation of line thickness using morphological operations.
+        Much faster than coordinate-based calculation.
+        
+        Args:
+            line_mask: Binary mask of lines
+        
+        Returns:
+            Average line thickness in pixels
+        """
+        if np.count_nonzero(line_mask) == 0:
+            return 3.0
+        
+        # OPTIMIZED: Use cached kernel
+        # Use erosion to estimate thickness
+        # Count how many erosions until line disappears
+        kernel = self._get_morphological_kernel('rect', (3, 3))
+        eroded = line_mask.copy()
+        thickness = 0
+        
+        for _ in range(10):  # Max 10 iterations
+            if np.count_nonzero(eroded) == 0:
+                break
+            eroded = cv2.erode(eroded, kernel, iterations=1)
+            thickness += 1
+        
+        # Thickness = 2 * iterations + 1 (approximate)
+        return max(3.0, thickness * 2 + 1)
+    
+    def _calculate_line_thickness(self, line_mask, is_horizontal=True):
+        """
+        Calculate average thickness of lines in the mask.
+        
+        Args:
+            line_mask: Binary mask of lines
+            is_horizontal: True for horizontal lines, False for vertical
+        
+        Returns:
+            Average line thickness in pixels
+        """
+        if np.count_nonzero(line_mask) == 0:
+            return 3.0  # Default thickness
+        
+        # Get line coordinates
+        coords = np.column_stack(np.where(line_mask > 0))
+        if len(coords) == 0:
+            return 3.0
+        
+        if is_horizontal:
+            # For horizontal lines, measure vertical thickness
+            # Group by approximate Y position
+            y_coords = coords[:, 0]
+            unique_y = np.unique(y_coords)
+            
+            thicknesses = []
+            for y in unique_y:
+                y_range = coords[coords[:, 0] == y]
+                if len(y_range) > 0:
+                    # Find vertical extent at this Y position
+                    nearby_y = coords[np.abs(coords[:, 0] - y) <= 10]
+                    if len(nearby_y) > 0:
+                        thickness = np.max(nearby_y[:, 0]) - np.min(nearby_y[:, 0]) + 1
+                        thicknesses.append(thickness)
+            
+            return np.median(thicknesses) if thicknesses else 3.0
+        else:
+            # For vertical lines, measure horizontal thickness
+            x_coords = coords[:, 1]
+            unique_x = np.unique(x_coords)
+            
+            thicknesses = []
+            for x in unique_x:
+                x_range = coords[coords[:, 1] == x]
+                if len(x_range) > 0:
+                    # Find horizontal extent at this X position
+                    nearby_x = coords[np.abs(coords[:, 1] - x) <= 10]
+                    if len(nearby_x) > 0:
+                        thickness = np.max(nearby_x[:, 1]) - np.min(nearby_x[:, 1]) + 1
+                        thicknesses.append(thickness)
+            
+            return np.median(thicknesses) if thicknesses else 3.0
+
+    def _create_cells_reduced_by_line_thickness(self, cells, line_thickness, img_h, img_w):
+        """
+        Create reduced cells by shrinking them by line thickness.
+        
+        Args:
+            cells: Original cell list
+            line_thickness: Average line thickness in pixels
+            img_h, img_w: Image dimensions
+        
+        Returns:
+            List of reduced cell dicts
+        """
+        reduced_cells = []
+        
+        # Use line thickness as reduction amount (at least 3px)
+        reduction = max(3, int(round(line_thickness)))
+        
+        for cell in cells:
+            x, y, w, h = cell['bbox']
+            
+            # Shrink cell from all sides by line thickness
+            reduced_x = x + reduction
+            reduced_y = y + reduction
+            reduced_w = max(1, w - 2 * reduction)
+            reduced_h = max(1, h - 2 * reduction)
+            
+            # Ensure within image bounds
+            reduced_x = max(0, min(img_w - 1, reduced_x))
+            reduced_y = max(0, min(img_h - 1, reduced_y))
+            reduced_w = min(reduced_w, img_w - reduced_x)
+            reduced_h = min(reduced_h, img_h - reduced_y)
+            
+            if reduced_w > 0 and reduced_h > 0:
+                reduced_cells.append({
+                    'bbox': [reduced_x, reduced_y, reduced_w, reduced_h],
+                    'original_bbox': [x, y, w, h],
+                    'reduction': reduction
+                })
+        
+        return reduced_cells
+
+    def _check_text_touching_lines_fast(self, labels, label_idx, bbox, all_lines, h_lines, v_lines, width, height):
+        """
+        OPTIMIZED: Fast check if text touches lines using bounding box ROI instead of full mask.
+        
+        Args:
+            labels: Labeled image from connected components
+            label_idx: Component label index
+            bbox: Bounding box (x1, y1, x2, y2)
+            all_lines: Combined line mask
+            h_lines: Horizontal lines mask
+            v_lines: Vertical lines mask
+            width, height: Component dimensions
+        
+        Returns:
+            Dict with touching information
+        """
+        x1, y1, x2, y2 = bbox
+        
+        # Expand ROI slightly to catch nearby lines
+        margin = 5
+        roi_x1 = max(0, x1 - margin)
+        roi_y1 = max(0, y1 - margin)
+        roi_x2 = min(all_lines.shape[1], x2 + margin)
+        roi_y2 = min(all_lines.shape[0], y2 + margin)
+        
+        # Extract ROI from labels and line masks
+        labels_roi = labels[roi_y1:roi_y2, roi_x1:roi_x2]
+        component_roi = (labels_roi == label_idx).astype(np.uint8) * 255
+        
+        all_lines_roi = all_lines[roi_y1:roi_y2, roi_x1:roi_x2]
+        h_lines_roi = h_lines[roi_y1:roi_y2, roi_x1:roi_x2]
+        v_lines_roi = v_lines[roi_y1:roi_y2, roi_x1:roi_x2]
+        
+        # Calculate overlap with lines (much faster on smaller ROI)
+        overlap = cv2.bitwise_and(component_roi, all_lines_roi)
+        overlap_pixels = np.count_nonzero(overlap)
+        component_pixels = np.count_nonzero(component_roi)
+        overlap_ratio = overlap_pixels / component_pixels if component_pixels > 0 else 0
+        
+        # Determine which type of line it touches
+        h_overlap = cv2.bitwise_and(component_roi, h_lines_roi)
+        v_overlap = cv2.bitwise_and(component_roi, v_lines_roi)
+        h_overlap_pixels = np.count_nonzero(h_overlap)
+        v_overlap_pixels = np.count_nonzero(v_overlap)
+        
+        # Determine primary line direction
+        if h_overlap_pixels > v_overlap_pixels:
+            line_direction = 'horizontal'
+        elif v_overlap_pixels > h_overlap_pixels:
+            line_direction = 'vertical'
+        else:
+            line_direction = 'both'
+        
+        # Calculate aspect ratio from dimensions (no coordinate extraction needed)
+        aspect_ratio = max(width / (height + 1e-5), height / (width + 1e-5))
+        
+        return {
+            'is_touching': overlap_ratio > 0.1,  # At least 10% overlap
+            'overlap_ratio': overlap_ratio,
+            'line_direction': line_direction,
+            'h_overlap_pixels': h_overlap_pixels,
+            'v_overlap_pixels': v_overlap_pixels,
+            'aspect_ratio': aspect_ratio
+        }
+    
+    def _get_nearby_cells(self, bbox, reduced_cells, original_cells, margin=20):
+        """
+        Get only cells that are near the component's bounding box (spatial filtering).
+        
+        Args:
+            bbox: Component bounding box (x1, y1, x2, y2)
+            reduced_cells: List of reduced cell dicts
+            original_cells: List of original cell dicts
+            margin: Margin to expand search area
+        
+        Returns:
+            List of tuples (reduced_cell, original_cell) for nearby cells
+        """
+        x1, y1, x2, y2 = bbox
+        
+        # Expand search area
+        search_x1 = x1 - margin
+        search_y1 = y1 - margin
+        search_x2 = x2 + margin
+        search_y2 = y2 + margin
+        
+        nearby = []
+        for reduced_cell, orig_cell in zip(reduced_cells, original_cells):
+            rx, ry, rw, rh = reduced_cell['bbox']
+            rx2, ry2 = rx + rw, ry + rh
+            
+            # Check if cell overlaps with search area
+            if not (rx2 < search_x1 or rx > search_x2 or ry2 < search_y1 or ry > search_y2):
+                nearby.append((reduced_cell, orig_cell))
+        
+        return nearby
+    
+    def _check_extension_into_reduced_cells_fast(self, component_mask, nearby_cells, line_direction):
+        """
+        OPTIMIZED: Check if text extends into reduced cell interior (only checks nearby cells).
+        
+        Args:
+            component_mask: Binary mask of text component
+            nearby_cells: List of (reduced_cell, original_cell) tuples (spatially filtered)
+            line_direction: Direction of line ('horizontal', 'vertical', 'both')
+        
+        Returns:
+            Dict with extension information
+        """
+        img_h, img_w = component_mask.shape[:2]
+        max_extension = 0
+        extends_into_cell = False
+        touching_cell_idx = -1
+        
+        # Minimum extension to be considered real text (in pixels)
+        min_extension = 3
+        
+        # Get component coordinates once (cache)
+        comp_coords = np.column_stack(np.where(component_mask > 0))
+        if len(comp_coords) == 0:
+            return {
+                'extends_into_cell': False,
+                'extension_distance': 0,
+                'cell_index': -1
+            }
+        
+        comp_y_min = np.min(comp_coords[:, 0])
+        comp_y_max = np.max(comp_coords[:, 0])
+        comp_x_min = np.min(comp_coords[:, 1])
+        comp_x_max = np.max(comp_coords[:, 1])
+        
+        for idx, (reduced_cell, orig_cell) in enumerate(nearby_cells):
+            x_red, y_red, w_red, h_red = reduced_cell['bbox']
+            x_red2, y_red2 = x_red + w_red, y_red + h_red
+            
+            # Quick bounding box check first (no mask creation)
+            if comp_x_max < x_red or comp_x_min > x_red2 or comp_y_max < y_red or comp_y_min > y_red2:
+                continue  # No overlap, skip
+            
+            # Only create mask if bounding boxes overlap
+            reduced_mask = np.zeros((img_h, img_w), dtype=np.uint8)
+            cv2.rectangle(reduced_mask, (int(x_red), int(y_red)), 
+                         (int(x_red2), int(y_red2)), 255, -1)
+            
+            # Check overlap with reduced cell
+            overlap = cv2.bitwise_and(component_mask, reduced_mask)
+            overlap_pixels = np.count_nonzero(overlap)
+            
+            if overlap_pixels >= min_extension:
+                # Calculate extension using cached coordinates
+                if line_direction == 'horizontal':
+                    # Measure vertical extension into cell
+                    extension = min(comp_y_max - y_red, y_red2 - comp_y_min)
+                elif line_direction == 'vertical':
+                    # Measure horizontal extension into cell
+                    extension = min(comp_x_max - x_red, x_red2 - comp_x_min)
+                else:  # both
+                    # Measure both directions
+                    comp_y_span = comp_y_max - comp_y_min
+                    comp_x_span = comp_x_max - comp_x_min
+                    extension = min(comp_y_span, comp_x_span)
+                
+                if extension > max_extension:
+                    max_extension = extension
+                    touching_cell_idx = idx
+                
+                if extension >= min_extension:
+                    extends_into_cell = True
+        
+        return {
+            'extends_into_cell': extends_into_cell,
+            'extension_distance': max_extension,
+            'cell_index': touching_cell_idx
+        }
+    
+    def _is_isolated_line_artifact_fast(self, component_mask, area, width, height,
+                                        touching_result, extension_info):
+        """
+        OPTIMIZED: Determine if component is an isolated line artifact (uses cached data).
+        
+        Args:
+            component_mask: Binary mask of component
+            area: Component area
+            width, height: Component dimensions
+            touching_result: Dict from _check_text_touching_lines_fast
+            extension_info: Dict from _check_extension_into_reduced_cells_fast
+        
+        Returns:
+            True if it's a line artifact, False otherwise
+        """
+        # Check 1: Must touch lines significantly
+        if touching_result['overlap_ratio'] < 0.4:
+            return False
+        
+        # Check 2: Must NOT extend into reduced cells
+        if extension_info['extends_into_cell']:
+            return False
+        
+        # Check 3: Must be elongated (line-like)
+        if touching_result['aspect_ratio'] < 3.0:
+            return False
+        
+        # Check 4: Check if aligned with line (straight and narrow)
+        # Only extract coordinates if we need to check straightness
+        if touching_result['overlap_ratio'] > 0.6:
+            coords = np.column_stack(np.where(component_mask > 0))
+            if len(coords) < 3:
+                return True  # Very small, likely artifact
+            
+            # Check straightness
+            if touching_result['line_direction'] == 'horizontal':
+                # Should have low Y variance for horizontal line
+                y_variance = np.var(coords[:, 0])
+                is_straight = y_variance < 4.0
+                is_thin = height <= 5
+            elif touching_result['line_direction'] == 'vertical':
+                # Should have low X variance for vertical line
+                x_variance = np.var(coords[:, 1])
+                is_straight = x_variance < 4.0
+                is_thin = width <= 5
+            else:
+                is_straight = False
+                is_thin = False
+            
+            # It's an artifact if: elongated + straight + thin + high overlap with line
+            return (is_straight and is_thin and touching_result['overlap_ratio'] > 0.6)
+        
+        return False
+    
+    def _check_text_touching_lines(self, component_mask, all_lines, h_lines, v_lines):
+        """
+        Check if text component touches lines and analyze the contact.
+        
+        Args:
+            component_mask: Binary mask of text component
+            all_lines: Combined line mask
+            h_lines: Horizontal lines mask
+            v_lines: Vertical lines mask
+        
+        Returns:
+            Dict with touching information
+        """
+        # Calculate overlap with lines
+        overlap = cv2.bitwise_and(component_mask, all_lines)
+        overlap_pixels = np.count_nonzero(overlap)
+        component_pixels = np.count_nonzero(component_mask)
+        overlap_ratio = overlap_pixels / component_pixels if component_pixels > 0 else 0
+        
+        # Determine which type of line it touches
+        h_overlap = cv2.bitwise_and(component_mask, h_lines)
+        v_overlap = cv2.bitwise_and(component_mask, v_lines)
+        h_overlap_pixels = np.count_nonzero(h_overlap)
+        v_overlap_pixels = np.count_nonzero(v_overlap)
+        
+        # Determine primary line direction
+        if h_overlap_pixels > v_overlap_pixels:
+            line_direction = 'horizontal'
+        elif v_overlap_pixels > h_overlap_pixels:
+            line_direction = 'vertical'
+        else:
+            line_direction = 'both'
+        
+        # Calculate aspect ratio of component
+        coords = np.column_stack(np.where(component_mask > 0))
+        if len(coords) > 0:
+            y_span = np.max(coords[:, 0]) - np.min(coords[:, 0]) + 1
+            x_span = np.max(coords[:, 1]) - np.min(coords[:, 1]) + 1
+            aspect_ratio = max(x_span / (y_span + 1e-5), y_span / (x_span + 1e-5))
+        else:
+            aspect_ratio = 1.0
+        
+        return {
+            'is_touching': overlap_ratio > 0.1,  # At least 10% overlap
+            'overlap_ratio': overlap_ratio,
+            'line_direction': line_direction,
+            'h_overlap_pixels': h_overlap_pixels,
+            'v_overlap_pixels': v_overlap_pixels,
+            'aspect_ratio': aspect_ratio
+        }
+
+    def _check_extension_into_reduced_cells(self, component_mask, reduced_cells, 
+                                            original_cells, line_direction):
+        """
+        Check if text extends into reduced cell interior (away from lines).
+        
+        Args:
+            component_mask: Binary mask of text component
+            reduced_cells: List of reduced cell dicts
+            original_cells: List of original cell dicts
+            line_direction: Direction of line ('horizontal', 'vertical', 'both')
+        
+        Returns:
+            Dict with extension information
+        """
+        img_h, img_w = component_mask.shape[:2]
+        max_extension = 0
+        extends_into_cell = False
+        touching_cell_idx = -1
+        
+        # Minimum extension to be considered real text (in pixels)
+        min_extension = 3
+        
+        for idx, (reduced_cell, orig_cell) in enumerate(zip(reduced_cells, original_cells)):
+            x_red, y_red, w_red, h_red = reduced_cell['bbox']
+            x_orig, y_orig, w_orig, h_orig = orig_cell['bbox']
+            
+            # Create reduced cell mask
+            reduced_mask = np.zeros((img_h, img_w), dtype=np.uint8)
+            cv2.rectangle(reduced_mask, (int(x_red), int(y_red)), 
+                         (int(x_red + w_red), int(y_red + h_red)), 255, -1)
+            
+            # Check overlap with reduced cell
+            overlap = cv2.bitwise_and(component_mask, reduced_mask)
+            overlap_pixels = np.count_nonzero(overlap)
+            
+            if overlap_pixels >= min_extension:
+                # Calculate how far text extends from cell edge into interior
+                # Get component coordinates
+                comp_coords = np.column_stack(np.where(component_mask > 0))
+                
+                if len(comp_coords) > 0:
+                    if line_direction == 'horizontal':
+                        # Measure vertical extension into cell
+                        comp_y_min = np.min(comp_coords[:, 0])
+                        comp_y_max = np.max(comp_coords[:, 0])
+                        
+                        # Distance from top/bottom edge
+                        dist_from_top = max(0, comp_y_min - y_red)
+                        dist_from_bottom = max(0, (y_red + h_red) - comp_y_max)
+                        extension = min(comp_y_max - y_red, y_red + h_red - comp_y_min)
+                        
+                    elif line_direction == 'vertical':
+                        # Measure horizontal extension into cell
+                        comp_x_min = np.min(comp_coords[:, 1])
+                        comp_x_max = np.max(comp_coords[:, 1])
+                        
+                        # Distance from left/right edge
+                        dist_from_left = max(0, comp_x_min - x_red)
+                        dist_from_right = max(0, (x_red + w_red) - comp_x_max)
+                        extension = min(comp_x_max - x_red, x_red + w_red - comp_x_min)
+                        
+                    else:  # both
+                        # Measure both directions
+                        comp_y_span = np.max(comp_coords[:, 0]) - np.min(comp_coords[:, 0])
+                        comp_x_span = np.max(comp_coords[:, 1]) - np.min(comp_coords[:, 1])
+                        extension = min(comp_y_span, comp_x_span)
+                    
+                    if extension > max_extension:
+                        max_extension = extension
+                        touching_cell_idx = idx
+                    
+                    if extension >= min_extension:
+                        extends_into_cell = True
+        
+        return {
+            'extends_into_cell': extends_into_cell,
+            'extension_distance': max_extension,
+            'cell_index': touching_cell_idx
+        }
+
+    def _is_isolated_line_artifact(self, component_mask, all_lines, area, width, height,
+                                    touching_result, extension_info):
+        """
+        Determine if component is an isolated line artifact.
+        
+        Criteria for line artifact:
+        1. High overlap with lines (>60%)
+        2. Doesn't extend into reduced cells
+        3. High aspect ratio (elongated like a line)
+        4. Aligned with line direction
+        
+        Args:
+            component_mask: Binary mask of component
+            all_lines: Combined line mask
+            area: Component area
+            width, height: Component dimensions
+            touching_result: Dict from _check_text_touching_lines
+            extension_info: Dict from _check_extension_into_reduced_cells
+        
+        Returns:
+            True if it's a line artifact, False otherwise
+        """
+        # Check 1: Must touch lines significantly
+        if touching_result['overlap_ratio'] < 0.4:
+            return False
+        
+        # Check 2: Must NOT extend into reduced cells
+        if extension_info['extends_into_cell']:
+            return False
+        
+        # Check 3: Must be elongated (line-like)
+        if touching_result['aspect_ratio'] < 3.0:
+            return False
+        
+        # Check 4: Check if aligned with line (straight and narrow)
+        coords = np.column_stack(np.where(component_mask > 0))
+        if len(coords) < 3:
+            return True  # Very small, likely artifact
+        
+        # Check straightness
+        if touching_result['line_direction'] == 'horizontal':
+            # Should have low Y variance for horizontal line
+            y_variance = np.var(coords[:, 0])
+            is_straight = y_variance < 4.0
+            is_thin = height <= 5
+        elif touching_result['line_direction'] == 'vertical':
+            # Should have low X variance for vertical line
+            x_variance = np.var(coords[:, 1])
+            is_straight = x_variance < 4.0
+            is_thin = width <= 5
+        else:
+            is_straight = False
+            is_thin = False
+        
+        # It's an artifact if: elongated + straight + thin + high overlap with line
+        return (is_straight and is_thin and touching_result['overlap_ratio'] > 0.6)
+
+    def _save_filtering_visualization(self, original_text_mask, filtered_text_mask, 
+                                       all_lines, reduced_cells, original_cells, image_shape):
+        """
+        Save debug visualization showing what was filtered and why.
+        
+        Args:
+            original_text_mask: Text mask before filtering
+            filtered_text_mask: Text mask after filtering
+            all_lines: Combined line mask
+            reduced_cells: List of reduced cells
+            original_cells: List of original cells
+            image_shape: Image shape
+        """
+        img_h, img_w = image_shape[:2]
+        
+        # Create visualization
+        vis = np.ones((img_h, img_w, 3), dtype=np.uint8) * 255
+        
+        # Draw original cells in light blue
+        for cell in original_cells:
+            x, y, w, h = cell['bbox']
+            cv2.rectangle(vis, (int(x), int(y)), (int(x+w), int(y+h)), 
+                         (255, 200, 200), 1)
+        
+        # Draw reduced cells in light green
+        for cell in reduced_cells:
+            x, y, w, h = cell['bbox']
+            cv2.rectangle(vis, (int(x), int(y)), (int(x+w), int(y+h)), 
+                         (200, 255, 200), 1)
+        
+        # Draw lines in gray
+        vis[all_lines > 0] = [128, 128, 128]
+        
+        # Draw filtered out text in red (removed)
+        removed_text = cv2.bitwise_and(original_text_mask, 
+                                       cv2.bitwise_not(filtered_text_mask))
+        vis[removed_text > 0] = [0, 0, 255]
+        
+        # Draw kept text in green
+        vis[filtered_text_mask > 0] = [0, 255, 0]
+        
+        self.save_debug_image(vis, "smart_filtering_result.jpg", 
+                             "Red=Removed artifacts, Green=Kept text, Gray=Lines")
+
+    def remove_lines_using_cell_edges(self, image, cells, img_name):
+        """
+        Aggressive cell-edge-based line removal.
+        """
+        if not cells:
+            if self.debug:
+                print("  No cells provided, falling back to aggressive removal")
+            return self.remove_table_lines(image)
+        
+        # Work with color image
+        if len(image.shape) == 2:
+            image_color = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+        else:
+            image_color = image.copy()
+        
+        # Use cached dimensions
+        img_h, img_w, img_diagonal, img_area = self.get_image_dimensions(image)
+        
+        if self.debug:
+            print(f"  Aggressive cell-edge removal from {len(cells)} cells...")
+        
+        # Step 0: Apply adaptive sharpening to original image
+        if self.debug:
+            print("  Applying adaptive sharpening to original image...")
+        sharpened_image = self._apply_adaptive_sharpening(image, img_name=None, strict_validation=False)
+        
+        # Step 1: Detect all possible lines (on sharpened image)
+        h_lines, v_lines = self._detect_table_lines_aggressive(sharpened_image)
+        
+        # OPTIMIZED: Use cached kernels
+        # Step 1b: Dilate lines for smart filtering (to catch text that's directly on lines)
+        h_dilate_kernel = self._get_morphological_kernel('rect', (1, 5))
+        v_dilate_kernel = self._get_morphological_kernel('rect', (5, 1))
+        h_lines_dilated = cv2.dilate(h_lines, h_dilate_kernel, iterations=1)
+        v_lines_dilated = cv2.dilate(v_lines, v_dilate_kernel, iterations=1)
+        
+        # Step 2: Detect text candidates (on sharpened image)
+        text_candidates = self._detect_text_blobs(sharpened_image, cells=cells)
+        
+        # Step 2b: Apply smart filtering to remove line artifacts
+        text_mask = self._filter_text_using_smart_cell_analysis(
+            text_candidates, h_lines_dilated, v_lines_dilated, cells, 
+            sharpened_image.shape[:2]
+        )
+        
+        # Step 3: Get cell boundary positions
+        cell_h_positions = set()
+        cell_v_positions = set()
+        
+        # Use wider tolerance to catch nearby lines
+        tolerance = max(8, int(round(img_diagonal / 300)))
+        
+        for cell in cells:
+            x, y, w, h = cell['bbox']
+            y_top = int(round(y))
+            y_bottom = int(round(y + h))
+            x_left = int(round(x))
+            x_right = int(round(x + w))
+            
+            cell_h_positions.add(y_top)
+            cell_h_positions.add(y_bottom)
+            cell_v_positions.add(x_left)
+            cell_v_positions.add(x_right)
+        
+        # Step 4: Filter lines near cell boundaries
+        filtered_h_lines = np.zeros_like(h_lines)
+        filtered_v_lines = np.zeros_like(v_lines)
+        
+        for y_pos in cell_h_positions:
+            if 0 <= y_pos < img_h:
+                y_start = max(0, y_pos - tolerance)
+                y_end = min(img_h, y_pos + tolerance + 1)
+                filtered_h_lines[y_start:y_end, :] = np.maximum(
+                    filtered_h_lines[y_start:y_end, :],
+                    h_lines[y_start:y_end, :]
+                )
+        
+        for x_pos in cell_v_positions:
+            if 0 <= x_pos < img_w:
+                x_start = max(0, x_pos - tolerance)
+                x_end = min(img_w, x_pos + tolerance + 1)
+                filtered_v_lines[:, x_start:x_end] = np.maximum(
+                    filtered_v_lines[:, x_start:x_end],
+                    v_lines[:, x_start:x_end]
+                )
+        
+        # Step 5: Calculate protection radius (adaptive)
+        protection_radius = max(5, int(round(img_diagonal / 400)))
+        
+        if self.debug:
+            print(f"    Protection radius around text: {protection_radius} pixels")
+        
+        # Step 6: Thin lines near text (smart approach)
+        thinned_h_lines, thinned_v_lines = self._thin_lines_near_text(
+            filtered_h_lines, filtered_v_lines, text_mask, protection_radius
+        )
+        
+        # Step 7: Combine thinned lines for removal
+        removal_mask = cv2.bitwise_or(thinned_h_lines, thinned_v_lines)
+        
+        # Step 8: Final safety check - never remove text itself
+        removal_mask = cv2.bitwise_and(removal_mask, cv2.bitwise_not(text_mask))
+        
+        if self.debug:
+            original_lines = cv2.bitwise_or(filtered_h_lines, filtered_v_lines)
+            self.save_debug_image(original_lines, 
+                                f"{img_name}_cell_lines_filtered.jpg", 
+                                "Filtered cell lines (original)")
+            self.save_debug_image(removal_mask, 
+                                f"{img_name}_cell_lines_removal_thinned.jpg", 
+                                "Final removal mask (thinned near text)")
+            
+            vis = image_color.copy()
+            vis[removal_mask > 0] = [0, 255, 0]  # Green = will remove
+            vis[text_mask > 0] = [255, 0, 0]  # Red = protected text
+            # Show original lines that were thinned (cyan)
+            thinned_away = cv2.bitwise_and(original_lines, cv2.bitwise_not(removal_mask))
+            thinned_away = cv2.bitwise_and(thinned_away, cv2.bitwise_not(text_mask))
+            vis[thinned_away > 0] = [255, 255, 0]  # Cyan = thinned away near text
+            self.save_debug_image(vis, 
+                                f"{img_name}_removal_preview_thinned.jpg", 
+                                "Green=Remove, Red=Text, Cyan=Thinned")
+        
+        # Step 9: Safe inpainting with improved parameters
+        inpaint_radius = max(5, int(round(img_diagonal / 350)))  # Slightly larger radius for better coverage
+        
+        result = cv2.inpaint(image_color, removal_mask, 
+                           inpaintRadius=inpaint_radius, 
+                           flags=cv2.INPAINT_TELEA)
+        
+        # Additional pass: whiten very light grey areas (close to white) that might remain
+        if len(result.shape) == 3:
+            gray_result = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
+        else:
+            gray_result = result.copy()
+        
+        # OPTIMIZED: Use cached kernel
+        # Whitening very light grey (200-254) that's not near text
+        very_light_grey = cv2.inRange(gray_result, 200, 254)
+        protection_kernel_3 = self._get_morphological_kernel('ellipse', (3, 3))
+        text_protection_light = cv2.dilate(text_mask, protection_kernel_3, iterations=1)
+        light_grey_to_whiten = cv2.bitwise_and(very_light_grey, cv2.bitwise_not(text_protection_light))
+        
+        if np.count_nonzero(light_grey_to_whiten) > 0:
+            if len(result.shape) == 3:
+                result[light_grey_to_whiten > 0] = [255, 255, 255]
+            else:
+                result[light_grey_to_whiten > 0] = 255
+        
+        # Step 10: Remove grey line remnants left after inpainting
+        result = self._remove_grey_line_remnants(result, text_mask)
+        
+        # Step 11: Remove small isolated noise spots FIRST (one-pixel dark dots)
+        result = self._remove_small_noise_spots(result, text_mask)
+        
+        # Step 12: Remove leftover line artifacts (cleanup for OCR)
+        result = self._remove_remaining_line_artifacts(result, text_mask)
+        
+        if self.debug:
+            pixels_removed = np.count_nonzero(removal_mask)
+            original_lines = cv2.bitwise_or(filtered_h_lines, filtered_v_lines)
+            pixels_thinned = np.count_nonzero(cv2.bitwise_and(
+                original_lines, 
+                cv2.bitwise_not(removal_mask)
+            ))
+            print(f"    ✓ Removed {pixels_removed} pixels (lines at cell edges)")
+            print(f"    ✓ Thinned {pixels_thinned} line pixels near text (preserved)")
+        
+        return result
+    
+    def enhance_cell_for_ocr(self, cell_img, use_fast_denoising=True):
+        """
+        Enhanced cell preprocessing for OCR with better text preservation.
+        ULTRA-OPTIMIZED for speed - minimal operations, maximum performance.
+        
+        Args:
+            cell_img: Input cell image (can be view or copy)
+            use_fast_denoising: If True, use faster bilateral filter instead of slow NL-means
+        """
+        # OPTIMIZED: Check if contiguous, only copy if needed
+        if len(cell_img.shape) == 3:
+            gray = cv2.cvtColor(cell_img, cv2.COLOR_BGR2GRAY)
+        elif not cell_img.flags['C_CONTIGUOUS']:
+            gray = np.ascontiguousarray(cell_img)
+        else:
+            gray = cell_img  # Already contiguous, no copy needed
+        
+        h, w = gray.shape
+        cell_area = h * w
+        
+        # OPTIMIZED: Fast path for very small cells - minimal processing
+        if cell_area < 2000:  # Very small cells (< ~45x45px)
+            _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+            return binary
+        
+        # OPTIMIZED: Conditional border - only add if really needed
+        needs_border = h < 80 or w < 80
+        if needs_border:
+            border = 10 if (h < 50 or w < 50) else 5
+            gray = cv2.copyMakeBorder(gray, border, border, border, border,
+                                      cv2.BORDER_CONSTANT, value=255)
+            h, w = gray.shape
+            cell_area = h * w  # Update area after border
+        
+        # OPTIMIZED: Skip denoising for small cells (biggest time saver)
+        if use_fast_denoising:
+            if cell_area < 8000:  # Small cells (< ~90x90px)
+                denoised = gray  # Skip denoising - saves ~50-100ms per cell
+            else:
+                # Use minimal bilateral filter (d=3 is fastest while still effective)
+                denoised = cv2.bilateralFilter(gray, d=3, sigmaColor=30, sigmaSpace=30)
+        else:
+            denoised = cv2.fastNlMeansDenoising(gray, None, h=5, 
+                                                templateWindowSize=7, 
+                                                searchWindowSize=21)
+        
+        # OPTIMIZED: Adaptive upscaling with pre-computed sizes
+        if h < 100 or w < 100:
+            # Small cells: upscale 2x
+            upscaled = cv2.resize(denoised, (w << 1, h << 1),  # Bit shift instead of multiply
+                                 interpolation=cv2.INTER_LINEAR)
+        elif h < 150 or w < 150:
+            # Medium cells: upscale 1.5x (pre-compute size)
+            new_w = int(w * 1.5)
+            new_h = int(h * 1.5)
+            upscaled = cv2.resize(denoised, (new_w, new_h), 
+                                 interpolation=cv2.INTER_LINEAR)
+        else:
+            # Large cells: no upscaling
+            upscaled = denoised
+        
+        # OPTIMIZED: Adaptive threshold (already fast, but ensure optimal blockSize)
+        block_size = 31 if (h * w) < 50000 else 21  # Smaller block for large images
+        binary = cv2.adaptiveThreshold(
+            upscaled, 255,
+            cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv2.THRESH_BINARY,
+            blockSize=block_size,
+            C=10
+        )
+        
+        return binary

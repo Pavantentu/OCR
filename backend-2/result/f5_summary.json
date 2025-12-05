@@ -1,0 +1,23 @@
+{
+  "image": "f5.jpeg",
+  "table_bbox": [
+    0,
+    0,
+    1920,
+    1440
+  ],
+  "total_cells": 298,
+  "extracted_cells": 166,
+  "shg_id_path": null,
+  "training_counter": 0,
+  "timing": {
+    "Image Loading & Scaling": 0.06292557716369629,
+    "Preprocessing": 0.7534418106079102,
+    "Step 1: Detect Table Boundary": 7.209834098815918,
+    "Step 2: Crop and Deskew": 2.9497406482696533,
+    "Step 3: Verify Table Shape": 0.5453183650970459,
+    "Step 4: Detect Lines & Intersections": 16.01596713066101,
+    "Step 5: Trace Cells": 1.8295884132385254,
+    "Step 6 & 7: Extract SHG ID & Filter Cells (Parallel)": 47.885822772979736
+  }
+}

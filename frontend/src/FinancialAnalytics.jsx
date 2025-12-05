@@ -3,10 +3,9 @@ import { TrendingUp } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import ApMap from './components/ApMap';
 import apDistricts from './data/ap-districts';
+import { API_BASE } from './utils/apiConfig';
 
 const normalizeDistrictName = (name = '') => name.toLowerCase().replace(/[^a-z0-9]/g, '');
-
-const API_BASE = 'https://api.stemverse.app/OCR';
 
 export default function FinancialAnalytics({
   districts = [],

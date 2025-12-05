@@ -11,7 +11,8 @@ export default function ConvertedResults({
   onShowStats,
   selectedMonth,
   selectedYear,
-  onUpdateResult
+  onUpdateResult,
+  onUpdateAnalytics
 }) {
   const [expandedFolders, setExpandedFolders] = useState({
     converted: false,
@@ -273,11 +274,12 @@ export default function ConvertedResults({
     const convertedCount = convertedFiles.length;
     const nonConvertedCount = nonConvertedFiles.length;
     const totalNeeded = TOTAL_FILES_TARGET;
-    const cappedUploaded = Math.min(totalItems, TOTAL_FILES_TARGET);
+    // Only count successfully converted files in totalUploaded
+    const cappedUploaded = Math.min(convertedCount, TOTAL_FILES_TARGET);
     const remaining = Math.max(totalNeeded - cappedUploaded, 0);
 
     return {
-      totalUploaded: totalItems,
+      totalUploaded: convertedCount, // Only count successfully converted files
       convertedCount,
       nonConvertedCount,
       totalNeeded,
@@ -341,7 +343,29 @@ export default function ConvertedResults({
                   CSV
                 </button>
                 <button
-                  onClick={() => window.alert('Submited file')}
+                  onClick={async () => {
+                    try {
+                      // Update analytics to mark as synced to MBK
+                      if (onUpdateAnalytics && file.district && file.mandal && file.village && file.month && file.year) {
+                        const monthNum = new Date(`${file.month} 1, 2000`).getMonth() + 1;
+                        await onUpdateAnalytics({
+                          district: file.district,
+                          mandal: file.mandal,
+                          village: file.village,
+                          month: monthNum.toString(),
+                          year: file.year.toString(),
+                          shgId: file.results[0]?.shgMbkId || '',
+                          validationStatus: 'success',
+                          failureReason: null,
+                          syncedToMbk: true
+                        });
+                      }
+                      window.alert('File submitted to MBK successfully!');
+                    } catch (error) {
+                      console.error('Error submitting to MBK:', error);
+                      window.alert('Error submitting to MBK. Please try again.');
+                    }
+                  }}
                   className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-full text-[11px] font-semibold flex items-center gap-1 shadow-sm hover:shadow-md transition-all"
                 >
                   Submit
@@ -458,7 +482,32 @@ export default function ConvertedResults({
                   </div>
                   <div className="flex items-center gap-3">
                     <button
-                      onClick={() => window.alert('Submit all files')}
+                      onClick={async () => {
+                        try {
+                          let submittedCount = 0;
+                          for (const file of convertedFiles) {
+                            if (onUpdateAnalytics && file.district && file.mandal && file.village && file.month && file.year) {
+                              const monthNum = new Date(`${file.month} 1, 2000`).getMonth() + 1;
+                              await onUpdateAnalytics({
+                                district: file.district,
+                                mandal: file.mandal,
+                                village: file.village,
+                                month: monthNum.toString(),
+                                year: file.year.toString(),
+                                shgId: file.results[0]?.shgMbkId || '',
+                                validationStatus: 'success',
+                                failureReason: null,
+                                syncedToMbk: true
+                              });
+                              submittedCount++;
+                            }
+                          }
+                          window.alert(`Successfully submitted ${submittedCount} file(s) to MBK!`);
+                        } catch (error) {
+                          console.error('Error submitting files to MBK:', error);
+                          window.alert('Error submitting files to MBK. Please try again.');
+                        }
+                      }}
                       className="px-4 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-full text-xs font-semibold shadow-sm hover:shadow-md transition-all"
                     >
                       Submit All

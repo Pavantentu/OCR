@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { BarChart3, TrendingUp, AlertTriangle, CheckCircle, X, Filter, Download, AlertCircle } from 'lucide-react';
+import { BarChart3, TrendingUp, AlertTriangle, CheckCircle, X, Filter, Download, AlertCircle, RotateCw } from 'lucide-react';
+import { API_BASE } from './utils/apiConfig';
 
 // Add custom animations via style tag
 const animationStyles = `
@@ -432,7 +433,6 @@ export default function DataAnalytics({
   const [chartView, setChartView] = useState('district'); // 'district' or 'year'
   const [chartType, setChartType] = useState('pie'); // 'bar' or 'pie'
   
-  const API_BASE = 'https://api.stemverse.app/OCR';
 
 
   // Get filtered mandals and villages based on selected district
@@ -461,6 +461,11 @@ export default function DataAnalytics({
   useEffect(() => {
     fetchAnalyticsData();
   }, [filterDistrict, filterMandal, filterVillage, filterMonth, filterYear]);
+
+  // Refresh analytics data when component mounts
+  useEffect(() => {
+    fetchAnalyticsData();
+  }, []); // Run once on mount
 
   const fetchAnalyticsData = async () => {
     try {
@@ -508,11 +513,13 @@ export default function DataAnalytics({
       const data = await res.json();
 
       if (!data.success) {
+        console.error('Analytics API returned error:', data);
         setAnalyticsData(null);
         setAnalyticsError(data?.error || 'Unable to load analytics data. Please upload the Excel file.');
         return;
       }
 
+      console.log('Analytics data received:', data.data);
       setAnalyticsData(data.data);
       setAnalyticsError('');
     } catch (error) {
@@ -807,6 +814,15 @@ export default function DataAnalytics({
             Data Capture Analytics
           </h3>
           <div className="flex gap-2">
+            <button
+              onClick={() => fetchAnalyticsData()}
+              disabled={analyticsLoading}
+              className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 flex items-center gap-2"
+              title="Refresh analytics data"
+            >
+              <RotateCw size={18} className={analyticsLoading ? 'animate-spin' : ''} />
+              Refresh
+            </button>
           <button
               onClick={() => setShowOverallState(true)}
               className={`px-4 py-2 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 ${
