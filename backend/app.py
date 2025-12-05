@@ -292,6 +292,10 @@ def load_location_data():
     except Exception as e:
         logger.error(f"Error loading location data: {e}")
         logger.error(traceback.format_exc())
+        # Don't crash the server - just log the error and continue with empty cache
+        districts_cache = []
+        mandals_by_district_cache = {}
+        villages_by_mandal_cache = {}
 
 # Load location data on startup
 load_location_data()
@@ -2359,6 +2363,9 @@ if __name__ == '__main__':
     print("  Health:   http://localhost:5002/OCR/api/health")
     print("  Extract:  http://localhost:5002/OCR/api/extract-tables")
     print("  Validate: http://localhost:5002/OCR/api/validate-only")
+    print("  Districts: http://localhost:5002/api/districts")
+    print("  Mandals:   http://localhost:5002/api/mandals?district=DistrictName")
+    print("  Villages: http://localhost:5002/api/villages?district=DistrictName&mandal=MandalName")
     print("=" * 70)
     print("\n🚀 Starting Flask server with CPU optimizations...")
     print("📊 Watch for throughput metrics (cells/sec) in logs\n")
