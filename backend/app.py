@@ -167,6 +167,12 @@ CORS(app,
             "allow_headers": ["Content-Type", "Authorization"],
             "supports_credentials": True,
             "max_age": 3600
+        },
+        r"/api/*": {
+            "origins": ["*"],
+            "methods": ["GET", "OPTIONS"],
+            "allow_headers": ["Content-Type"],
+            "max_age": 3600
         }
     }
 )
@@ -177,10 +183,118 @@ UPLOAD_FOLDER = Path('uploads')
 RESULT_FOLDER = Path('result')
 FINANCIAL_FOLDER = Path(__file__).resolve().parent / 'financial_data'
 ANALYTICS_FOLDER = Path(__file__).resolve().parent / 'analytics_data'
+CSV_FILE_PATH = Path(__file__).resolve().parent / 'districts-mandals.csv'
 
 # Create necessary folders
 for folder in [TEMP_FOLDER, UPLOAD_FOLDER, RESULT_FOLDER, FINANCIAL_FOLDER, ANALYTICS_FOLDER]:
     folder.mkdir(parents=True, exist_ok=True)
+
+# ============================================================================
+# LOCATION DATA (Districts/Mandals/Villages) - Load from CSV
+# ============================================================================
+# In-memory cache for districts, mandals, and villages
+districts_cache = []
+mandals_by_district_cache = {}  # Key: district name, Value: list of mandal names
+villages_by_mandal_cache = {}  # Key: "district|mandal", Value: list of village names
+
+def load_location_data():
+    """Load and parse districts-mandals.csv file"""
+    global districts_cache, mandals_by_district_cache, villages_by_mandal_cache
+    
+    try:
+        if not CSV_FILE_PATH.exists():
+            logger.warning(f"CSV file not found at {CSV_FILE_PATH}")
+            # Try alternative path (in backend directory)
+            alt_path = Path(__file__).resolve().parent / 'districts-mandals.csv'
+            if alt_path.exists():
+                csv_path = alt_path
+            else:
+                logger.error("Could not find districts-mandals.csv file")
+                return
+        else:
+            csv_path = CSV_FILE_PATH
+        
+        logger.info(f"Loading location data from: {csv_path}")
+        
+        # Read CSV file
+        df = pd.read_csv(csv_path)
+        
+        # Normalize column names (handle case variations)
+        df.columns = df.columns.str.strip()
+        
+        # Find column indices (case-insensitive)
+        mandal_col = None
+        district_col = None
+        village_col = None
+        
+        for col in df.columns:
+            col_lower = col.lower()
+            if 'mandal' in col_lower:
+                mandal_col = col
+            elif 'district' in col_lower:
+                district_col = col
+            elif 'village' in col_lower:
+                village_col = col
+        
+        if not mandal_col or not district_col:
+            logger.error(f"Required columns not found. Available columns: {list(df.columns)}")
+            return
+        
+        # Clear existing cache
+        districts_cache = []
+        mandals_by_district_cache = {}
+        villages_by_mandal_cache = {}
+        
+        districts_set = set()
+        
+        # Process each row
+        for _, row in df.iterrows():
+            mandal = str(row[mandal_col]).strip() if pd.notna(row[mandal_col]) else ""
+            district = str(row[district_col]).strip() if pd.notna(row[district_col]) else ""
+            village = str(row[village_col]).strip() if village_col and pd.notna(row[village_col]) else ""
+            
+            if not district or not mandal:
+                continue
+            
+            # Add district to set
+            districts_set.add(district)
+            
+            # Add mandal to district map
+            if district not in mandals_by_district_cache:
+                mandals_by_district_cache[district] = []
+            
+            if mandal not in mandals_by_district_cache[district]:
+                mandals_by_district_cache[district].append(mandal)
+            
+            # Add village if present
+            if village:
+                key = f"{district}|{mandal}"
+                if key not in villages_by_mandal_cache:
+                    villages_by_mandal_cache[key] = []
+                
+                if village not in villages_by_mandal_cache[key]:
+                    villages_by_mandal_cache[key].append(village)
+        
+        # Convert set to sorted list
+        districts_cache = sorted(list(districts_set))
+        
+        # Sort mandals and villages
+        for district in mandals_by_district_cache:
+            mandals_by_district_cache[district].sort()
+        
+        for key in villages_by_mandal_cache:
+            villages_by_mandal_cache[key].sort()
+        
+        logger.info(f"✓ Loaded {len(districts_cache)} districts")
+        logger.info(f"✓ Loaded mandals for {len(mandals_by_district_cache)} districts")
+        logger.info(f"✓ Loaded villages for {len(villages_by_mandal_cache)} mandals")
+        
+    except Exception as e:
+        logger.error(f"Error loading location data: {e}")
+        logger.error(traceback.format_exc())
+
+# Load location data on startup
+load_location_data()
 
 # PDF Processing
 try:
@@ -2058,6 +2172,164 @@ def get_analytics_data():
             "success": False, 
             "error": error_message,
             "data": None
+        }), 500
+
+
+@app.route('/api/districts', methods=['GET'])
+def get_districts():
+    """Get all districts"""
+    try:
+        districts = [
+            {
+                "id": index + 1,
+                "name": name
+            }
+            for index, name in enumerate(districts_cache)
+        ]
+        
+        return jsonify({
+            "success": True,
+            "count": len(districts),
+            "districts": districts
+        })
+    except Exception as e:
+        logger.error(f"Error fetching districts: {e}")
+        logger.error(traceback.format_exc())
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+@app.route('/api/mandals', methods=['GET'])
+def get_mandals():
+    """Get mandals for a specific district"""
+    try:
+        district_name = request.args.get('district')
+        
+        if not district_name:
+            return jsonify({
+                "success": False,
+                "error": "District parameter is required"
+            }), 400
+        
+        # Find matching district (case-insensitive)
+        matching_district = None
+        for dist in districts_cache:
+            if dist.lower() == district_name.lower():
+                matching_district = dist
+                break
+        
+        if not matching_district:
+            return jsonify({
+                "success": False,
+                "error": f"District '{district_name}' not found"
+            }), 404
+        
+        mandals = mandals_by_district_cache.get(matching_district, [])
+        
+        district_id = districts_cache.index(matching_district) + 1
+        mandals_with_ids = [
+            {
+                "id": district_id * 1000 + index + 1,
+                "name": name,
+                "districtId": district_id,
+                "districtName": matching_district
+            }
+            for index, name in enumerate(mandals)
+        ]
+        
+        return jsonify({
+            "success": True,
+            "district": matching_district,
+            "districtId": district_id,
+            "count": len(mandals_with_ids),
+            "mandals": mandals_with_ids
+        })
+    except Exception as e:
+        logger.error(f"Error fetching mandals: {e}")
+        logger.error(traceback.format_exc())
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+@app.route('/api/villages', methods=['GET'])
+def get_villages():
+    """Get villages for a specific mandal"""
+    try:
+        district_name = request.args.get('district')
+        mandal_name = request.args.get('mandal')
+        
+        if not district_name or not mandal_name:
+            return jsonify({
+                "success": False,
+                "error": "Both district and mandal parameters are required"
+            }), 400
+        
+        # Find matching district (case-insensitive)
+        matching_district = None
+        for dist in districts_cache:
+            if dist.lower() == district_name.lower():
+                matching_district = dist
+                break
+        
+        if not matching_district:
+            return jsonify({
+                "success": False,
+                "error": f"District '{district_name}' not found"
+            }), 404
+        
+        # Find matching mandal (case-insensitive)
+        mandals = mandals_by_district_cache.get(matching_district, [])
+        matching_mandal = None
+        for mandal in mandals:
+            if mandal.lower() == mandal_name.lower():
+                matching_mandal = mandal
+                break
+        
+        if not matching_mandal:
+            return jsonify({
+                "success": False,
+                "error": f"Mandal '{mandal_name}' not found in district '{matching_district}'"
+            }), 404
+        
+        key = f"{matching_district}|{matching_mandal}"
+        villages = villages_by_mandal_cache.get(key, [])
+        
+        # If no villages in CSV, return mandal name as default village
+        if not villages:
+            villages = [matching_mandal]
+        
+        district_id = districts_cache.index(matching_district) + 1
+        mandal_id = mandals.index(matching_mandal) + 1
+        
+        villages_with_ids = [
+            {
+                "id": (district_id * 1000 + mandal_id) * 1000 + index + 1,
+                "name": name,
+                "mandalId": district_id * 1000 + mandal_id,
+                "mandalName": matching_mandal,
+                "districtId": district_id,
+                "districtName": matching_district
+            }
+            for index, name in enumerate(villages)
+        ]
+        
+        return jsonify({
+            "success": True,
+            "district": matching_district,
+            "mandal": matching_mandal,
+            "count": len(villages_with_ids),
+            "villages": villages_with_ids
+        })
+    except Exception as e:
+        logger.error(f"Error fetching villages: {e}")
+        logger.error(traceback.format_exc())
+        return jsonify({
+            "success": False,
+            "error": str(e)
         }), 500
 
 
