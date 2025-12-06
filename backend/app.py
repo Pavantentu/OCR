@@ -159,14 +159,10 @@ app = Flask(__name__)
 CORS(app, 
     resources={
         r"/OCR/*": {
-            "origins": [
-                "http://localhost:5173",
-                "https://pavantentu.github.io",
-                "*"
-            ],
+            "origins": "*",
             "methods": ["GET", "POST", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
-            "supports_credentials": True,
+            "supports_credentials": False,
             "max_age": 3600
         }
     }
